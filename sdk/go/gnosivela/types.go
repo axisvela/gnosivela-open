@@ -1,6 +1,6 @@
 // Package gnosivela is the official Go client SDK for the GNOSIVELA
 // Semantic Control Plane API. It is generated from the semantic contract
-// (api/openapi.yaml) and is Apache-2.0 licensed — it never links the AGPL
+// (contracts/openapi.yaml) and is Apache-2.0 licensed — it never links the AGPL
 // core; it talks to it over HTTP.
 package gnosivela
 

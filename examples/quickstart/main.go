@@ -26,7 +26,7 @@ func main() {
 	ctx := context.Background()
 
 	// 1. Create an ontology from a Semantic Contract DSL document.
-	doc, err := os.ReadFile("examples/supplier.dsl")
+	doc, err := os.ReadFile("contracts/examples/supplier.dsl")
 	if err != nil {
 		log.Fatalf("read dsl: %v", err)
 	}
