@@ -266,11 +266,24 @@ type Path struct {
 	Explanations []string   `json:"explanations"`
 }
 
+// MetricDefinition defines a governed metric's semantics.
+type MetricDefinition struct {
+	ID         string   `json:"id"`
+	Formula    string   `json:"formula"`
+	Dimensions []string `json:"dimensions,omitempty"`
+	Grain      string   `json:"grain,omitempty"`
+	Unit       string   `json:"unit,omitempty"`
+	Source     string   `json:"source,omitempty"`
+	Owner      string   `json:"owner,omitempty"`
+	Version    string   `json:"version,omitempty"`
+}
+
 // SemanticResult is the outcome of a semantic query.
 type SemanticResult struct {
-	Intent         Intent          `json:"intent"`
-	View           *KnowledgeView  `json:"view"`
-	Relations      []*Relation     `json:"relations,omitempty"`
-	Paths          []*Path         `json:"paths,omitempty"`
-	EvidenceChains []EvidenceChain `json:"evidenceChains,omitempty"`
+	Intent         Intent             `json:"intent"`
+	View           *KnowledgeView     `json:"view"`
+	Relations      []*Relation        `json:"relations,omitempty"`
+	Paths          []*Path            `json:"paths,omitempty"`
+	EvidenceChains []EvidenceChain    `json:"evidenceChains,omitempty"`
+	Metrics        []*MetricDefinition `json:"metrics,omitempty"`
 }
