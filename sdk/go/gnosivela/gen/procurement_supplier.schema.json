@@ -1,0 +1,24 @@
+{
+  "$defs": {
+    "Supplier": {
+      "properties": {
+        "canonicalSupplierId": {
+          "type": "string"
+        },
+        "riskScore": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "canonicalSupplierId"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "urn:gnosivela:procurement.supplier@1.2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "procurement.supplier"
+}

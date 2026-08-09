@@ -1,0 +1,487 @@
+openapi: 3.0.3
+info:
+  title: GNOSIVELA Semantic Control Plane API
+  description: |
+    GNOSIVELA is an Enterprise Semantic and Knowledge Fabric. This API manages
+    ontologies, knowledge assertions, entity identity and grounding. The
+    contract binds to semantic objects, never to a graph/vector/search vendor.
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: ontology
+  - name: assertion
+  - name: entity
+paths:
+  /ontologies:
+    post:
+      summary: Create an ontology from DSL text or JSON
+      tags: [ontology]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Ontology' }
+          text/plain:
+            schema: { type: string, example: "ontology procurement.supplier @version 1.2\n..." }
+      responses:
+        '201':
+          description: Created (possibly with non-blocking issues)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OntologyCreateResult' }
+        '422':
+          description: Validation failed
+    get:
+      summary: List all ontologies
+      tags: [ontology]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Ontology' }
+  /ontologies/{namespace}/latest:
+    get:
+      summary: Get the latest version of a namespace
+      tags: [ontology]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: OK }
+        '404': { description: Not found }
+  /ontologies/{namespace}/versions/{version}:
+    get:
+      summary: Get a specific ontology version
+      tags: [ontology]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: OK }
+        '404': { description: Not found }
+    post:
+      summary: Publish or deprecate an ontology version
+      tags: [ontology]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: path, required: true, schema: { type: string } }
+        - { name: action, in: query, required: true, schema: { type: string, enum: [publish, deprecate] } }
+      responses:
+        '200': { description: OK }
+  /ontologies/{namespace}/versions/{version}/diff:
+    get:
+      summary: Semantic diff between two versions of a namespace
+      tags: [ontology]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: path, required: true, schema: { type: string } }
+        - { name: other, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  changes:
+                    type: array
+                    items: { $ref: '#/components/schemas/Change' }
+  /assertions:
+    post:
+      summary: Propose a knowledge assertion
+      tags: [assertion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/KnowledgeAssertion' }
+      responses:
+        '201': { description: Created }
+    get:
+      summary: List assertions for a subject entity
+      tags: [assertion]
+      parameters:
+        - { name: subjectNs, in: query, required: true, schema: { type: string } }
+        - { name: subjectId, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/KnowledgeAssertion' }
+  /assertions/{id}:
+    get:
+      summary: Get an assertion by id
+      tags: [assertion]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: OK }
+        '404': { description: Not found }
+  /entities:
+    post:
+      summary: Register a canonical entity reference
+      tags: [entity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EntityRef' }
+      responses:
+        '201': { description: Created }
+  /entities/resolve:
+    post:
+      summary: Resolve a hint to canonical entity references
+      tags: [entity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hint: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/EntityRef' }
+  /entities/explain:
+    post:
+      summary: Resolve a hint into a full Resolution (canonical ref, match evidence, relations, gaps)
+      tags: [entity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hint: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Resolution' }
+  /entities/merge-candidate:
+    post:
+      summary: Propose a merge candidate relation with match evidence (authority=candidate)
+      tags: [entity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                left: { $ref: '#/components/schemas/EntityRef' }
+                right: { $ref: '#/components/schemas/EntityRef' }
+                kind: { type: string, enum: [exactSameAs, similarTo] }
+                generatedBy: { type: string, enum: [rule, model, human] }
+              required: [left, right]
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  relation: { $ref: '#/components/schemas/Relation' }
+                  evidence: { $ref: '#/components/schemas/MatchEvidence' }
+  /query/semantic:
+    post:
+      summary: Semantic query: intent resolution + joint retrieval + KnowledgeView
+      tags: [query]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query: { type: string, example: "ACME supplier risk in Singapore" }
+                principal: { type: string }
+                purpose: { type: string, example: "supplier_onboarding" }
+              required: [query]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SemanticResult' }
+  /query/path:
+    post:
+      summary: Multi-hop path between two node keys
+      tags: [query]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from: { type: string, example: "policy:P-1" }
+                to: { type: string, example: "process:PR-9" }
+              required: [from, to]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Path' }
+  /query/subgraph:
+    post:
+      summary: 1-hop neighborhood of a node
+      tags: [query]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                node: { type: string, example: "capability:C-2" }
+              required: [node]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Relation' }
+  /healthz:
+    get:
+      summary: Health check
+      responses:
+        '200': { description: OK }
+components:
+  schemas:
+    Ontology:
+      type: object
+      properties:
+        id: { type: string }
+        namespace: { type: string }
+        version: { type: string }
+        dependencies: { type: array, items: { type: string } }
+        status: { type: string, enum: [draft, validated, published, deprecated, revoked] }
+        owner: { type: string }
+        signature: { type: string }
+        concepts:
+          type: array
+          items: { $ref: '#/components/schemas/Concept' }
+        relations:
+          type: array
+          items: { $ref: '#/components/schemas/RelationSpec' }
+        constraints:
+          type: array
+          items: { $ref: '#/components/schemas/Constraint' }
+    OntologyCreateResult:
+      type: object
+      properties:
+        ontology: { $ref: '#/components/schemas/Ontology' }
+        issues:
+          type: array
+          items: { $ref: '#/components/schemas/Issue' }
+    Concept:
+      type: object
+      properties:
+        id: { type: string }
+        type: { type: string }
+        label: { type: string }
+        definition: { type: string }
+        scope: { type: string }
+        owner: { type: string }
+        properties:
+          type: array
+          items: { $ref: '#/components/schemas/Property' }
+    Property:
+      type: object
+      properties:
+        name: { type: string }
+        dataType: { type: string }
+        unit: { type: string }
+        required: { type: boolean }
+        cardinality: { type: string }
+        enum: { type: array, items: { type: string } }
+    RelationSpec:
+      type: object
+      properties:
+        id: { type: string }
+        domain: { type: string }
+        range: { type: string }
+        roles: { type: array, items: { type: string } }
+        cardinality: { type: string }
+        inverse: { type: string }
+        properties: { type: array, items: { type: string } }
+    Constraint:
+      type: object
+      properties:
+        id: { type: string }
+        target: { type: string }
+        expression: { type: string }
+        severity: { type: string, enum: [error, warning, info] }
+        message: { type: string }
+        version: { type: string }
+    Issue:
+      type: object
+      properties:
+        severity: { type: string, enum: [error, warning, info] }
+        path: { type: string }
+        message: { type: string }
+    Change:
+      type: object
+      properties:
+        kind: { type: string, enum: [added, removed, modified] }
+        type: { type: string }
+        id: { type: string }
+        before: { type: string }
+        after: { type: string }
+        breaking: { type: boolean }
+    EntityRef:
+      type: object
+      properties:
+        namespace: { type: string }
+        canonicalId: { type: string }
+        type: { type: string }
+        aliases: { type: array, items: { type: string } }
+        authority: { type: string }
+      required: [namespace, canonicalId]
+    Relation:
+      type: object
+      properties:
+        id: { type: string }
+        from: { $ref: '#/components/schemas/EntityRef' }
+        to: { $ref: '#/components/schemas/EntityRef' }
+        kind: { type: string, enum: [exactSameAs, legallyRepresents, operationalAlias, memberOf, partOf, derivedFrom, similarTo] }
+        authority: { type: string }
+    MatchEvidence:
+      type: object
+      properties:
+        left: { $ref: '#/components/schemas/EntityRef' }
+        right: { $ref: '#/components/schemas/EntityRef' }
+        score: { type: number }
+        matchedOn: { type: array, items: { type: string } }
+        generatedBy: { type: string }
+        status: { type: string }
+        capturedAt: { type: string, format: date-time }
+    ResolvedMatch:
+      type: object
+      properties:
+        ref: { $ref: '#/components/schemas/EntityRef' }
+        score: { type: number }
+        matchedOn: { type: array, items: { type: string } }
+        status: { type: string }
+    Resolution:
+      type: object
+      properties:
+        hint: { type: string }
+        canonical: { $ref: '#/components/schemas/EntityRef' }
+        matches:
+          type: array
+          items: { $ref: '#/components/schemas/ResolvedMatch' }
+        related:
+          type: array
+          items: { $ref: '#/components/schemas/Relation' }
+        gaps: { type: array, items: { type: string } }
+        asOf: { type: string, format: date-time }
+    Intent:
+      type: object
+      properties:
+        query: { type: string }
+        concepts: { type: array, items: { type: string } }
+        entities:
+          type: array
+          items: { $ref: '#/components/schemas/EntityRef' }
+        relations: { type: array, items: { type: string } }
+        region: { type: string }
+        purpose: { type: string }
+        tokens: { type: array, items: { type: string } }
+    KnowledgeView:
+      type: object
+      properties:
+        purpose: { type: string }
+        principal: { type: string }
+        asOf: { type: string, format: date-time }
+        assertions:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeAssertion' }
+        conflicts:
+          type: array
+          items:
+            type: object
+            properties:
+              subject: { $ref: '#/components/schemas/EntityRef' }
+              predicate: { type: string }
+              assertions:
+                type: array
+                items: { $ref: '#/components/schemas/KnowledgeAssertion' }
+        gaps: { type: array, items: { type: string } }
+    EvidenceChain:
+      type: object
+      properties:
+        assertionId: { type: string }
+        sources: { type: array, items: { type: string } }
+        derivations: { type: array, items: { type: string } }
+    PathStep:
+      type: object
+      properties:
+        from: { type: string }
+        relation: { type: string }
+        to: { type: string }
+    Path:
+      type: object
+      properties:
+        nodes: { type: array, items: { type: string } }
+        steps:
+          type: array
+          items: { $ref: '#/components/schemas/PathStep' }
+        explanations: { type: array, items: { type: string } }
+    SemanticResult:
+      type: object
+      properties:
+        intent: { $ref: '#/components/schemas/Intent' }
+        view: { $ref: '#/components/schemas/KnowledgeView' }
+        relations:
+          type: array
+          items: { $ref: '#/components/schemas/Relation' }
+        paths:
+          type: array
+          items: { $ref: '#/components/schemas/Path' }
+        evidenceChains:
+          type: array
+          items: { $ref: '#/components/schemas/EvidenceChain' }
+    KnowledgeAssertion:
+      type: object
+      properties:
+        assertionId: { type: string }
+        subject: { $ref: '#/components/schemas/EntityRef' }
+        predicate: { type: string }
+        object:
+          type: object
+          properties:
+            type: { type: string, enum: [entity, string, number, boolean, date] }
+            entityRef: { $ref: '#/components/schemas/EntityRef' }
+            string: { type: string }
+            number: { type: number }
+            boolean: { type: boolean }
+        context:
+          type: object
+          properties:
+            domain: { type: string }
+            region: { type: string }
+            contract: { type: string }
+            scenario: { type: string }
+            purpose: { type: string }
+            tags: { type: array, items: { type: string } }
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+        source: { type: string }
+        authority: { type: string }
+        confidence: { type: number }
+        status: { type: string, enum: [proposed, validated, contested, superseded, revoked] }
+        policyTags: { type: array, items: { type: string } }
+        ontologyVersion: { type: string }
+      required: [subject, predicate]
