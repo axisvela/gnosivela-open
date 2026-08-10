@@ -69,9 +69,9 @@ func TestAssertionAndResolve(t *testing.T) {
 			writeJSON(w, http.StatusOK, []*EntityRef{{Namespace: "mdm", CanonicalID: "C-1042", Aliases: []string{"ACME"}}})
 		case r.Method == http.MethodPost && r.URL.Path == "/entities/explain":
 			writeJSON(w, http.StatusOK, &Resolution{
-				Hint: "ACME",
+				Hint:      "ACME",
 				Canonical: &EntityRef{Namespace: "mdm", CanonicalID: "C-1042"},
-				Matches: []ResolvedMatch{{Ref: EntityRef{Namespace: "mdm", CanonicalID: "C-1042"}, Score: 1, Status: "exact"}},
+				Matches:   []ResolvedMatch{{Ref: EntityRef{Namespace: "mdm", CanonicalID: "C-1042"}, Score: 1, Status: "exact"}},
 			})
 		case r.Method == http.MethodPost && r.URL.Path == "/entities/merge-candidate":
 			writeJSON(w, http.StatusCreated, map[string]any{

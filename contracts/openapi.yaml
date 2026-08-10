@@ -61,15 +61,121 @@ paths:
       responses:
         '200': { description: OK }
         '404': { description: Not found }
+  /ontologies/{namespace}/versions/{version}/publish:
     post:
-      summary: Publish or deprecate an ontology version
+      summary: Publish an ontology version after impact analysis
+      description: Breaking changes require an approval token, otherwise the publish is refused with 409 and the impact report.
       tags: [ontology]
       parameters:
         - { name: namespace, in: path, required: true, schema: { type: string } }
         - { name: version, in: path, required: true, schema: { type: string } }
-        - { name: action, in: query, required: true, schema: { type: string, enum: [publish, deprecate] } }
+        - { name: approval, in: query, required: false, schema: { type: string } }
+      responses:
+        '200':
+          description: Published
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublishResult' }
+        '409':
+          description: Blocked by breaking changes without approval
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ImpactReport' }
+  /ontologies/{namespace}/versions/{version}/deprecate:
+    post:
+      summary: Deprecate an ontology version
+      tags: [ontology]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: path, required: true, schema: { type: string } }
       responses:
         '200': { description: OK }
+  /ontologies/{namespace}/versions/{version}/rollback:
+    post:
+      summary: Roll back a published version
+      description: Deprecates the version and returns the highest remaining published version. Both remain resolvable during the dual-read window.
+      tags: [ontology]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Rolled back
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  toVersion: { type: string }
+  /ontologies/{namespace}/versions/{version}/impact:
+    get:
+      summary: Analyse the impact of publishing a candidate version
+      description: Compares the candidate against the latest published version and lists breaking/additive changes plus affected assertions and entities.
+      tags: [ontology]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ImpactReport' }
+  /consistency/report:
+    get:
+      summary: Run rule validation and the seven consistency checks over the control plane
+      description: Optionally pins an ontology namespace to enable structural and rule checks. Never mutates state.
+      tags: [consistency]
+      parameters:
+        - { name: ontology, in: query, required: false, schema: { type: string } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConsistencyReport' }
+  /consistency/conflicts:
+    get:
+      summary: List detected groups of competing assertions
+      tags: [consistency]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conflicts:
+                    type: array
+                    items: { $ref: '#/components/schemas/Conflict' }
+  /consistency/resolve:
+    post:
+      summary: Apply the resolution policy to all detected conflicts
+      description: Winners stay untouched; losers are marked contested; ties are escalated without mutation. Every decision is audited.
+      tags: [consistency]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resolutions:
+                    type: array
+                    items: { $ref: '#/components/schemas/ConsistencyResolution' }
+  /consistency/audit:
+    get:
+      summary: List the recorded resolution audit trail
+      tags: [consistency]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resolutions:
+                    type: array
+                    items: { $ref: '#/components/schemas/ConsistencyResolution' }
   /ontologies/{namespace}/versions/{version}/diff:
     get:
       summary: Semantic diff between two versions of a namespace
@@ -195,7 +301,7 @@ paths:
                   evidence: { $ref: '#/components/schemas/MatchEvidence' }
   /query/semantic:
     post:
-      summary: Semantic query: intent resolution + joint retrieval + KnowledgeView
+      summary: "Semantic query: intent resolution + joint retrieval + KnowledgeView"
       tags: [query]
       requestBody:
         required: true
@@ -252,6 +358,72 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Relation' }
+  /grounding/assemble:
+    post:
+      summary: Assemble an evidence-backed, purpose-scoped grounding bundle
+      tags: [grounding]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query: { type: string, example: "ACME supplier risk in Singapore" }
+                principal: { type: string }
+                purpose: { type: string, example: "supplier_onboarding" }
+                budget: { type: integer, description: "max assertions in knowledge (0 = unlimited)" }
+              required: [query]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GroundingBundle' }
+  /grounding/explain:
+    post:
+      summary: Citation-level explanation of a grounding assembly
+      tags: [grounding]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query: { type: string }
+                principal: { type: string }
+                purpose: { type: string }
+              required: [query]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GroundingExplanation' }
+  /grounding/redact:
+    post:
+      summary: Re-assemble with sensitive evidence sources hidden, audit refs kept
+      tags: [grounding]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query: { type: string }
+                principal: { type: string }
+                purpose: { type: string }
+                budget: { type: integer }
+                hideTags:
+                  type: array
+                  items: { type: string }
+                  description: "policy tags whose evidence sources are redacted"
+              required: [query]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GroundingBundle' }
   /healthz:
     get:
       summary: Health check
@@ -340,6 +512,74 @@ components:
         before: { type: string }
         after: { type: string }
         breaking: { type: boolean }
+    AffectedAssertion:
+      type: object
+      properties:
+        assertionId: { type: string }
+        subject: { $ref: '#/components/schemas/EntityRef' }
+        predicate: { type: string }
+        ontologyVersion: { type: string }
+        reason: { type: string }
+    ImpactSummary:
+      type: object
+      properties:
+        changes: { type: integer }
+        breaking: { type: integer }
+        additive: { type: integer }
+        deprecations: { type: integer }
+        affectedAssertions: { type: integer }
+        affectedEntities: { type: integer }
+    ImpactReport:
+      type: object
+      properties:
+        namespace: { type: string }
+        fromVersion: { type: string }
+        toVersion: { type: string }
+        breaking: { type: array, items: { $ref: '#/components/schemas/Change' } }
+        additive: { type: array, items: { $ref: '#/components/schemas/Change' } }
+        deprecations: { type: array, items: { $ref: '#/components/schemas/Change' } }
+        affectedAssertions: { type: array, items: { $ref: '#/components/schemas/AffectedAssertion' } }
+        affectedEntities: { type: array, items: { $ref: '#/components/schemas/EntityRef' } }
+        blocking: { type: boolean }
+    PublishResult:
+      type: object
+      properties:
+        status: { type: string }
+        impact: { $ref: '#/components/schemas/ImpactSummary' }
+    RuleResult:
+      type: object
+      properties:
+        constraintId: { type: string }
+        expression: { type: string }
+        assertionId: { type: string }
+        passed: { type: boolean }
+        severity: { type: string }
+        message: { type: string }
+    CheckResult:
+      type: object
+      properties:
+        type: { type: string, enum: [lexical, identity, structural, temporal, contextual, inferential, authority] }
+        severity: { type: string, enum: [error, warning, info] }
+        message: { type: string }
+        ref: { type: string }
+    ConsistencyReport:
+      type: object
+      properties:
+        rules: { type: array, items: { $ref: '#/components/schemas/RuleResult' } }
+        checks: { type: array, items: { $ref: '#/components/schemas/CheckResult' } }
+        failures: { type: integer }
+        warnings: { type: integer }
+    ConsistencyResolution:
+      type: object
+      properties:
+        at: { type: string, format: date-time }
+        subject: { $ref: '#/components/schemas/EntityRef' }
+        predicate: { type: string }
+        winner: { type: string }
+        loser: { type: string }
+        basis: { type: string }
+        escalated: { type: boolean }
+        ties: { type: array, items: { type: string } }
     EntityRef:
       type: object
       properties:
@@ -410,14 +650,7 @@ components:
           items: { $ref: '#/components/schemas/KnowledgeAssertion' }
         conflicts:
           type: array
-          items:
-            type: object
-            properties:
-              subject: { $ref: '#/components/schemas/EntityRef' }
-              predicate: { type: string }
-              assertions:
-                type: array
-                items: { $ref: '#/components/schemas/KnowledgeAssertion' }
+          items: { $ref: '#/components/schemas/Conflict' }
         gaps: { type: array, items: { type: string } }
     EvidenceChain:
       type: object
@@ -453,6 +686,21 @@ components:
         evidenceChains:
           type: array
           items: { $ref: '#/components/schemas/EvidenceChain' }
+        metrics:
+          type: array
+          items: { $ref: '#/components/schemas/MetricDefinition' }
+    MetricDefinition:
+      type: object
+      properties:
+        id: { type: string }
+        formula: { type: string }
+        dimensions: { type: array, items: { type: string } }
+        grain: { type: string }
+        unit: { type: string }
+        source: { type: string }
+        owner: { type: string }
+        version: { type: string }
+      required: [id]
     KnowledgeAssertion:
       type: object
       properties:
@@ -485,3 +733,70 @@ components:
         policyTags: { type: array, items: { type: string } }
         ontologyVersion: { type: string }
       required: [subject, predicate]
+    EvidenceRef:
+      type: object
+      properties:
+        source: { type: string }
+        artifactDigest: { type: string }
+        locator: { type: string }
+        capturedAt: { type: string, format: date-time }
+        principal: { type: string }
+      required: [source]
+    SemanticContract:
+      type: object
+      properties:
+        ontologyVersion: { type: string }
+        mappingVersion: { type: string }
+        units: { type: array, items: { type: string } }
+    GroundingBundle:
+      type: object
+      properties:
+        resolvedIntent: { type: string }
+        knowledge:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeAssertion' }
+        evidence:
+          type: array
+          items: { $ref: '#/components/schemas/EvidenceRef' }
+        semanticContract: { $ref: '#/components/schemas/SemanticContract' }
+        policyDecision: { type: string }
+        conflict:
+          type: array
+          items: { $ref: '#/components/schemas/Conflict' }
+        gap: { type: array, items: { type: string } }
+        contextBudget: { type: integer }
+      required: [resolvedIntent]
+    Conflict:
+      type: object
+      properties:
+        reason: { type: string }
+        subject: { $ref: '#/components/schemas/EntityRef' }
+        predicate: { type: string }
+        assertions:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeAssertion' }
+    GroundingCitation:
+      type: object
+      properties:
+        assertionId: { type: string }
+        subject: { type: string }
+        predicate: { type: string }
+        status: { type: string }
+        confidence: { type: number }
+        ontologyVersion: { type: string }
+        sources: { type: array, items: { type: string } }
+        derivations: { type: array, items: { type: string } }
+        evidence:
+          type: array
+          items: { $ref: '#/components/schemas/EvidenceRef' }
+    GroundingExplanation:
+      type: object
+      properties:
+        intent: { type: string }
+        citations:
+          type: array
+          items: { $ref: '#/components/schemas/GroundingCitation' }
+        conflicts: { type: array, items: { type: string } }
+        gaps: { type: array, items: { type: string } }
+        policy: { type: string }
+        citationCompleteness: { type: number }

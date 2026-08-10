@@ -98,11 +98,11 @@ type EntityRef struct {
 
 // Value is a typed object value or target entity of an assertion.
 type Value struct {
-	Type      string      `json:"type,omitempty"`
-	EntityRef *EntityRef  `json:"entityRef,omitempty"`
-	String    *string     `json:"string,omitempty"`
-	Number    *float64    `json:"number,omitempty"`
-	Boolean   *bool       `json:"boolean,omitempty"`
+	Type      string     `json:"type,omitempty"`
+	EntityRef *EntityRef `json:"entityRef,omitempty"`
+	String    *string    `json:"string,omitempty"`
+	Number    *float64   `json:"number,omitempty"`
+	Boolean   *bool      `json:"boolean,omitempty"`
 }
 
 // AssertionContext describes the business scope of an assertion.
@@ -195,8 +195,50 @@ type ImpactReport struct {
 
 // PublishResult is returned by publish, carrying the impact summary.
 type PublishResult struct {
-	Status string        `json:"status"`
+	Status string         `json:"status"`
 	Impact *ImpactSummary `json:"impact"`
+}
+
+// RuleResult is the outcome of evaluating one ontology constraint against one
+// assertion.
+type RuleResult struct {
+	ConstraintID string `json:"constraintId"`
+	Expression   string `json:"expression"`
+	AssertionID  string `json:"assertionId"`
+	Passed       bool   `json:"passed"`
+	Severity     string `json:"severity"`
+	Message      string `json:"message,omitempty"`
+}
+
+// CheckResult is a single consistency finding with severity and a reference.
+type CheckResult struct {
+	Type     string `json:"type"`
+	Severity string `json:"severity"`
+	Message  string `json:"message"`
+	Ref      string `json:"ref,omitempty"`
+}
+
+// ConsistencyReport aggregates rule validation and the seven consistency
+// checks (lexical/identity/structural/temporal/contextual/inferential/authority).
+type ConsistencyReport struct {
+	Rules    []RuleResult  `json:"rules,omitempty"`
+	Checks   []CheckResult `json:"checks,omitempty"`
+	Failures int           `json:"failures"`
+	Warnings int           `json:"warnings"`
+}
+
+// ConsistencyResolution records how a group of competing assertions was
+// settled. Conflicts are never resolved silently: every decision carries a
+// basis, losers are marked contested, and ties are escalated without mutation.
+type ConsistencyResolution struct {
+	At        time.Time `json:"at"`
+	Subject   EntityRef `json:"subject"`
+	Predicate string    `json:"predicate"`
+	Winner    string    `json:"winner,omitempty"`
+	Loser     string    `json:"loser,omitempty"`
+	Basis     string    `json:"basis"`
+	Escalated bool      `json:"escalated"`
+	Ties      []string  `json:"ties,omitempty"`
 }
 
 // OntologyCreateResult is returned by OntologyCreate.
@@ -220,23 +262,23 @@ const (
 
 // Relation links two entity references with a typed identity relation.
 type Relation struct {
-	ID        string       `json:"id"`
-	From      EntityRef    `json:"from"`
-	To        EntityRef    `json:"to"`
-	Kind      RelationKind `json:"kind"`
+	ID        string        `json:"id"`
+	From      EntityRef     `json:"from"`
+	To        EntityRef     `json:"to"`
+	Kind      RelationKind  `json:"kind"`
 	Evidence  []EvidenceRef `json:"evidence,omitempty"`
-	Authority string       `json:"authority,omitempty"`
+	Authority string        `json:"authority,omitempty"`
 }
 
 // MatchEvidence records why two references were matched.
 type MatchEvidence struct {
-	Left        EntityRef  `json:"left"`
-	Right       EntityRef  `json:"right"`
-	Score       float64    `json:"score"`
-	MatchedOn   []string   `json:"matchedOn"`
-	GeneratedBy string     `json:"generatedBy"`
-	Status      string     `json:"status"`
-	CapturedAt  time.Time  `json:"capturedAt"`
+	Left        EntityRef `json:"left"`
+	Right       EntityRef `json:"right"`
+	Score       float64   `json:"score"`
+	MatchedOn   []string  `json:"matchedOn"`
+	GeneratedBy string    `json:"generatedBy"`
+	Status      string    `json:"status"`
+	CapturedAt  time.Time `json:"capturedAt"`
 }
 
 // ResolvedMatch is a candidate match with its evidence.
@@ -249,12 +291,12 @@ type ResolvedMatch struct {
 
 // Resolution is the purpose-scoped outcome of an entity resolution request.
 type Resolution struct {
-	Hint      string       `json:"hint"`
-	Canonical *EntityRef   `json:"canonical,omitempty"`
+	Hint      string          `json:"hint"`
+	Canonical *EntityRef      `json:"canonical,omitempty"`
 	Matches   []ResolvedMatch `json:"matches"`
-	Related   []*Relation  `json:"related,omitempty"`
-	Gaps      []string     `json:"gaps,omitempty"`
-	AsOf      time.Time    `json:"asOf"`
+	Related   []*Relation     `json:"related,omitempty"`
+	Gaps      []string        `json:"gaps,omitempty"`
+	AsOf      time.Time       `json:"asOf"`
 }
 
 // Intent is the resolved business intent of a semantic query.
@@ -270,6 +312,7 @@ type Intent struct {
 
 // Conflict captures competing assertions that are not silently merged.
 type Conflict struct {
+	Reason     string                `json:"reason,omitempty"`
 	Subject    EntityRef             `json:"subject"`
 	Predicate  string                `json:"predicate"`
 	Assertions []*KnowledgeAssertion `json:"assertions"`
@@ -320,11 +363,11 @@ type MetricDefinition struct {
 
 // SemanticResult is the outcome of a semantic query.
 type SemanticResult struct {
-	Intent         Intent             `json:"intent"`
-	View           *KnowledgeView     `json:"view"`
-	Relations      []*Relation        `json:"relations,omitempty"`
-	Paths          []*Path            `json:"paths,omitempty"`
-	EvidenceChains []EvidenceChain    `json:"evidenceChains,omitempty"`
+	Intent         Intent              `json:"intent"`
+	View           *KnowledgeView      `json:"view"`
+	Relations      []*Relation         `json:"relations,omitempty"`
+	Paths          []*Path             `json:"paths,omitempty"`
+	EvidenceChains []EvidenceChain     `json:"evidenceChains,omitempty"`
 	Metrics        []*MetricDefinition `json:"metrics,omitempty"`
 }
 

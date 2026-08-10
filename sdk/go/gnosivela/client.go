@@ -118,6 +118,50 @@ func (c *Client) OntologyDiff(ctx context.Context, namespace, from, to string) (
 	return out.Changes, err
 }
 
+// ConsistencyReport runs rule validation and the seven consistency checks.
+// An empty ontologyNamespace runs the store-wide checks only; pass a namespace
+// to also enable structural and rule validation.
+func (c *Client) ConsistencyReport(ctx context.Context, ontologyNamespace string) (*ConsistencyReport, error) {
+	path := "/consistency/report"
+	if ontologyNamespace != "" {
+		path += "?ontology=" + url.QueryEscape(ontologyNamespace)
+	}
+	var out ConsistencyReport
+	err := c.do(ctx, http.MethodGet, path, "", nil, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ConsistencyConflicts lists the detected groups of competing assertions.
+func (c *Client) ConsistencyConflicts(ctx context.Context) ([]*Conflict, error) {
+	var out struct {
+		Conflicts []*Conflict `json:"conflicts"`
+	}
+	err := c.do(ctx, http.MethodGet, "/consistency/conflicts", "", nil, &out)
+	return out.Conflicts, err
+}
+
+// ConsistencyResolve applies the resolution policy to all detected conflicts,
+// marking losers contested and escalating ties. Returns the recorded decisions.
+func (c *Client) ConsistencyResolve(ctx context.Context) ([]*ConsistencyResolution, error) {
+	var out struct {
+		Resolutions []*ConsistencyResolution `json:"resolutions"`
+	}
+	err := c.do(ctx, http.MethodPost, "/consistency/resolve", "", nil, &out)
+	return out.Resolutions, err
+}
+
+// ConsistencyAudit lists the recorded resolution audit trail.
+func (c *Client) ConsistencyAudit(ctx context.Context) ([]*ConsistencyResolution, error) {
+	var out struct {
+		Resolutions []*ConsistencyResolution `json:"resolutions"`
+	}
+	err := c.do(ctx, http.MethodGet, "/consistency/audit", "", nil, &out)
+	return out.Resolutions, err
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)
