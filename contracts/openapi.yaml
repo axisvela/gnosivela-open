@@ -422,6 +422,32 @@ paths:
                     type: object
                     additionalProperties: { type: integer }
                   asOf: { type: string, format: date-time }
+  /metrics/definitions:
+    get:
+      summary: List governed metric definitions (Metric Ontology)
+      description: Metrics are first-class objects (formula, grain, unit, source, owner, version) served to the semantic query executor.
+      tags: [metric]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  definitions:
+                    type: array
+                    items: { $ref: '#/components/schemas/MetricDefinition' }
+    post:
+      summary: Register a governed metric definition
+      tags: [metric]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MetricDefinition' }
+      responses:
+        '201': { description: Registered }
+        '409': { description: Duplicate metric id }
   /quality:
     get:
       summary: Aggregated quality/SLO snapshot over the control plane
@@ -1015,6 +1041,7 @@ components:
         gaps: { type: array, items: { type: string } }
         domainHits: { type: object, additionalProperties: { type: integer } }
         domainOf: { type: object, additionalProperties: { type: string } }
+        domainLatency: { type: object, additionalProperties: { type: integer } }
         policyDecision: { type: string }
         latencyMillis: { type: integer }
         domainsQueried: { type: integer }

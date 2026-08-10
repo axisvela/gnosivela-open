@@ -399,6 +399,24 @@ func (c *Client) IncidentResolve(ctx context.Context, id string) error {
 	return c.do(ctx, http.MethodPost, "/incidents/"+url.PathEscape(id)+"/resolve", "", nil, nil)
 }
 
+// MetricDefinitions lists the governed metric definitions.
+func (c *Client) MetricDefinitions(ctx context.Context) ([]MetricDefinition, error) {
+	var out struct {
+		Definitions []MetricDefinition `json:"definitions"`
+	}
+	err := c.do(ctx, http.MethodGet, "/metrics/definitions", "", nil, &out)
+	return out.Definitions, err
+}
+
+// MetricDefinitionRegister registers a governed metric definition.
+func (c *Client) MetricDefinitionRegister(ctx context.Context, def MetricDefinition) error {
+	body, err := json.Marshal(def)
+	if err != nil {
+		return err
+	}
+	return c.do(ctx, http.MethodPost, "/metrics/definitions", "application/json", body, nil)
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)

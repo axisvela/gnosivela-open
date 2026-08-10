@@ -230,6 +230,14 @@ public final class GnosivelaClient {
         return post("/incidents/" + enc(id) + "/resolve", null);
     }
 
+    public String metricDefinitions() {
+        return get("/metrics/definitions");
+    }
+
+    public String metricDefinitionRegister(String json) {
+        return post("/metrics/definitions", json);
+    }
+
     private static String escape(String s) {
         if (s == null) {
             return "";

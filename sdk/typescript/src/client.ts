@@ -181,4 +181,10 @@ export class Client {
   incidentResolve(id: string): Promise<Record<string, unknown>> {
     return this.request("POST", `/incidents/${encodeURIComponent(id)}/resolve`);
   }
+  metricDefinitions(): Promise<{ definitions: unknown[] }> {
+    return this.request("GET", "/metrics/definitions");
+  }
+  metricDefinitionRegister(def: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.request("POST", "/metrics/definitions", def);
+  }
 }

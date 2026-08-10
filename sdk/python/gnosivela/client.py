@@ -221,3 +221,9 @@ class Client:
 
     def incident_resolve(self, incident_id: str) -> Dict[str, Any]:
         return self._request("POST", "/incidents/%s/resolve" % urllib.parse.quote(incident_id))
+
+    def metric_definitions(self) -> Dict[str, Any]:
+        return self._request("GET", "/metrics/definitions")
+
+    def metric_definition_register(self, definition: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request("POST", "/metrics/definitions", definition)
