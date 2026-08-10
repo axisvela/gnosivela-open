@@ -159,6 +159,46 @@ type Change struct {
 	Breaking bool   `json:"breaking,omitempty"`
 }
 
+// AffectedAssertion references a knowledge assertion produced under an old
+// ontology version that now references removed or narrowed elements.
+type AffectedAssertion struct {
+	AssertionID     string    `json:"assertionId"`
+	Subject         EntityRef `json:"subject"`
+	Predicate       string    `json:"predicate"`
+	OntologyVersion string    `json:"ontologyVersion"`
+	Reason          string    `json:"reason"`
+}
+
+// ImpactSummary reduces an ImpactReport to gate-relevant counters.
+type ImpactSummary struct {
+	Changes            int `json:"changes"`
+	Breaking           int `json:"breaking"`
+	Additive           int `json:"additive"`
+	Deprecations       int `json:"deprecations"`
+	AffectedAssertions int `json:"affectedAssertions"`
+	AffectedEntities   int `json:"affectedEntities"`
+}
+
+// ImpactReport is the outcome of analysing a candidate ontology version
+// against the currently published version of the same namespace.
+type ImpactReport struct {
+	Namespace          string              `json:"namespace"`
+	FromVersion        string              `json:"fromVersion"`
+	ToVersion          string              `json:"toVersion"`
+	Breaking           []Change            `json:"breaking,omitempty"`
+	Additive           []Change            `json:"additive,omitempty"`
+	Deprecations       []Change            `json:"deprecations,omitempty"`
+	AffectedAssertions []AffectedAssertion `json:"affectedAssertions,omitempty"`
+	AffectedEntities   []EntityRef         `json:"affectedEntities,omitempty"`
+	Blocking           bool                `json:"blocking"`
+}
+
+// PublishResult is returned by publish, carrying the impact summary.
+type PublishResult struct {
+	Status string        `json:"status"`
+	Impact *ImpactSummary `json:"impact"`
+}
+
 // OntologyCreateResult is returned by OntologyCreate.
 type OntologyCreateResult struct {
 	Ontology *Ontology `json:"ontology"`

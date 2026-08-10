@@ -62,9 +62,49 @@ func (c *Client) OntologyGet(ctx context.Context, namespace, version string) (*O
 
 // OntologyPublish publishes an ontology version.
 func (c *Client) OntologyPublish(ctx context.Context, namespace, version string) error {
+	var out PublishResult
 	return c.do(ctx, http.MethodPost,
 		"/ontologies/"+url.PathEscape(namespace)+"/versions/"+url.PathEscape(version)+"/publish",
-		"", nil, nil)
+		"", nil, &out)
+}
+
+// OntologyPublishWithApproval publishes an ontology version that has breaking
+// changes, using an approval token.
+func (c *Client) OntologyPublishWithApproval(ctx context.Context, namespace, version, approval string) (*PublishResult, error) {
+	var out PublishResult
+	err := c.do(ctx, http.MethodPost,
+		"/ontologies/"+url.PathEscape(namespace)+"/versions/"+url.PathEscape(version)+"/publish?approval="+url.QueryEscape(approval),
+		"", nil, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OntologyImpact analyses the impact of publishing version against the latest
+// published version of the namespace.
+func (c *Client) OntologyImpact(ctx context.Context, namespace, version string) (*ImpactReport, error) {
+	var out ImpactReport
+	err := c.do(ctx, http.MethodGet,
+		"/ontologies/"+url.PathEscape(namespace)+"/versions/"+url.PathEscape(version)+"/impact",
+		"", nil, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// OntologyRollback rolls back a published version, deprecating it and
+// returning the version the namespace resolves to from now on.
+func (c *Client) OntologyRollback(ctx context.Context, namespace, version string) (string, error) {
+	var out struct {
+		Status    string `json:"status"`
+		ToVersion string `json:"toVersion"`
+	}
+	err := c.do(ctx, http.MethodPost,
+		"/ontologies/"+url.PathEscape(namespace)+"/versions/"+url.PathEscape(version)+"/rollback",
+		"", nil, &out)
+	return out.ToVersion, err
 }
 
 // OntologyDiff computes the semantic diff between two versions.
