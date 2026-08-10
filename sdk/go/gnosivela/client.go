@@ -186,6 +186,81 @@ func (c *Client) PolicyEvaluate(ctx context.Context, req PolicyRequest) (*Policy
 	return &out, nil
 }
 
+// ApprovalCreate opens an approval request for a governed action.
+func (c *Client) ApprovalCreate(ctx context.Context, create ApprovalCreate) (*ApprovalRequest, error) {
+	body, err := json.Marshal(create)
+	if err != nil {
+		return nil, err
+	}
+	var out ApprovalRequest
+	err = c.do(ctx, http.MethodPost, "/approval/requests", "application/json", body, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ApprovalList lists approval requests in creation order.
+func (c *Client) ApprovalList(ctx context.Context) ([]*ApprovalRequest, error) {
+	var out struct {
+		Requests []*ApprovalRequest `json:"requests"`
+	}
+	err := c.do(ctx, http.MethodGet, "/approval/requests", "", nil, &out)
+	return out.Requests, err
+}
+
+// ApprovalGet fetches one approval request.
+func (c *Client) ApprovalGet(ctx context.Context, id string) (*ApprovalRequest, error) {
+	var out ApprovalRequest
+	err := c.do(ctx, http.MethodGet, "/approval/requests/"+url.PathEscape(id), "", nil, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ApprovalApprove approves a pending step for the given role.
+func (c *Client) ApprovalApprove(ctx context.Context, id, approver, comment string, role ApprovalRole) (*ApprovalRequest, error) {
+	body, _ := json.Marshal(map[string]any{"approver": approver, "role": role, "comment": comment})
+	var out ApprovalRequest
+	err := c.do(ctx, http.MethodPost, "/approval/requests/"+url.PathEscape(id)+"/approve", "application/json", body, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ApprovalReject rejects a pending step, settling the request as rejected.
+func (c *Client) ApprovalReject(ctx context.Context, id, approver, comment string, role ApprovalRole) (*ApprovalRequest, error) {
+	body, _ := json.Marshal(map[string]any{"approver": approver, "role": role, "comment": comment})
+	var out ApprovalRequest
+	err := c.do(ctx, http.MethodPost, "/approval/requests/"+url.PathEscape(id)+"/reject", "application/json", body, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// AuditList returns the governance audit trail in chronological order.
+func (c *Client) AuditList(ctx context.Context) ([]*AuditEntry, error) {
+	var out struct {
+		Entries []*AuditEntry `json:"entries"`
+	}
+	err := c.do(ctx, http.MethodGet, "/audit", "", nil, &out)
+	return out.Entries, err
+}
+
+// AuditAttest pins a sha256 digest over content against an audit entry.
+func (c *Client) AuditAttest(ctx context.Context, entryID, ref, content, by string) (*AuditEntry, error) {
+	body, _ := json.Marshal(map[string]any{"entryId": entryID, "ref": ref, "content": content, "by": by})
+	var out AuditEntry
+	err := c.do(ctx, http.MethodPost, "/audit/attest", "application/json", body, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)

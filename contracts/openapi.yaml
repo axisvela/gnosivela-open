@@ -206,6 +206,104 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/PolicyDecision' }
         '409': { description: Policy engine disabled }
+  /approval/requests:
+    post:
+      summary: Open an approval request for a governed action
+      tags: [approval]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ApprovalCreate' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApprovalRequest' }
+    get:
+      summary: List approval requests in creation order
+      tags: [approval]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requests:
+                    type: array
+                    items: { $ref: '#/components/schemas/ApprovalRequest' }
+  /approval/requests/{id}:
+    get:
+      summary: Get one approval request
+      tags: [approval]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApprovalRequest' }
+  /approval/requests/{id}/approve:
+    post:
+      summary: Approve a pending step of an approval request
+      tags: [approval]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ApprovalStep' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApprovalRequest' }
+  /approval/requests/{id}/reject:
+    post:
+      summary: Reject a pending step (settles the request as rejected)
+      tags: [approval]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ApprovalStep' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApprovalRequest' }
+  /audit:
+    get:
+      summary: List the durable governance audit trail (chronological)
+      tags: [audit]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entries:
+                    type: array
+                    items: { $ref: '#/components/schemas/AuditEntry' }
+  /audit/attest:
+    post:
+      summary: Attest evidence by digest against an audit entry
+      tags: [audit]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AuditAttest' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditEntry' }
   /ontologies/{namespace}/versions/{version}/diff:
     get:
       summary: Semantic diff between two versions of a namespace
@@ -641,6 +739,61 @@ components:
         allowed: { type: boolean }
         reason: { type: string }
         policies: { type: array, items: { type: string } }
+    ApprovalStep:
+      type: object
+      properties:
+        role: { type: string, enum: [domain-owner, steward, security] }
+        status: { type: string, enum: [pending, approved, rejected] }
+        approver: { type: string }
+        comment: { type: string }
+        at: { type: string, format: date-time }
+      required: [role, status]
+    ApprovalRequest:
+      type: object
+      properties:
+        id: { type: string }
+        action: { type: string }
+        resource: { type: string }
+        requester: { type: string }
+        reason: { type: string }
+        steps: { type: array, items: { $ref: '#/components/schemas/ApprovalStep' } }
+        status: { type: string, enum: [pending, approved, rejected] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ApprovalCreate:
+      type: object
+      properties:
+        action: { type: string }
+        resource: { type: string }
+        requester: { type: string }
+        reason: { type: string }
+      required: [action, resource]
+    AuditEvidence:
+      type: object
+      properties:
+        ref: { type: string }
+        digest: { type: string }
+        attestedAt: { type: string, format: date-time }
+        by: { type: string }
+    AuditEntry:
+      type: object
+      properties:
+        id: { type: string }
+        at: { type: string, format: date-time }
+        actor: { type: string }
+        action: { type: string }
+        resource: { type: string }
+        outcome: { type: string }
+        detail: { type: string }
+        evidence: { type: array, items: { $ref: '#/components/schemas/AuditEvidence' } }
+    AuditAttest:
+      type: object
+      properties:
+        entryId: { type: string }
+        ref: { type: string }
+        content: { type: string }
+        by: { type: string }
+      required: [entryId, ref, content]
     EntityRef:
       type: object
       properties:

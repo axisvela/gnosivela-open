@@ -283,6 +283,65 @@ type PolicyDecision struct {
 	Policies []string `json:"policies,omitempty"`
 }
 
+// ApprovalRole is a role in an approval chain.
+type ApprovalRole string
+
+const (
+	ApprovalRoleDomainOwner ApprovalRole = "domain-owner"
+	ApprovalRoleSteward     ApprovalRole = "steward"
+	ApprovalRoleSecurity    ApprovalRole = "security"
+)
+
+// ApprovalStep is one role's decision in an approval chain.
+type ApprovalStep struct {
+	Role     ApprovalRole `json:"role"`
+	Status   string       `json:"status"` // pending | approved | rejected
+	Approver string       `json:"approver,omitempty"`
+	Comment  string       `json:"comment,omitempty"`
+	At       time.Time    `json:"at,omitempty"`
+}
+
+// ApprovalRequest is a pending or settled approval over an action/resource.
+type ApprovalRequest struct {
+	ID        string         `json:"id"`
+	Action    string         `json:"action"`
+	Resource  string         `json:"resource"`
+	Requester string         `json:"requester"`
+	Reason    string         `json:"reason,omitempty"`
+	Steps     []ApprovalStep `json:"steps"`
+	Status    string         `json:"status"` // pending | approved | rejected
+	CreatedAt time.Time      `json:"createdAt"`
+	UpdatedAt time.Time      `json:"updatedAt"`
+}
+
+// ApprovalCreate is the payload to open an approval request.
+type ApprovalCreate struct {
+	Action    string `json:"action"`
+	Resource  string `json:"resource"`
+	Requester string `json:"requester,omitempty"`
+	Reason    string `json:"reason,omitempty"`
+}
+
+// AuditEvidence is a digest-attested source artifact.
+type AuditEvidence struct {
+	Ref        string    `json:"ref"`
+	Digest     string    `json:"digest,omitempty"`
+	AttestedAt time.Time `json:"attestedAt,omitempty"`
+	By         string    `json:"by,omitempty"`
+}
+
+// AuditEntry is one audited governance decision.
+type AuditEntry struct {
+	ID       string          `json:"id"`
+	At       time.Time       `json:"at"`
+	Actor    string          `json:"actor"`
+	Action   string          `json:"action"`
+	Resource string          `json:"resource"`
+	Outcome  string          `json:"outcome"`
+	Detail   string          `json:"detail,omitempty"`
+	Evidence []AuditEvidence `json:"evidence,omitempty"`
+}
+
 // OntologyCreateResult is returned by OntologyCreate.
 type OntologyCreateResult struct {
 	Ontology *Ontology `json:"ontology"`
