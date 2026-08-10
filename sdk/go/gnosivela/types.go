@@ -342,6 +342,32 @@ type AuditEntry struct {
 	Evidence []AuditEvidence `json:"evidence,omitempty"`
 }
 
+// PipelineRequest is a single mapping CI/CD run over one ontology version.
+type PipelineRequest struct {
+	Namespace       string `json:"namespace"`
+	Version         string `json:"version"`
+	Principal       string `json:"principal,omitempty"`
+	ApprovalID      string `json:"approvalId,omitempty"`
+	RequireApproval bool   `json:"requireApproval,omitempty"`
+	MaxFailures     int    `json:"maxFailures,omitempty"`
+	AutoRollback    bool   `json:"autoRollback,omitempty"`
+}
+
+// PipelineStage is the outcome of one stage of a pipeline run.
+type PipelineStage struct {
+	Stage  string `json:"stage"`
+	Status string `json:"status"`
+	Detail string `json:"detail,omitempty"`
+}
+
+// PipelineReport is the full record of a pipeline run.
+type PipelineReport struct {
+	Namespace   string          `json:"namespace"`
+	Version     string          `json:"version"`
+	FinalStatus string          `json:"finalStatus"` // deployed | rolled-back | blocked | failed | degraded
+	Stages      []PipelineStage `json:"stages"`
+}
+
 // OntologyCreateResult is returned by OntologyCreate.
 type OntologyCreateResult struct {
 	Ontology *Ontology `json:"ontology"`

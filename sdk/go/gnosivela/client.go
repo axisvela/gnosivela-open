@@ -261,6 +261,21 @@ func (c *Client) AuditAttest(ctx context.Context, entryID, ref, content, by stri
 	return &out, nil
 }
 
+// PipelineRun executes the mapping CI/CD closed loop and returns the stage
+// report. A blocked run (approval/impact gate) surfaces as a non-nil error.
+func (c *Client) PipelineRun(ctx context.Context, req PipelineRequest) (*PipelineReport, error) {
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	var out PipelineReport
+	err = c.do(ctx, http.MethodPost, "/pipeline/run", "application/json", body, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)

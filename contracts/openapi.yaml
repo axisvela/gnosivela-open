@@ -304,6 +304,26 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/AuditEntry' }
+  /pipeline/run:
+    post:
+      summary: Run the mapping CI/CD closed loop (test -> publish -> observe -> rollback)
+      description: Validates the version, gates on approval when required, publishes through the impact guard, observes consistency, and rolls back when the observe gate is exceeded and autoRollback is set.
+      tags: [pipeline]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PipelineRequest' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PipelineReport' }
+        '409':
+          description: Blocked (approval required or breaking change without approval)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PipelineReport' }
   /ontologies/{namespace}/versions/{version}/diff:
     get:
       summary: Semantic diff between two versions of a namespace
@@ -794,6 +814,30 @@ components:
         content: { type: string }
         by: { type: string }
       required: [entryId, ref, content]
+    PipelineRequest:
+      type: object
+      properties:
+        namespace: { type: string }
+        version: { type: string }
+        principal: { type: string }
+        approvalId: { type: string }
+        requireApproval: { type: boolean }
+        maxFailures: { type: integer }
+        autoRollback: { type: boolean }
+      required: [namespace, version]
+    PipelineStage:
+      type: object
+      properties:
+        stage: { type: string, enum: [test, publish, observe, rollback] }
+        status: { type: string, enum: [passed, failed, skipped, rolled-back] }
+        detail: { type: string }
+    PipelineReport:
+      type: object
+      properties:
+        namespace: { type: string }
+        version: { type: string }
+        finalStatus: { type: string, enum: [deployed, rolled-back, blocked, failed, degraded] }
+        stages: { type: array, items: { $ref: '#/components/schemas/PipelineStage' } }
     EntityRef:
       type: object
       properties:
