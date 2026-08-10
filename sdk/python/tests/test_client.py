@@ -30,6 +30,14 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
             self._reply({"entries": [{"id": "AUD-000001", "action": "publish", "actor": "alice"}]})
         elif self.path == "/events/contracts":
             self._reply({"contracts": [{"id": "c-1", "type": "price.updated"}]})
+        elif self.path == "/quality":
+            self._reply({"citationCompleteness": 0.98, "unresolvedRate": 0.0, "conflicts": 0})
+        elif self.path == "/metrics":
+            self._reply({"counts": {"query.semantic": 3}, "asOf": "2024-01-01T00:00:00Z"})
+        elif self.path == "/bridge/procurement.supplier/contract":
+            self._reply({"id": "procurement.supplier@1.2", "signature": "a" * 64, "concepts": []})
+        elif self.path == "/metrics/definitions":
+            self._reply({"definitions": [{"id": "m:1", "formula": "sum(x)"}]})
         else:
             self._reply({"error": "not found"}, 404)
 
@@ -50,6 +58,19 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
             self._reply({"allowed": True, "reason": "open default"})
         elif self.path == "/federation/query":
             self._reply({"query": body.get("query"), "domainsQueried": 1, "domainHits": {"local": 1}})
+        elif self.path == "/quality":
+            self._reply({"citationCompleteness": 0.98, "unresolvedRate": 0.0, "conflicts": 0})
+        elif self.path == "/metrics":
+            self._reply({"counts": {"query.semantic": 3}, "asOf": "2024-01-01T00:00:00Z"})
+        elif self.path == "/incidents/check":
+            self._reply({"opened": [{"id": "INC-001", "status": "open"}], "quality": {}})
+        elif self.path == "/bridge/procurement.supplier/contract":
+            self._reply({"id": "procurement.supplier@1.2", "signature": "a" * 64, "concepts": []})
+        elif self.path == "/metrics/definitions":
+            if "POST" == self.command:
+                self._reply({"id": "m:1", "formula": "sum(x)"}, 201)
+            else:
+                self._reply({"definitions": [{"id": "m:1", "formula": "sum(x)"}]})
         else:
             self._reply({"error": "not found"}, 404)
 
@@ -106,6 +127,20 @@ class TestClient(unittest.TestCase):
         c = Client(self.base)
         view = c.federation_query("ACME", "auditor", "review")
         self.assertEqual(view["domainsQueried"], 1)
+
+    def test_operations_endpoints(self):
+        c = Client(self.base)
+        q = c.quality("")
+        self.assertGreater(q["citationCompleteness"], 0.9)
+        counts = c.metrics()["counts"]
+        self.assertEqual(counts["query.semantic"], 3)
+        opened = c.incident_check()["opened"]
+        self.assertEqual(opened[0]["status"], "open")
+        contract = c.bridge_contract_export("procurement.supplier")
+        self.assertEqual(len(contract["signature"]), 64)
+        c.metric_definition_register({"id": "m:1", "formula": "sum(x)"})
+        defs = c.metric_definitions()["definitions"]
+        self.assertEqual(defs[0]["id"], "m:1")
 
     def test_error(self):
         c = Client(self.base)

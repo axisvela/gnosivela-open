@@ -24,6 +24,24 @@ test.before(async () => {
     if (req.method === "GET" && path === "/events/contracts") {
       return send({ contracts: [{ id: "c-1", type: "price.updated" }] });
     }
+    if (req.method === "GET" && path === "/quality") {
+      return send({ citationCompleteness: 0.98, unresolvedRate: 0, conflicts: 0 });
+    }
+    if (req.method === "GET" && path === "/metrics") {
+      return send({ counts: { "query.semantic": 3 } });
+    }
+    if (req.method === "GET" && path === "/bridge/procurement.supplier/contract") {
+      return send({ id: "procurement.supplier@1.2", signature: "a".repeat(64), concepts: [] });
+    }
+    if (req.method === "GET" && path === "/metrics/definitions") {
+      return send({ definitions: [{ id: "m:1", formula: "sum(x)" }] });
+    }
+    if (req.method === "POST" && path === "/incidents/check") {
+      return send({ opened: [{ id: "INC-001", status: "open" }], quality: {} });
+    }
+    if (req.method === "POST" && path === "/metrics/definitions") {
+      return send({ id: "m:1", formula: "sum(x)" }, 201);
+    }
     if (req.method === "POST" && path === "/policy/evaluate") {
       return send({ allowed: true, reason: "open default" });
     }
@@ -72,6 +90,21 @@ test("entity save", async () => {
   const c = new Client(base);
   const e = await c.entitySave({ namespace: "mdm", canonicalId: "C-1", type: "Company" });
   assert.equal(e.canonicalId, "C-1");
+});
+
+test("operations endpoints", async () => {
+  const c = new Client(base);
+  const q = await c.quality("");
+  assert.ok(q.citationCompleteness > 0.9);
+  const counts = await c.metrics();
+  assert.equal(counts.counts["query.semantic"], 3);
+  const opened = await c.incidentCheck();
+  assert.equal(opened.opened[0].status, "open");
+  const contract = await c.bridgeContractExport("procurement.supplier");
+  assert.equal(contract.signature.length, 64);
+  await c.metricDefinitionRegister({ id: "m:1", formula: "sum(x)" });
+  const defs = await c.metricDefinitions();
+  assert.equal(defs.definitions[0].id, "m:1");
 });
 
 test("error surfaces status", async () => {
