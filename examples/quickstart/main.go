@@ -71,6 +71,94 @@ func main() {
 		log.Fatalf("propose assertion: %v", err)
 	}
 	fmt.Printf("assertion %s status=%s (predicate=%s)\n", a.AssertionID, a.Status, a.Predicate)
+
+	// 5. Governance: consistency + conflicts + audit.
+	report, err := c.ConsistencyReport(ctx, "procurement.supplier")
+	if err != nil {
+		log.Fatalf("consistency report: %v", err)
+	}
+	fmt.Printf("consistency failures=%d warnings=%d\n", report.Failures, report.Warnings)
+
+	conflicts, err := c.ConsistencyConflicts(ctx)
+	if err != nil {
+		log.Fatalf("consistency conflicts: %v", err)
+	}
+	fmt.Printf("conflicts=%d\n", len(conflicts))
+
+	audit, err := c.AuditList(ctx)
+	if err != nil {
+		log.Fatalf("audit list: %v", err)
+	}
+	fmt.Printf("audit entries=%d\n", len(audit))
+
+	// 6. Semantic bridge: export the signed contract and query through it.
+	contract, err := c.BridgeContractExport(ctx, "procurement.supplier")
+	if err != nil {
+		log.Fatalf("bridge export: %v", err)
+	}
+	fmt.Printf("contract %s signature=%s… jsonSchema=%d chars\n",
+		contract.ID, contract.Signature[:8], len(contract.JSONSchema))
+
+	view, err := c.BridgeQuery(ctx, "procurement.supplier", "ACME credit", "risk-officer", "onboarding")
+	if err != nil {
+		log.Fatalf("bridge query: %v", err)
+	}
+	fmt.Printf("contract-driven view assertions=%d\n", len(view.Assertions))
+
+	// 7. Federation: query across the registered domain (local by default).
+	fedView, err := c.FederationQuery(ctx, "ACME credit", "risk-officer", "onboarding")
+	if err != nil {
+		log.Fatalf("federation query: %v", err)
+	}
+	fmt.Printf("federation domains=%d hits=%d latencyMs=%d\n",
+		fedView.DomainsQueried, len(fedView.DomainHits), fedView.LatencyMillis)
+
+	// 8. Real-time events: register a contract and ingest an event.
+	err = c.EventContractRegister(ctx, gnosivela.EventContract{
+		ID: "procurement.price.updated", Type: "price.updated", Ontology: "procurement.supplier@1.2",
+		Templates: []gnosivela.EventTemplate{{
+			Predicate: "Supplier:price", SubjectField: "company", SubjectType: "Supplier",
+			ObjectField: "amount", ObjectType: "number", Region: "SG", ValidFor: "90d",
+		}},
+	})
+	if err != nil {
+		log.Fatalf("event contract register: %v", err)
+	}
+	ing, err := c.EventIngest(ctx, "procurement.price.updated", &gnosivela.Event{
+		ID: "e-1", Type: "price.updated", Source: "market-feed",
+		Payload: map[string]any{"company": "ACME", "amount": 12.5},
+	})
+	if err != nil {
+		log.Fatalf("event ingest: %v", err)
+	}
+	fmt.Printf("event ingest assertions=%d resolved=%d gaps=%d\n",
+		len(ing.Assertions), len(ing.Resolved), len(ing.Gaps))
+
+	// 9. Operations: quality snapshot + SLO incidents + metrics.
+	q, err := c.Quality(ctx, "")
+	if err != nil {
+		log.Fatalf("quality: %v", err)
+	}
+	fmt.Printf("quality citation=%.3f unresolved=%.3f conflicts=%d\n",
+		q.CitationCompleteness, q.UnresolvedRate, q.Conflicts)
+
+	err = c.IncidentRuleAdd(ctx, gnosivela.IncidentRule{
+		ID: "r-conflicts", Metric: "conflicts", Operator: ">=", Threshold: 0, Severity: "warning",
+	})
+	if err != nil {
+		log.Fatalf("incident rule add: %v", err)
+	}
+	opened, _, err := c.IncidentCheck(ctx)
+	if err != nil {
+		log.Fatalf("incident check: %v", err)
+	}
+	fmt.Printf("incidents opened=%d\n", len(opened))
+
+	metrics, err := c.Metrics(ctx)
+	if err != nil {
+		log.Fatalf("metrics: %v", err)
+	}
+	fmt.Printf("metrics=%v\n", metrics)
 }
 
 func str(s string) *string { return &s }
