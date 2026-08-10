@@ -214,6 +214,22 @@ public final class GnosivelaClient {
         return get("/quality" + q);
     }
 
+    public String incidentRuleAdd(String json) {
+        return post("/incidents/rules", json);
+    }
+
+    public String incidentCheck() {
+        return post("/incidents/check", null);
+    }
+
+    public String incidentList() {
+        return get("/incidents");
+    }
+
+    public String incidentResolve(String id) {
+        return post("/incidents/" + enc(id) + "/resolve", null);
+    }
+
     private static String escape(String s) {
         if (s == null) {
             return "";

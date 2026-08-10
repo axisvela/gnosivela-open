@@ -482,6 +482,28 @@ type QualityReport struct {
 	ApprovalPending      int       `json:"approvalPending"`
 }
 
+// IncidentRule is an SLO threshold over a quality metric.
+type IncidentRule struct {
+	ID       string  `json:"id"`
+	Metric   string  `json:"metric"`
+	Operator string  `json:"operator"` // >= | > | <= | < | ==
+	Threshold float64 `json:"threshold"`
+	Severity string  `json:"severity"`
+	Message  string  `json:"message,omitempty"`
+}
+
+// Incident is one open or resolved SLO violation.
+type Incident struct {
+	ID      string    `json:"id"`
+	Rule    string    `json:"rule"`
+	Metric  string    `json:"metric"`
+	Value   float64   `json:"value"`
+	Opened  time.Time `json:"opened"`
+	Closed  time.Time `json:"closed,omitempty"`
+	Status  string    `json:"status"`
+	Message string    `json:"message,omitempty"`
+}
+
 // OntologyCreateResult is returned by OntologyCreate.
 type OntologyCreateResult struct {
 	Ontology *Ontology `json:"ontology"`

@@ -434,6 +434,55 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/QualityReport' }
+  /incidents/rules:
+    post:
+      summary: Register an SLO rule (metric + operator + threshold)
+      tags: [ops]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IncidentRule' }
+      responses:
+        '201': { description: Registered }
+  /incidents/check:
+    post:
+      summary: Evaluate SLO rules against the current quality snapshot
+      description: Opens an incident only on the failing edge of a rule; a continuously failing rule does not re-open.
+      tags: [ops]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  opened:
+                    type: array
+                    items: { $ref: '#/components/schemas/Incident' }
+                  quality: { $ref: '#/components/schemas/QualityReport' }
+  /incidents:
+    get:
+      summary: List incidents (newest first)
+      tags: [ops]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  incidents:
+                    type: array
+                    items: { $ref: '#/components/schemas/Incident' }
+  /incidents/{id}/resolve:
+    post:
+      summary: Resolve an open incident explicitly
+      tags: [ops]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Resolved }
   /ontologies/{namespace}/versions/{version}/diff:
     get:
       summary: Semantic diff between two versions of a namespace
@@ -1071,6 +1120,27 @@ components:
         approvalApproved: { type: integer }
         approvalRejected: { type: integer }
         approvalPending: { type: integer }
+    IncidentRule:
+      type: object
+      properties:
+        id: { type: string }
+        metric: { type: string }
+        operator: { type: string, enum: ['>=', '>', '<=', '<', '=='] }
+        threshold: { type: number }
+        severity: { type: string }
+        message: { type: string }
+      required: [id, metric, operator, threshold]
+    Incident:
+      type: object
+      properties:
+        id: { type: string }
+        rule: { type: string }
+        metric: { type: string }
+        value: { type: number }
+        opened: { type: string, format: date-time }
+        closed: { type: string, format: date-time }
+        status: { type: string, enum: [open, resolved] }
+        message: { type: string }
     EntityRef:
       type: object
       properties:

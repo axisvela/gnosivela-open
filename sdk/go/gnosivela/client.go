@@ -365,6 +365,40 @@ func (c *Client) Quality(ctx context.Context, ontologyNamespace string) (*Qualit
 	return &out, nil
 }
 
+// IncidentRuleAdd registers an SLO rule.
+func (c *Client) IncidentRuleAdd(ctx context.Context, rule IncidentRule) error {
+	body, err := json.Marshal(rule)
+	if err != nil {
+		return err
+	}
+	return c.do(ctx, http.MethodPost, "/incidents/rules", "application/json", body, nil)
+}
+
+// IncidentCheck evaluates SLO rules against the current quality snapshot and
+// returns the incidents opened on the failing edge.
+func (c *Client) IncidentCheck(ctx context.Context) ([]*Incident, *QualityReport, error) {
+	var out struct {
+		Opened  []*Incident   `json:"opened"`
+		Quality *QualityReport `json:"quality"`
+	}
+	err := c.do(ctx, http.MethodPost, "/incidents/check", "", nil, &out)
+	return out.Opened, out.Quality, err
+}
+
+// IncidentList lists incidents, newest first.
+func (c *Client) IncidentList(ctx context.Context) ([]*Incident, error) {
+	var out struct {
+		Incidents []*Incident `json:"incidents"`
+	}
+	err := c.do(ctx, http.MethodGet, "/incidents", "", nil, &out)
+	return out.Incidents, err
+}
+
+// IncidentResolve resolves an open incident explicitly.
+func (c *Client) IncidentResolve(ctx context.Context, id string) error {
+	return c.do(ctx, http.MethodPost, "/incidents/"+url.PathEscape(id)+"/resolve", "", nil, nil)
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)

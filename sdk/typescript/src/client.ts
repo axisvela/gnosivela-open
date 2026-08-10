@@ -169,4 +169,16 @@ export class Client {
     const q = ontologyNamespace ? `?ontology=${encodeURIComponent(ontologyNamespace)}` : "";
     return this.request("GET", `/quality${q}`);
   }
+  incidentRuleAdd(rule: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.request("POST", "/incidents/rules", rule);
+  }
+  incidentCheck(): Promise<{ opened: unknown[]; quality: Record<string, unknown> }> {
+    return this.request("POST", "/incidents/check");
+  }
+  incidentList(): Promise<{ incidents: unknown[] }> {
+    return this.request("GET", "/incidents");
+  }
+  incidentResolve(id: string): Promise<Record<string, unknown>> {
+    return this.request("POST", `/incidents/${encodeURIComponent(id)}/resolve`);
+  }
 }

@@ -209,3 +209,15 @@ class Client:
         if ontology_namespace:
             path += "?ontology=" + urllib.parse.quote(ontology_namespace)
         return self._request("GET", path)
+
+    def incident_rule_add(self, rule: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request("POST", "/incidents/rules", rule)
+
+    def incident_check(self) -> Dict[str, Any]:
+        return self._request("POST", "/incidents/check")
+
+    def incident_list(self) -> Dict[str, Any]:
+        return self._request("GET", "/incidents")
+
+    def incident_resolve(self, incident_id: str) -> Dict[str, Any]:
+        return self._request("POST", "/incidents/%s/resolve" % urllib.parse.quote(incident_id))
