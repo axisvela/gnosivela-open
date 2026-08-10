@@ -238,6 +238,14 @@ public final class GnosivelaClient {
         return post("/metrics/definitions", json);
     }
 
+    public String industryPacks() {
+        return get("/industry/packs");
+    }
+
+    public String industryPack(String id) {
+        return get("/industry/packs/" + enc(id));
+    }
+
     private static String escape(String s) {
         if (s == null) {
             return "";

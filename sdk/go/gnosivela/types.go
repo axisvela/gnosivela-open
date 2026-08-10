@@ -504,6 +504,16 @@ type Incident struct {
 	Message string    `json:"message,omitempty"`
 }
 
+// IndustryPackSummary is the lightweight metadata of an industry reference pack.
+type IndustryPackSummary struct {
+	ID         string   `json:"id"`
+	Name       string   `json:"name"`
+	Domain     string   `json:"domain"`
+	Concepts   []string `json:"concepts"`
+	Assertions []string `json:"assertions"`
+	OntologyID string   `json:"ontologyId"`
+}
+
 // OntologyCreateResult is returned by OntologyCreate.
 type OntologyCreateResult struct {
 	Ontology *Ontology `json:"ontology"`

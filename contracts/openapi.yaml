@@ -523,6 +523,33 @@ paths:
         - { name: id, in: path, required: true, schema: { type: string } }
       responses:
         '200': { description: Resolved }
+  /industry/packs:
+    get:
+      summary: List industry reference packs (finance/manufacturing/supply chain/public sector)
+      description: Reference semantic contracts for verticals; each parses to a valid, publishable ontology. Adapt per institution; packs are never a substitute for a governed ontology.
+      tags: [industry]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  packs:
+                    type: array
+                    items: { $ref: '#/components/schemas/IndustryPackSummary' }
+  /industry/packs/{id}:
+    get:
+      summary: Get a full industry reference pack (ontology payload included)
+      tags: [industry]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IndustryPack' }
+        '404': { description: Unknown pack }
   /ontologies/{namespace}/versions/{version}/diff:
     get:
       summary: Semantic diff between two versions of a namespace
@@ -1195,6 +1222,25 @@ components:
         closed: { type: string, format: date-time }
         status: { type: string, enum: [open, resolved] }
         message: { type: string }
+    IndustryPackSummary:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        domain: { type: string }
+        concepts: { type: array, items: { type: string } }
+        assertions: { type: array, items: { type: string } }
+        ontologyId: { type: string }
+    IndustryPack:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        domain: { type: string }
+        concepts: { type: array, items: { type: string } }
+        assertions: { type: array, items: { type: string } }
+        ontologyId: { type: string }
+        ontology: { $ref: '#/components/schemas/Ontology' }
     EntityRef:
       type: object
       properties:

@@ -428,6 +428,25 @@ func (c *Client) MetricDefinitionRegister(ctx context.Context, def MetricDefinit
 	return c.do(ctx, http.MethodPost, "/metrics/definitions", "application/json", body, nil)
 }
 
+// IndustryPacks lists the industry reference packs.
+func (c *Client) IndustryPacks(ctx context.Context) ([]IndustryPackSummary, error) {
+	var out struct {
+		Packs []IndustryPackSummary `json:"packs"`
+	}
+	err := c.do(ctx, http.MethodGet, "/industry/packs", "", nil, &out)
+	return out.Packs, err
+}
+
+// IndustryPack returns a full industry reference pack including its ontology.
+func (c *Client) IndustryPack(ctx context.Context, id string) (map[string]any, error) {
+	var out map[string]any
+	err := c.do(ctx, http.MethodGet, "/industry/packs/"+url.PathEscape(id), "", nil, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)

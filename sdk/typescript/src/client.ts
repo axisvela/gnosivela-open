@@ -187,4 +187,10 @@ export class Client {
   metricDefinitionRegister(def: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.request("POST", "/metrics/definitions", def);
   }
+  industryPacks(): Promise<{ packs: unknown[] }> {
+    return this.request("GET", "/industry/packs");
+  }
+  industryPack(id: string): Promise<Record<string, unknown>> {
+    return this.request("GET", `/industry/packs/${encodeURIComponent(id)}`);
+  }
 }

@@ -227,3 +227,9 @@ class Client:
 
     def metric_definition_register(self, definition: Dict[str, Any]) -> Dict[str, Any]:
         return self._request("POST", "/metrics/definitions", definition)
+
+    def industry_packs(self) -> Dict[str, Any]:
+        return self._request("GET", "/industry/packs")
+
+    def industry_pack(self, pack_id: str) -> Dict[str, Any]:
+        return self._request("GET", "/industry/packs/%s" % urllib.parse.quote(pack_id))
