@@ -759,9 +759,21 @@ paths:
               schema: { $ref: '#/components/schemas/GroundingBundle' }
   /healthz:
     get:
-      summary: Health check
+      summary: Health check with backing store kind and read probe
+      description: Returns 200 when healthy; 503 when the configured PostgreSQL store is unreachable.
+      tags: [ops]
       responses:
-        '200': { description: OK }
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [ok, degraded] }
+                  store: { type: string, enum: [memory, postgres] }
+                  version: { type: string }
+                  storeError: { type: string }
+        '503': { description: Store degraded }
 components:
   schemas:
     Ontology:
