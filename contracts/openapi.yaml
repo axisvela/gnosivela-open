@@ -1015,6 +1015,7 @@ components:
         gaps: { type: array, items: { type: string } }
         domainHits: { type: object, additionalProperties: { type: integer } }
         domainOf: { type: object, additionalProperties: { type: string } }
+        policyDecision: { type: string }
         latencyMillis: { type: integer }
         domainsQueried: { type: integer }
     ContractProperty:
