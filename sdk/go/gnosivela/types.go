@@ -287,3 +287,45 @@ type SemanticResult struct {
 	EvidenceChains []EvidenceChain    `json:"evidenceChains,omitempty"`
 	Metrics        []*MetricDefinition `json:"metrics,omitempty"`
 }
+
+// SemanticContract carries the ontology/mapping versions behind a bundle.
+type SemanticContract struct {
+	OntologyVersion string   `json:"ontologyVersion"`
+	MappingVersion  string   `json:"mappingVersion,omitempty"`
+	Units           []string `json:"units,omitempty"`
+}
+
+// GroundingBundle is the assembled, evidence-backed context for one task.
+type GroundingBundle struct {
+	ResolvedIntent   string                `json:"resolvedIntent"`
+	Knowledge        []*KnowledgeAssertion `json:"knowledge,omitempty"`
+	Evidence         []EvidenceRef         `json:"evidence,omitempty"`
+	SemanticContract *SemanticContract     `json:"semanticContract,omitempty"`
+	PolicyDecision   string                `json:"policyDecision,omitempty"`
+	Conflict         []*Conflict           `json:"conflict,omitempty"`
+	Gap              []string              `json:"gap,omitempty"`
+	ContextBudget    int                   `json:"contextBudget,omitempty"`
+}
+
+// GroundingCitation is one assertion's evidence citation in an explanation.
+type GroundingCitation struct {
+	AssertionID     string        `json:"assertionId"`
+	Subject         string        `json:"subject"`
+	Predicate       string        `json:"predicate"`
+	Status          string        `json:"status"`
+	Confidence      float64       `json:"confidence,omitempty"`
+	OntologyVersion string        `json:"ontologyVersion,omitempty"`
+	Sources         []string      `json:"sources,omitempty"`
+	Derivations     []string      `json:"derivations,omitempty"`
+	Evidence        []EvidenceRef `json:"evidence,omitempty"`
+}
+
+// GroundingExplanation is the citation-level breakdown of an assembly.
+type GroundingExplanation struct {
+	Intent               string              `json:"intent"`
+	Citations            []GroundingCitation `json:"citations"`
+	Conflicts            []string            `json:"conflicts,omitempty"`
+	Gaps                 []string            `json:"gaps,omitempty"`
+	Policy               string              `json:"policy"`
+	CitationCompleteness float64             `json:"citationCompleteness"`
+}

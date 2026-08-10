@@ -166,6 +166,36 @@ func (c *Client) SubgraphQuery(ctx context.Context, node string) ([]*Relation, e
 	return out, err
 }
 
+// GroundingAssemble assembles an evidence-backed grounding bundle.
+func (c *Client) GroundingAssemble(ctx context.Context, query, principal, purpose string, budget int) (*GroundingBundle, error) {
+	body, _ := json.Marshal(map[string]any{
+		"query": query, "principal": principal, "purpose": purpose, "budget": budget,
+	})
+	var out GroundingBundle
+	err := c.do(ctx, http.MethodPost, "/grounding/assemble", "application/json", body, &out)
+	return &out, err
+}
+
+// GroundingExplain returns the citation-level explanation of an assembly.
+func (c *Client) GroundingExplain(ctx context.Context, query, principal, purpose string) (*GroundingExplanation, error) {
+	body, _ := json.Marshal(map[string]string{
+		"query": query, "principal": principal, "purpose": purpose,
+	})
+	var out GroundingExplanation
+	err := c.do(ctx, http.MethodPost, "/grounding/explain", "application/json", body, &out)
+	return &out, err
+}
+
+// GroundingRedact re-assembles with sensitive evidence sources hidden.
+func (c *Client) GroundingRedact(ctx context.Context, query, principal, purpose string, hideTags []string) (*GroundingBundle, error) {
+	body, _ := json.Marshal(map[string]any{
+		"query": query, "principal": principal, "purpose": purpose, "hideTags": hideTags,
+	})
+	var out GroundingBundle
+	err := c.do(ctx, http.MethodPost, "/grounding/redact", "application/json", body, &out)
+	return &out, err
+}
+
 func (c *Client) do(ctx context.Context, method, path, contentType string, body []byte, out any) error {
 	var reader io.Reader
 	if body != nil {

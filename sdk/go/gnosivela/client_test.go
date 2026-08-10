@@ -78,6 +78,22 @@ func TestAssertionAndResolve(t *testing.T) {
 				"relation": &Relation{ID: "rel:1", Kind: RelationExactSameAs, Authority: "candidate"},
 				"evidence": &MatchEvidence{Status: "auto", GeneratedBy: "rule", Score: 1},
 			})
+		case r.Method == http.MethodPost && r.URL.Path == "/grounding/assemble":
+			writeJSON(w, http.StatusOK, &GroundingBundle{
+				ResolvedIntent:   "entities=[mdm:C-1042]",
+				PolicyDecision:   "allow tags=[procurement]",
+				SemanticContract: &SemanticContract{OntologyVersion: "procurement.supplier@1.2"},
+			})
+		case r.Method == http.MethodPost && r.URL.Path == "/grounding/explain":
+			writeJSON(w, http.StatusOK, &GroundingExplanation{
+				Intent:               "entities=[mdm:C-1042]",
+				CitationCompleteness: 1.0,
+			})
+		case r.Method == http.MethodPost && r.URL.Path == "/grounding/redact":
+			writeJSON(w, http.StatusOK, &GroundingBundle{
+				ResolvedIntent: "entities=[mdm:C-1042]",
+				Knowledge:      []*KnowledgeAssertion{{AssertionID: "ka:g1"}},
+			})
 		default:
 			http.Error(w, "not found", http.StatusNotFound)
 		}
@@ -123,6 +139,30 @@ func TestAssertionAndResolve(t *testing.T) {
 	}
 	if rel == nil || rel.Authority != "candidate" || ev.Status != "auto" {
 		t.Errorf("merge candidate = %+v, evidence = %+v", rel, ev)
+	}
+
+	bundle, err := c.GroundingAssemble(ctx, "ACME risk", "alice", "onboarding", 0)
+	if err != nil {
+		t.Fatalf("grounding assemble: %v", err)
+	}
+	if bundle.ResolvedIntent != "entities=[mdm:C-1042]" || bundle.PolicyDecision != "allow tags=[procurement]" {
+		t.Errorf("bundle = %+v", bundle)
+	}
+
+	ex, err := c.GroundingExplain(ctx, "ACME risk", "alice", "onboarding")
+	if err != nil {
+		t.Fatalf("grounding explain: %v", err)
+	}
+	if ex.CitationCompleteness != 1.0 {
+		t.Errorf("explain = %+v", ex)
+	}
+
+	rb, err := c.GroundingRedact(ctx, "ACME risk", "alice", "onboarding", []string{"procurement"})
+	if err != nil {
+		t.Fatalf("grounding redact: %v", err)
+	}
+	if len(rb.Knowledge) != 1 || rb.Knowledge[0].AssertionID != "ka:g1" {
+		t.Errorf("redacted bundle = %+v", rb)
 	}
 }
 
