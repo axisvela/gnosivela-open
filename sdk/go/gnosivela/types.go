@@ -383,6 +383,46 @@ type FederatedView struct {
 	DomainsQueried int                   `json:"domainsQueried"`
 }
 
+// ContractProperty is a governed attribute exposed by a semantic contract.
+type ContractProperty struct {
+	Name     string   `json:"name"`
+	DataType string   `json:"dataType"`
+	Unit     string   `json:"unit,omitempty"`
+	Required bool     `json:"required,omitempty"`
+	Enum     []string `json:"enum,omitempty"`
+}
+
+// ContractConcept is a governed business object type in a contract.
+type ContractConcept struct {
+	ID         string             `json:"id"`
+	Label      string             `json:"label"`
+	Properties []ContractProperty `json:"properties"`
+}
+
+// BridgeContract is the versioned, signed semantic contract exported from a
+// published ontology for downstream consumption.
+type BridgeContract struct {
+	ID          string            `json:"id"`
+	Namespace   string            `json:"namespace"`
+	Version     string            `json:"version"`
+	Owner       string            `json:"owner,omitempty"`
+	Concepts    []ContractConcept `json:"concepts"`
+	Relations   []string          `json:"relations,omitempty"`
+	Constraints []string          `json:"constraints,omitempty"`
+	Units       []string          `json:"units,omitempty"`
+	JSONSchema  string            `json:"jsonSchema,omitempty"`
+	DDL         string            `json:"ddl,omitempty"`
+	Signature   string            `json:"signature"`
+	ExportedAt  time.Time         `json:"exportedAt"`
+}
+
+// ContractView is the result of a contract-driven query.
+type ContractView struct {
+	Contract   BridgeContract        `json:"contract"`
+	Assertions []*KnowledgeAssertion `json:"assertions,omitempty"`
+	AsOf       time.Time             `json:"asOf"`
+}
+
 // OntologyCreateResult is returned by OntologyCreate.
 type OntologyCreateResult struct {
 	Ontology *Ontology `json:"ontology"`

@@ -288,6 +288,29 @@ func (c *Client) FederationQuery(ctx context.Context, query, principal, purpose 
 	return &out, nil
 }
 
+// BridgeContractExport fetches the signed semantic contract of the latest
+// published ontology version of a namespace.
+func (c *Client) BridgeContractExport(ctx context.Context, namespace string) (*BridgeContract, error) {
+	var out BridgeContract
+	err := c.do(ctx, http.MethodGet, "/bridge/"+url.PathEscape(namespace)+"/contract", "", nil, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// BridgeQuery runs a contract-driven query filtered to the contract's declared
+// predicates, pinning the returned view to the governing contract.
+func (c *Client) BridgeQuery(ctx context.Context, namespace, query, principal, purpose string) (*ContractView, error) {
+	body, _ := json.Marshal(map[string]any{"namespace": namespace, "query": query, "principal": principal, "purpose": purpose})
+	var out ContractView
+	err := c.do(ctx, http.MethodPost, "/bridge/query", "application/json", body, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)
