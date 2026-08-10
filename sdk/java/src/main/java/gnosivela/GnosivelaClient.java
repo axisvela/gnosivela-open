@@ -185,6 +185,14 @@ public final class GnosivelaClient {
         return post("/federation/query", "{\"query\":\"" + escape(query) + "\",\"principal\":\"" + escape(principal) + "\",\"purpose\":\"" + escape(purpose) + "\"}");
     }
 
+    public String federationDomains() {
+        return get("/federation/domains");
+    }
+
+    public String federationDomainAdd(String name, String baseUrl) {
+        return post("/federation/domains", "{\"name\":\"" + escape(name) + "\",\"baseUrl\":\"" + escape(baseUrl) + "\"}");
+    }
+
     public String bridgeContractExport(String namespace) {
         return get("/bridge/" + enc(namespace) + "/contract");
     }

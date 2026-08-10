@@ -147,6 +147,12 @@ export class Client {
   federationQuery(query: string, principal = "", purpose = ""): Promise<Record<string, unknown>> {
     return this.request("POST", "/federation/query", { query, principal, purpose });
   }
+  federationDomains(): Promise<{ domains: unknown[] }> {
+    return this.request("GET", "/federation/domains");
+  }
+  federationDomainAdd(name: string, baseUrl: string): Promise<Record<string, unknown>> {
+    return this.request("POST", "/federation/domains", { name, baseUrl });
+  }
   bridgeContractExport(namespace: string): Promise<Record<string, unknown>> {
     return this.request("GET", `/bridge/${encodeURIComponent(namespace)}/contract`);
   }

@@ -299,6 +299,21 @@ func (c *Client) FederationQuery(ctx context.Context, query, principal, purpose 
 	return &out, nil
 }
 
+// FederationDomains lists the registered federated domains.
+func (c *Client) FederationDomains(ctx context.Context) ([]map[string]any, error) {
+	var out struct {
+		Domains []map[string]any `json:"domains"`
+	}
+	err := c.do(ctx, http.MethodGet, "/federation/domains", "", nil, &out)
+	return out.Domains, err
+}
+
+// FederationDomainAdd registers a remote federated domain (HTTP endpoint).
+func (c *Client) FederationDomainAdd(ctx context.Context, name, baseURL string) error {
+	body, _ := json.Marshal(map[string]any{"name": name, "baseUrl": baseURL})
+	return c.do(ctx, http.MethodPost, "/federation/domains", "application/json", body, nil)
+}
+
 // BridgeContractExport fetches the signed semantic contract of the latest
 // published ontology version of a namespace.
 func (c *Client) BridgeContractExport(ctx context.Context, namespace string) (*BridgeContract, error) {

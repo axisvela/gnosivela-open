@@ -341,7 +341,7 @@ paths:
   /federation/query:
     post:
       summary: Run a federated semantic query across autonomous domains
-      description: Distributes the query to every registered domain, merges corroborating assertions, and surfaces competing values as cross-domain conflicts (never merged).
+      description: Distributes the query to every registered domain (local and remote), merges corroborating assertions, and surfaces competing values as cross-domain conflicts (never merged).
       tags: [federation]
       requestBody:
         required: true
@@ -353,6 +353,40 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/FederatedView' }
+  /federation/domains:
+    get:
+      summary: List the registered federated domains
+      tags: [federation]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  domains:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        type: { type: string, enum: [local, remote] }
+                        baseUrl: { type: string }
+    post:
+      summary: Register a remote federated domain (HTTP control-plane endpoint)
+      tags: [federation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                baseUrl: { type: string }
+              required: [name, baseUrl]
+      responses:
+        '201': { description: Registered }
   /bridge/{namespace}/contract:
     get:
       summary: Export the signed semantic contract of the latest published ontology

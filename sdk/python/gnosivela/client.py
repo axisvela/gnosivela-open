@@ -186,6 +186,12 @@ class Client:
     def federation_query(self, query: str, principal: str = "", purpose: str = "") -> Dict[str, Any]:
         return self._request("POST", "/federation/query", {"query": query, "principal": principal, "purpose": purpose})
 
+    def federation_domains(self) -> Dict[str, Any]:
+        return self._request("GET", "/federation/domains")
+
+    def federation_domain_add(self, name: str, base_url: str) -> Dict[str, Any]:
+        return self._request("POST", "/federation/domains", {"name": name, "baseUrl": base_url})
+
     def bridge_contract_export(self, namespace: str) -> Dict[str, Any]:
         return self._request("GET", "/bridge/%s/contract" % urllib.parse.quote(namespace))
 
