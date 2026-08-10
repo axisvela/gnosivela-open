@@ -366,6 +366,46 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ContractView' }
+  /events/contracts:
+    get:
+      summary: List registered event contracts
+      tags: [event]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contracts:
+                    type: array
+                    items: { $ref: '#/components/schemas/EventContract' }
+    post:
+      summary: Register an event contract (event type -> assertion templates)
+      tags: [event]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventContract' }
+      responses:
+        '201': { description: Registered }
+  /events/ingest:
+    post:
+      summary: Ingest an event and persist the governed assertions it produces
+      description: Subjects are resolved to canonical entities; unresolved hints are stored under the unresolved namespace and reported as gaps. Assertions carry validity windows from the template's validFor.
+      tags: [event]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventIngest' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IngestResult' }
+        '404': { description: Event contract not found }
   /ontologies/{namespace}/versions/{version}/diff:
     get:
       summary: Semantic diff between two versions of a namespace
@@ -943,6 +983,50 @@ components:
         contract: { $ref: '#/components/schemas/BridgeContract' }
         assertions: { type: array, items: { $ref: '#/components/schemas/KnowledgeAssertion' } }
         asOf: { type: string, format: date-time }
+    EventTemplate:
+      type: object
+      properties:
+        predicate: { type: string }
+        subjectField: { type: string }
+        subjectType: { type: string }
+        objectField: { type: string }
+        objectType: { type: string, enum: [string, number, boolean, date] }
+        region: { type: string }
+        domain: { type: string }
+        purpose: { type: string }
+        authority: { type: string }
+        confidence: { type: number }
+        validFor: { type: string }
+        status: { type: string, enum: [proposed, validated] }
+        sourceField: { type: string }
+    EventContract:
+      type: object
+      properties:
+        id: { type: string }
+        type: { type: string }
+        version: { type: string }
+        ontology: { type: string }
+        templates: { type: array, items: { $ref: '#/components/schemas/EventTemplate' } }
+      required: [id, type, templates]
+    EventIngest:
+      type: object
+      properties:
+        contractId: { type: string }
+        event:
+          type: object
+          properties:
+            id: { type: string }
+            type: { type: string }
+            at: { type: string, format: date-time }
+            source: { type: string }
+            payload: { type: object, additionalProperties: true }
+      required: [contractId, event]
+    IngestResult:
+      type: object
+      properties:
+        assertions: { type: array, items: { $ref: '#/components/schemas/KnowledgeAssertion' } }
+        resolved: { type: array, items: { type: string } }
+        gaps: { type: array, items: { type: string } }
     EntityRef:
       type: object
       properties:

@@ -423,6 +423,48 @@ type ContractView struct {
 	AsOf       time.Time             `json:"asOf"`
 }
 
+// EventTemplate maps one event payload to an ontology assertion.
+type EventTemplate struct {
+	Predicate    string  `json:"predicate"`
+	SubjectField string  `json:"subjectField"`
+	SubjectType  string  `json:"subjectType"`
+	ObjectField  string  `json:"objectField"`
+	ObjectType   string  `json:"objectType"` // string | number | boolean | date
+	Region       string  `json:"region,omitempty"`
+	Domain       string  `json:"domain,omitempty"`
+	Purpose      string  `json:"purpose,omitempty"`
+	Authority    string  `json:"authority,omitempty"`
+	Confidence   float64 `json:"confidence,omitempty"`
+	ValidFor     string  `json:"validFor,omitempty"`
+	Status       string  `json:"status,omitempty"`
+	SourceField  string  `json:"sourceField,omitempty"`
+}
+
+// EventContract declares how an event type maps to ontology assertions.
+type EventContract struct {
+	ID        string          `json:"id"`
+	Type      string          `json:"type"`
+	Version   string          `json:"version,omitempty"`
+	Ontology  string          `json:"ontology"`
+	Templates []EventTemplate `json:"templates"`
+}
+
+// Event is one inbound occurrence of an event type.
+type Event struct {
+	ID      string         `json:"id"`
+	Type    string         `json:"type"`
+	At      time.Time      `json:"at,omitempty"`
+	Source  string         `json:"source"`
+	Payload map[string]any `json:"payload"`
+}
+
+// IngestResult reports the assertions produced from one event plus gaps.
+type IngestResult struct {
+	Assertions []*KnowledgeAssertion `json:"assertions,omitempty"`
+	Resolved   []string              `json:"resolved,omitempty"`
+	Gaps       []string              `json:"gaps,omitempty"`
+}
+
 // OntologyCreateResult is returned by OntologyCreate.
 type OntologyCreateResult struct {
 	Ontology *Ontology `json:"ontology"`

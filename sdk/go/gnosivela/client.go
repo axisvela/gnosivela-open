@@ -311,6 +311,35 @@ func (c *Client) BridgeQuery(ctx context.Context, namespace, query, principal, p
 	return &out, nil
 }
 
+// EventContractRegister registers an event contract.
+func (c *Client) EventContractRegister(ctx context.Context, contract EventContract) error {
+	body, err := json.Marshal(contract)
+	if err != nil {
+		return err
+	}
+	return c.do(ctx, http.MethodPost, "/events/contracts", "application/json", body, nil)
+}
+
+// EventContractList lists the registered event contracts.
+func (c *Client) EventContractList(ctx context.Context) ([]*EventContract, error) {
+	var out struct {
+		Contracts []*EventContract `json:"contracts"`
+	}
+	err := c.do(ctx, http.MethodGet, "/events/contracts", "", nil, &out)
+	return out.Contracts, err
+}
+
+// EventIngest ingests an event and persists the governed assertions it produces.
+func (c *Client) EventIngest(ctx context.Context, contractID string, ev *Event) (*IngestResult, error) {
+	body, _ := json.Marshal(map[string]any{"contractId": contractID, "event": ev})
+	var out IngestResult
+	err := c.do(ctx, http.MethodPost, "/events/ingest", "application/json", body, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)
