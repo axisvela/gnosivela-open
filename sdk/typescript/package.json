@@ -1,0 +1,24 @@
+{
+  "name": "@axisrobo/gnosivela",
+  "version": "0.1.0",
+  "description": "GNOSIVELA Semantic Control Plane TypeScript client (Apache-2.0)",
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./src/types.ts",
+      "import": "./src/client.ts"
+    }
+  },
+  "scripts": {
+    "test": "node --test tests/client.test.ts",
+    "build": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/node": "^22.0.0"
+  }
+}

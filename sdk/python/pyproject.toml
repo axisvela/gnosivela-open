@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gnosivela"
+version = "0.1.0"
+description = "GNOSIVELA Semantic Control Plane Python client (Apache-2.0)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "Apache-2.0" }
+keywords = ["semantic", "ontology", "knowledge", "governance"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gnosivela*"]
