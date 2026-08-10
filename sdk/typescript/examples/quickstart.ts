@@ -34,6 +34,32 @@ property riskScore: Decimal [0..1]
 
   const view = await c.bridgeQuery("procurement.supplier", "ACME risk", "risk-officer", "onboarding");
   console.log("bridge view assertions:", (view.assertions as unknown[] | undefined)?.length ?? 0);
+
+  const fed = await c.federationQuery("ACME risk", "risk-officer", "onboarding");
+  console.log("federation domains:", fed.domainsQueried, "hits:", fed.domainHits);
+
+  await c.eventContractRegister({
+    id: "procurement.price.updated",
+    type: "price.updated",
+    ontology: "procurement.supplier@1.2",
+    templates: [{
+      predicate: "Supplier:price", subjectField: "company", subjectType: "Supplier",
+      objectField: "amount", objectType: "number", region: "SG", validFor: "90d",
+    }],
+  });
+  const ing = await c.eventIngest("procurement.price.updated", {
+    id: "e-1", type: "price.updated", source: "market-feed",
+    payload: { company: "ACME", amount: 12.5 },
+  });
+  console.log("event ingest assertions:", ing.assertions.length, "resolved:", ing.resolved.length);
+
+  const q = await c.quality("");
+  console.log("quality citation:", q.citationCompleteness, "conflicts:", q.conflicts);
+  await c.incidentRuleAdd({ id: "r-conflicts", metric: "conflicts", operator: ">=", threshold: 0, severity: "warning" });
+  const opened = await c.incidentCheck();
+  console.log("incidents opened:", opened.opened.length);
+  const counts = await c.metrics();
+  console.log("metrics:", counts.counts);
 }
 
 main().catch((err) => {

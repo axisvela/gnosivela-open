@@ -40,3 +40,30 @@ print("consistency failures:", report["failures"])
 # 5. contract-driven query through the semantic bridge
 view = c.bridge_query("procurement.supplier", "ACME risk", "risk-officer", "onboarding")
 print("bridge view assertions:", len(view.get("assertions", [])))
+
+# 6. federated query across the registered domains (local by default)
+fed = c.federation_query("ACME risk", "risk-officer", "onboarding")
+print("federation domains:", fed["domainsQueried"], "hits:", fed.get("domainHits"))
+
+# 7. real-time events: register a contract and ingest an event
+c.event_contract_register({
+    "id": "procurement.price.updated", "type": "price.updated", "ontology": "procurement.supplier@1.2",
+    "templates": [{
+        "predicate": "Supplier:price", "subjectField": "company", "subjectType": "Supplier",
+        "objectField": "amount", "objectType": "number", "region": "SG", "validFor": "90d",
+    }],
+})
+ing = c.event_ingest("procurement.price.updated", {
+    "id": "e-1", "type": "price.updated", "source": "market-feed",
+    "payload": {"company": "ACME", "amount": 12.5},
+})
+print("event ingest assertions:", len(ing["assertions"]), "resolved:", len(ing["resolved"]))
+
+# 8. operations: quality snapshot + SLO incidents + metrics
+q = c.quality("")
+print("quality citation:", round(q["citationCompleteness"], 3), "conflicts:", q["conflicts"])
+c.incident_rule_add({"id": "r-conflicts", "metric": "conflicts", "operator": ">=", "threshold": 0, "severity": "warning"})
+opened = c.incident_check()["opened"]
+print("incidents opened:", len(opened))
+counts = c.metrics()["counts"]
+print("metrics:", counts)
