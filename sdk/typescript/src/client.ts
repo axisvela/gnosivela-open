@@ -162,4 +162,7 @@ export class Client {
   eventIngest(contractId: string, ev: Event): Promise<{ assertions: unknown[]; resolved: string[]; gaps: string[] }> {
     return this.request("POST", "/events/ingest", { contractId, event: ev });
   }
+  metrics(): Promise<{ counts: Record<string, number> }> {
+    return this.request("GET", "/metrics");
+  }
 }

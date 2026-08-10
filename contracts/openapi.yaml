@@ -406,6 +406,22 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/IngestResult' }
         '404': { description: Event contract not found }
+  /metrics:
+    get:
+      summary: Operational counters (queries, publish, ingest, governance)
+      description: Monotonic operation counters for SLO and monitoring. Keyed by stable names like query.semantic / ontology.publish / events.ingested.
+      tags: [ops]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  counts:
+                    type: object
+                    additionalProperties: { type: integer }
+                  asOf: { type: string, format: date-time }
   /ontologies/{namespace}/versions/{version}/diff:
     get:
       summary: Semantic diff between two versions of a namespace

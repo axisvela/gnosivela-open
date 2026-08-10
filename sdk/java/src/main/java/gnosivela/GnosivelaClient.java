@@ -205,6 +205,10 @@ public final class GnosivelaClient {
         return post("/events/ingest", "{\"contractId\":\"" + escape(contractId) + "\",\"event\":" + eventJson + "}");
     }
 
+    public String metrics() {
+        return get("/metrics");
+    }
+
     private static String escape(String s) {
         if (s == null) {
             return "";

@@ -200,3 +200,6 @@ class Client:
 
     def event_ingest(self, contract_id: str, event: Dict[str, Any]) -> Dict[str, Any]:
         return self._request("POST", "/events/ingest", {"contractId": contract_id, "event": event})
+
+    def metrics(self) -> Dict[str, Any]:
+        return self._request("GET", "/metrics")

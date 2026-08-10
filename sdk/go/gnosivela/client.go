@@ -340,6 +340,15 @@ func (c *Client) EventIngest(ctx context.Context, contractID string, ev *Event) 
 	return &out, nil
 }
 
+// Metrics returns the operational counters snapshot.
+func (c *Client) Metrics(ctx context.Context) (map[string]int64, error) {
+	var out struct {
+		Counts map[string]int64 `json:"counts"`
+	}
+	err := c.do(ctx, http.MethodGet, "/metrics", "", nil, &out)
+	return out.Counts, err
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)
