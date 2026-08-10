@@ -276,6 +276,18 @@ func (c *Client) PipelineRun(ctx context.Context, req PipelineRequest) (*Pipelin
 	return &out, nil
 }
 
+// FederationQuery runs a federated semantic query across the registered
+// domains and returns the merged, conflict-preserving view.
+func (c *Client) FederationQuery(ctx context.Context, query, principal, purpose string) (*FederatedView, error) {
+	body, _ := json.Marshal(map[string]any{"query": query, "principal": principal, "purpose": purpose})
+	var out FederatedView
+	err := c.do(ctx, http.MethodPost, "/federation/query", "application/json", body, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)

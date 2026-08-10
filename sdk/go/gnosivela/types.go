@@ -368,6 +368,21 @@ type PipelineReport struct {
 	Stages      []PipelineStage `json:"stages"`
 }
 
+// FederatedView is the merged, conflict-preserving result of a federated
+// semantic query across autonomous domains.
+type FederatedView struct {
+	Query          string                `json:"query"`
+	Purpose        string                `json:"purpose"`
+	AsOf           time.Time             `json:"asOf"`
+	Assertions     []*KnowledgeAssertion `json:"assertions,omitempty"`
+	Conflicts      []*Conflict           `json:"conflicts,omitempty"`
+	Gaps           []string              `json:"gaps,omitempty"`
+	DomainHits     map[string]int        `json:"domainHits"`
+	DomainOf       map[string]string     `json:"domainOf,omitempty"`
+	LatencyMillis  int64                 `json:"latencyMillis"`
+	DomainsQueried int                   `json:"domainsQueried"`
+}
+
 // OntologyCreateResult is returned by OntologyCreate.
 type OntologyCreateResult struct {
 	Ontology *Ontology `json:"ontology"`

@@ -324,6 +324,21 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/PipelineReport' }
+  /federation/query:
+    post:
+      summary: Run a federated semantic query across autonomous domains
+      description: Distributes the query to every registered domain, merges corroborating assertions, and surfaces competing values as cross-domain conflicts (never merged).
+      tags: [federation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FederatedQuery' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FederatedView' }
   /ontologies/{namespace}/versions/{version}/diff:
     get:
       summary: Semantic diff between two versions of a namespace
@@ -838,6 +853,26 @@ components:
         version: { type: string }
         finalStatus: { type: string, enum: [deployed, rolled-back, blocked, failed, degraded] }
         stages: { type: array, items: { $ref: '#/components/schemas/PipelineStage' } }
+    FederatedQuery:
+      type: object
+      properties:
+        query: { type: string }
+        principal: { type: string }
+        purpose: { type: string }
+      required: [query]
+    FederatedView:
+      type: object
+      properties:
+        query: { type: string }
+        purpose: { type: string }
+        asOf: { type: string, format: date-time }
+        assertions: { type: array, items: { $ref: '#/components/schemas/KnowledgeAssertion' } }
+        conflicts: { type: array, items: { $ref: '#/components/schemas/Conflict' } }
+        gaps: { type: array, items: { type: string } }
+        domainHits: { type: object, additionalProperties: { type: integer } }
+        domainOf: { type: object, additionalProperties: { type: string } }
+        latencyMillis: { type: integer }
+        domainsQueried: { type: integer }
     EntityRef:
       type: object
       properties:
