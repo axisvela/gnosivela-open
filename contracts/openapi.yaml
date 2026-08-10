@@ -304,6 +304,20 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/AuditEntry' }
+  /audit/verify:
+    get:
+      summary: Verify the tamper-evident audit hash chain
+      description: Re-computes every entry digest and the chaining to previous entries; brokenAt is -1 when the whole trail is intact.
+      tags: [audit]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  intact: { type: boolean }
+                  brokenAt: { type: integer }
   /pipeline/run:
     post:
       summary: Run the mapping CI/CD closed loop (test -> publish -> observe -> rollback)

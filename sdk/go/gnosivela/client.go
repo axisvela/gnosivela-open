@@ -261,6 +261,17 @@ func (c *Client) AuditAttest(ctx context.Context, entryID, ref, content, by stri
 	return &out, nil
 }
 
+// AuditVerify re-computes the tamper-evident audit hash chain. intact is false
+// and brokenAt >= 0 when an entry was tampered with.
+func (c *Client) AuditVerify(ctx context.Context) (intact bool, brokenAt int, err error) {
+	var out struct {
+		Intact   bool `json:"intact"`
+		BrokenAt int  `json:"brokenAt"`
+	}
+	err = c.do(ctx, http.MethodGet, "/audit/verify", "", nil, &out)
+	return out.Intact, out.BrokenAt, err
+}
+
 // PipelineRun executes the mapping CI/CD closed loop and returns the stage
 // report. A blocked run (approval/impact gate) surfaces as a non-nil error.
 func (c *Client) PipelineRun(ctx context.Context, req PipelineRequest) (*PipelineReport, error) {
