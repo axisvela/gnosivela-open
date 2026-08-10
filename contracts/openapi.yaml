@@ -422,6 +422,18 @@ paths:
                     type: object
                     additionalProperties: { type: integer }
                   asOf: { type: string, format: date-time }
+  /quality:
+    get:
+      summary: Aggregated quality/SLO snapshot over the control plane
+      description: Citation completeness, unresolved-entity rate, consistency failures/warnings, conflict count and governance activity (audit + approval).
+      tags: [ops]
+      parameters:
+        - { name: ontology, in: query, required: false, schema: { type: string } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QualityReport' }
   /ontologies/{namespace}/versions/{version}/diff:
     get:
       summary: Semantic diff between two versions of a namespace
@@ -1043,6 +1055,22 @@ components:
         assertions: { type: array, items: { $ref: '#/components/schemas/KnowledgeAssertion' } }
         resolved: { type: array, items: { type: string } }
         gaps: { type: array, items: { type: string } }
+    QualityReport:
+      type: object
+      properties:
+        asOf: { type: string, format: date-time }
+        assertions: { type: integer }
+        entities: { type: integer }
+        citationCompleteness: { type: number }
+        unresolvedRate: { type: number }
+        consistencyFailures: { type: integer }
+        consistencyWarnings: { type: integer }
+        conflicts: { type: integer }
+        auditEntries: { type: integer }
+        auditBlocked: { type: integer }
+        approvalApproved: { type: integer }
+        approvalRejected: { type: integer }
+        approvalPending: { type: integer }
     EntityRef:
       type: object
       properties:

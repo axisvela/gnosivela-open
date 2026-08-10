@@ -165,4 +165,8 @@ export class Client {
   metrics(): Promise<{ counts: Record<string, number> }> {
     return this.request("GET", "/metrics");
   }
+  quality(ontologyNamespace = ""): Promise<Record<string, unknown>> {
+    const q = ontologyNamespace ? `?ontology=${encodeURIComponent(ontologyNamespace)}` : "";
+    return this.request("GET", `/quality${q}`);
+  }
 }

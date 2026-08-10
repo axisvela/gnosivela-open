@@ -203,3 +203,9 @@ class Client:
 
     def metrics(self) -> Dict[str, Any]:
         return self._request("GET", "/metrics")
+
+    def quality(self, ontology_namespace: str = "") -> Dict[str, Any]:
+        path = "/quality"
+        if ontology_namespace:
+            path += "?ontology=" + urllib.parse.quote(ontology_namespace)
+        return self._request("GET", path)

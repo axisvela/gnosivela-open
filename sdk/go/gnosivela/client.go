@@ -349,6 +349,22 @@ func (c *Client) Metrics(ctx context.Context) (map[string]int64, error) {
 	return out.Counts, err
 }
 
+// Quality returns the aggregated quality/SLO snapshot. An empty
+// ontologyNamespace runs store-wide checks; pass one to also include
+// structural/rule findings.
+func (c *Client) Quality(ctx context.Context, ontologyNamespace string) (*QualityReport, error) {
+	path := "/quality"
+	if ontologyNamespace != "" {
+		path += "?ontology=" + url.QueryEscape(ontologyNamespace)
+	}
+	var out QualityReport
+	err := c.do(ctx, http.MethodGet, path, "", nil, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)

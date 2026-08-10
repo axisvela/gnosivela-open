@@ -465,6 +465,23 @@ type IngestResult struct {
 	Gaps       []string              `json:"gaps,omitempty"`
 }
 
+// QualityReport is a point-in-time quality/SLO snapshot over the control plane.
+type QualityReport struct {
+	AsOf                 time.Time `json:"asOf"`
+	Assertions           int       `json:"assertions"`
+	Entities             int       `json:"entities"`
+	CitationCompleteness float64   `json:"citationCompleteness"`
+	UnresolvedRate       float64   `json:"unresolvedRate"`
+	ConsistencyFailures  int       `json:"consistencyFailures"`
+	ConsistencyWarnings  int       `json:"consistencyWarnings"`
+	Conflicts            int       `json:"conflicts"`
+	AuditEntries         int       `json:"auditEntries"`
+	AuditBlocked         int       `json:"auditBlocked"`
+	ApprovalApproved     int       `json:"approvalApproved"`
+	ApprovalRejected     int       `json:"approvalRejected"`
+	ApprovalPending      int       `json:"approvalPending"`
+}
+
 // OntologyCreateResult is returned by OntologyCreate.
 type OntologyCreateResult struct {
 	Ontology *Ontology `json:"ontology"`

@@ -209,6 +209,11 @@ public final class GnosivelaClient {
         return get("/metrics");
     }
 
+    public String quality(String ontologyNamespace) {
+        String q = ontologyNamespace == null || ontologyNamespace.isEmpty() ? "" : "?ontology=" + enc(ontologyNamespace);
+        return get("/quality" + q);
+    }
+
     private static String escape(String s) {
         if (s == null) {
             return "";
