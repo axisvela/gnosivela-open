@@ -1,0 +1,68 @@
+name: ci
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  sdk-tests:
+    name: sdk tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache-dependency-path: go.sum
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Go SDK build + vet + test
+        run: |
+          go build ./...
+          go vet ./...
+          go test ./sdk/go/gnosivela/... ./examples/...
+
+      - name: Python SDK tests
+        run: |
+          python -m unittest discover -s sdk/python/tests -v
+
+      - name: TypeScript SDK tests
+        run: |
+          node --test sdk/typescript/tests/client.test.ts
+
+      - name: Java SDK compile + smoke
+        run: |
+          cd sdk/java
+          mkdir -p target/classes
+          javac -d target/classes $(find src -name '*.java')
+          java -cp target/classes gnosivela.GnosivelaClientTest
+
+  version-consistency:
+    name: version consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check VERSION matches SDK meta files
+        run: |
+          V=$(tr -d '[:space:]' < VERSION)
+          PY=$(grep -o '^version = ".*"' sdk/python/pyproject.toml | cut -d'"' -f2)
+          TS=$(grep -o '"version": "[^"]*"' sdk/typescript/package.json | cut -d'"' -f4)
+          JAVA=$(grep -o '<version>[^<]*</version>' sdk/java/pom.xml | head -1 | sed 's/<[^>]*>//g')
+          for META in "$PY" "$TS" "$JAVA"; do
+            [ "$META" = "$V" ] || { echo "version mismatch: want $V got $META" >&2; exit 1; }
+          done
+          echo "version consistent: $V"
