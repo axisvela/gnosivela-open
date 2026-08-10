@@ -162,6 +162,30 @@ func (c *Client) ConsistencyAudit(ctx context.Context) ([]*ConsistencyResolution
 	return out.Resolutions, err
 }
 
+// PolicyList lists the registered fine-grained policies and engine status.
+func (c *Client) PolicyList(ctx context.Context) ([]*Policy, bool, error) {
+	var out struct {
+		Enabled  bool      `json:"enabled"`
+		Policies []*Policy `json:"policies"`
+	}
+	err := c.do(ctx, http.MethodGet, "/policy/policies", "", nil, &out)
+	return out.Policies, out.Enabled, err
+}
+
+// PolicyEvaluate evaluates a policy request and returns the decision.
+func (c *Client) PolicyEvaluate(ctx context.Context, req PolicyRequest) (*PolicyDecision, error) {
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	var out PolicyDecision
+	err = c.do(ctx, http.MethodPost, "/policy/evaluate", "application/json", body, &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // AssertionPropose proposes a knowledge assertion.
 func (c *Client) AssertionPropose(ctx context.Context, a *KnowledgeAssertion) (*KnowledgeAssertion, error) {
 	body, err := json.Marshal(a)

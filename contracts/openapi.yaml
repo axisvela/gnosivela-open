@@ -176,6 +176,36 @@ paths:
                   resolutions:
                     type: array
                     items: { $ref: '#/components/schemas/ConsistencyResolution' }
+  /policy/policies:
+    get:
+      summary: List the registered fine-grained policies and engine status
+      tags: [policy]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enabled: { type: boolean }
+                  policies:
+                    type: array
+                    items: { $ref: '#/components/schemas/Policy' }
+  /policy/evaluate:
+    post:
+      summary: Evaluate a policy request (attributes -> allow/deny decision)
+      tags: [policy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PolicyRequest' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PolicyDecision' }
+        '409': { description: Policy engine disabled }
   /ontologies/{namespace}/versions/{version}/diff:
     get:
       summary: Semantic diff between two versions of a namespace
@@ -580,6 +610,37 @@ components:
         basis: { type: string }
         escalated: { type: boolean }
         ties: { type: array, items: { type: string } }
+    Condition:
+      type: object
+      properties:
+        field: { type: string }
+        op: { type: string, enum: [eq, neq, in] }
+        values: { type: array, items: { type: string } }
+    Policy:
+      type: object
+      properties:
+        id: { type: string }
+        effect: { type: string, enum: [allow, deny] }
+        actions: { type: array, items: { type: string } }
+        resources: { type: array, items: { type: string } }
+        conditions: { type: array, items: { $ref: '#/components/schemas/Condition' } }
+        callout: { type: string }
+    PolicyRequest:
+      type: object
+      properties:
+        principal: { type: string }
+        action: { type: string }
+        resource: { type: string }
+        tenant: { type: string }
+        region: { type: string }
+        attributes: { type: object, additionalProperties: { type: string } }
+      required: [action]
+    PolicyDecision:
+      type: object
+      properties:
+        allowed: { type: boolean }
+        reason: { type: string }
+        policies: { type: array, items: { type: string } }
     EntityRef:
       type: object
       properties:

@@ -241,6 +241,48 @@ type ConsistencyResolution struct {
 	Ties      []string  `json:"ties,omitempty"`
 }
 
+// PolicyEffect is allow or deny.
+type PolicyEffect string
+
+const (
+	PolicyEffectAllow PolicyEffect = "allow"
+	PolicyEffectDeny  PolicyEffect = "deny"
+)
+
+// Condition constrains a policy to requests whose field matches.
+type Condition struct {
+	Field  string   `json:"field"`
+	Op     string   `json:"op"` // eq | neq | in
+	Values []string `json:"values,omitempty"`
+}
+
+// Policy is a declarative attribute-based access rule.
+type Policy struct {
+	ID         string       `json:"id"`
+	Effect     PolicyEffect `json:"effect"`
+	Actions    []string     `json:"actions,omitempty"`
+	Resources  []string     `json:"resources,omitempty"`
+	Conditions []Condition  `json:"conditions,omitempty"`
+	Callout    string       `json:"callout,omitempty"`
+}
+
+// PolicyRequest is the attribute set evaluated by the policy engine.
+type PolicyRequest struct {
+	Principal  string            `json:"principal,omitempty"`
+	Action     string            `json:"action"`
+	Resource   string            `json:"resource,omitempty"`
+	Tenant     string            `json:"tenant,omitempty"`
+	Region     string            `json:"region,omitempty"`
+	Attributes map[string]string `json:"attributes,omitempty"`
+}
+
+// PolicyDecision is the evaluation outcome with matched policies and a reason.
+type PolicyDecision struct {
+	Allowed  bool     `json:"allowed"`
+	Reason   string   `json:"reason"`
+	Policies []string `json:"policies,omitempty"`
+}
+
 // OntologyCreateResult is returned by OntologyCreate.
 type OntologyCreateResult struct {
 	Ontology *Ontology `json:"ontology"`
