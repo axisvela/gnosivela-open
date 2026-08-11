@@ -279,7 +279,12 @@ paths:
   /audit:
     get:
       summary: List the durable governance audit trail (chronological)
+      description: Optional filters by actor, action and resource.
       tags: [audit]
+      parameters:
+        - { name: actor, in: query, required: false, schema: { type: string } }
+        - { name: action, in: query, required: false, schema: { type: string } }
+        - { name: resource, in: query, required: false, schema: { type: string } }
       responses:
         '200':
           content:

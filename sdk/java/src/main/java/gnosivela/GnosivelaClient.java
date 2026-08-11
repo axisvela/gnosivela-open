@@ -128,6 +128,18 @@ public final class GnosivelaClient {
         return post("/grounding/assemble", "{\"query\":\"" + escape(query) + "\",\"principal\":\"" + escape(principal) + "\",\"purpose\":\"" + escape(purpose) + "\"}");
     }
 
+    public String groundingExplain(String query, String principal, String purpose) {
+        return post("/grounding/explain", "{\"query\":\"" + escape(query) + "\",\"principal\":\"" + escape(principal) + "\",\"purpose\":\"" + escape(purpose) + "\"}");
+    }
+
+    public String groundingRedact(String query, String principal, String purpose) {
+        return post("/grounding/redact", "{\"query\":\"" + escape(query) + "\",\"principal\":\"" + escape(principal) + "\",\"purpose\":\"" + escape(purpose) + "\"}");
+    }
+
+    public String subgraphQuery(String node) {
+        return post("/query/subgraph", "{\"node\":\"" + escape(node) + "\"}");
+    }
+
     // ---- governance ----
 
     public String consistencyReport(String ontologyNamespace) {
@@ -167,8 +179,40 @@ public final class GnosivelaClient {
         return post("/approval/requests/" + enc(id) + "/approve", "{\"approver\":\"" + escape(approver) + "\",\"role\":\"" + escape(role) + "\"}");
     }
 
+    public String approvalGet(String id) {
+        return get("/approval/requests/" + enc(id));
+    }
+
+    public String approvalReject(String id, String approver, String role) {
+        return post("/approval/requests/" + enc(id) + "/reject", "{\"approver\":\"" + escape(approver) + "\",\"role\":\"" + escape(role) + "\"}");
+    }
+
     public String auditList() {
         return get("/audit");
+    }
+
+    public String auditListFiltered(String actor, String action, String resource) {
+        StringBuilder q = new StringBuilder();
+        if (actor != null && !actor.isEmpty()) {
+            q.append("actor=").append(enc(actor));
+        }
+        if (action != null && !action.isEmpty()) {
+            if (q.length() > 0) q.append("&");
+            q.append("action=").append(enc(action));
+        }
+        if (resource != null && !resource.isEmpty()) {
+            if (q.length() > 0) q.append("&");
+            q.append("resource=").append(enc(resource));
+        }
+        return get("/audit" + (q.length() > 0 ? "?" + q : ""));
+    }
+
+    public String auditVerify() {
+        return get("/audit/verify");
+    }
+
+    public String entityMergeCandidate(String leftJson, String rightJson, String kind, String generatedBy) {
+        return post("/entities/merge-candidate", "{\"left\":" + leftJson + ",\"right\":" + rightJson + ",\"kind\":\"" + escape(kind) + "\",\"generatedBy\":\"" + escape(generatedBy) + "\"}");
     }
 
     public String auditAttest(String entryId, String ref, String content, String by) {

@@ -64,6 +64,9 @@ class Client:
     def ontology_create(self, dsl: str) -> Dict[str, Any]:
         return self._request("POST", "/ontologies", dsl)
 
+    def ontology_create_json(self, ontology: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request("POST", "/ontologies", ontology)
+
     def ontology_latest(self, namespace: str) -> Dict[str, Any]:
         return self._request("GET", "/ontologies/%s/latest" % urllib.parse.quote(namespace))
 

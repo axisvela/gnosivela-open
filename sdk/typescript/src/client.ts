@@ -50,6 +50,9 @@ export class Client {
   ontologyCreate(dsl: string): Promise<Record<string, unknown>> {
     return this.request("POST", "/ontologies", dsl);
   }
+  ontologyCreateJSON(ontology: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.request("POST", "/ontologies", ontology);
+  }
   ontologyLatest(namespace: string): Promise<Record<string, unknown>> {
     return this.request("GET", `/ontologies/${encodeURIComponent(namespace)}/latest`);
   }
@@ -86,6 +89,9 @@ export class Client {
   entityExplain(hint: string): Promise<Record<string, unknown>> {
     return this.request("POST", "/entities/explain", { hint });
   }
+  entityMergeCandidate(left: Record<string, unknown>, right: Record<string, unknown>, kind: string, generatedBy: string): Promise<Record<string, unknown>> {
+    return this.request("POST", "/entities/merge-candidate", { left, right, kind, generatedBy });
+  }
 
   // ---- query / grounding ----
   semanticQuery(query: string, principal = "", purpose = ""): Promise<Record<string, unknown>> {
@@ -99,6 +105,9 @@ export class Client {
   }
   groundingAssemble(query: string, principal: string, purpose: string, budget = 0): Promise<Record<string, unknown>> {
     return this.request("POST", "/grounding/assemble", { query, principal, purpose, budget });
+  }
+  groundingExplain(query: string, principal: string, purpose: string): Promise<Record<string, unknown>> {
+    return this.request("POST", "/grounding/explain", { query, principal, purpose });
   }
   groundingRedact(query: string, principal: string, purpose: string, hideTags: string[] = []): Promise<Record<string, unknown>> {
     return this.request("POST", "/grounding/redact", { query, principal, purpose, hideTags });
@@ -130,11 +139,27 @@ export class Client {
   approvalList(): Promise<{ requests: unknown[] }> {
     return this.request("GET", "/approval/requests");
   }
+  approvalGet(id: string): Promise<Record<string, unknown>> {
+    return this.request("GET", `/approval/requests/${encodeURIComponent(id)}`);
+  }
   approvalApprove(id: string, approver: string, role: string, comment = ""): Promise<Record<string, unknown>> {
     return this.request("POST", `/approval/requests/${encodeURIComponent(id)}/approve`, { approver, role, comment });
   }
+  approvalReject(id: string, approver: string, role: string, comment = ""): Promise<Record<string, unknown>> {
+    return this.request("POST", `/approval/requests/${encodeURIComponent(id)}/reject`, { approver, role, comment });
+  }
   auditList(): Promise<{ entries: unknown[] }> {
     return this.request("GET", "/audit");
+  }
+  auditListFiltered(actor = "", action = "", resource = ""): Promise<{ entries: unknown[] }> {
+    const q = new URLSearchParams();
+    if (actor) q.set("actor", actor);
+    if (action) q.set("action", action);
+    if (resource) q.set("resource", resource);
+    return this.request("GET", `/audit?${q.toString()}`);
+  }
+  auditVerify(): Promise<{ intact: boolean; brokenAt: number }> {
+    return this.request("GET", "/audit/verify");
   }
   auditAttest(entryId: string, ref: string, content: string, by: string): Promise<Record<string, unknown>> {
     return this.request("POST", "/audit/attest", { entryId, ref, content, by });

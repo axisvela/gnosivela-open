@@ -1,0 +1,27 @@
+# Go
+sdk/go/bin/
+*.exe
+*.test
+*.out
+
+# Java
+sdk/java/target/
+
+# TypeScript / Node
+sdk/typescript/node_modules/
+sdk/typescript/package-lock.json
+
+# Python
+sdk/python/**/__pycache__/
+*.pyc
+*.egg-info/
+
+# Env / local
+.env
+.env.local
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
