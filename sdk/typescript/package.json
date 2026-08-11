@@ -6,13 +6,16 @@
   "license": "Apache-2.0",
   "exports": {
     ".": {
-      "types": "./src/types.ts",
+      "types": "./src/client.ts",
       "import": "./src/client.ts"
     }
   },
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "node --test tests/client.test.ts",
-    "build": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json"
   },
   "engines": {
     "node": ">=22.6"

@@ -4,6 +4,23 @@
  */
 import type { Event, EventContract, KnowledgeAssertion, PolicyRequest, PipelineRequest } from "./types.ts";
 
+// Re-export the shared contract types from the package entry point so
+// consumers can import them as `import type { EntityRef } from "@axisrobo/gnosivela"`.
+export type {
+  EntityRef,
+  AssertionContext,
+  Value,
+  EvidenceRef,
+  KnowledgeAssertion,
+  Conflict,
+  PolicyRequest,
+  PolicyDecision,
+  PipelineRequest,
+  EventContract,
+  EventTemplate,
+  Event,
+} from "./types.ts";
+
 export class GnosivelaError extends Error {
   status: number;
   body: string;
