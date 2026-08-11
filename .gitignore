@@ -13,6 +13,8 @@ sdk/typescript/package-lock.json
 
 # Python
 sdk/python/**/__pycache__/
+sdk/python/dist/
+sdk/python/build/
 *.pyc
 *.egg-info/
 
