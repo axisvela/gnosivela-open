@@ -1,6 +1,6 @@
 # GNOSIVELA-open
 
-> **GNOSIVELA-open** â€” Developer entry point and distribution surface (Apache-2.0).
+> **GNOSIVELA-open** â€?Developer entry point and distribution surface (Apache-2.0).
 
 [ä¸­æ–‡æ–‡æ¡£](./README.zh-CN.md)
 
@@ -10,11 +10,11 @@ GNOSIVELA is AxisRobo's **Enterprise Semantic & Knowledge Fabric**: it turns how
 
 Enterprise knowledge is scattered across ERP / CRM / documents / data lakes / policy stores, and every agent, planner, or BI tool guesses at meaning on its own. The result:
 
-- **Same name, different meaning** â€” three definitions of "Active Customer" coexist and no one knows which one is in use
-- **Split identities** â€” the same supplier has 12 IDs across 12 systems; cross-source merging is left to luck
-- **Ungrounded answers** â€” agents output plausible conclusions with no traceable source, time, or permission chain
-- **Silently overwritten conflicts** â€” new data replaces old data instead of being kept as competing assertions
-- **Vendor lock-in** â€” semantics get welded to the internal schema of a specific graph or vector store
+- **Same name, different meaning** â€?three definitions of "Active Customer" coexist and no one knows which one is in use
+- **Split identities** â€?the same supplier has 12 IDs across 12 systems; cross-source merging is left to luck
+- **Ungrounded answers** â€?agents output plausible conclusions with no traceable source, time, or permission chain
+- **Silently overwritten conflicts** â€?new data replaces old data instead of being kept as competing assertions
+- **Vendor lock-in** â€?semantics get welded to the internal schema of a specific graph or vector store
 
 GNOSIVELA's answer: define semantic objects first (Ontology / Assertion / Identity / Relation / Grounding), then decide on storage. The **semantic control plane** owns consistency and governance; the **polyglot projection** layer (SQL / Graph / Search / Vector) stays replaceable and never pollutes the semantic API.
 
@@ -27,7 +27,7 @@ GNOSIVELA's answer: define semantic objects first (Ontology / Assertion / Identi
 | Knowledge Assertion | Every claim carries source, time, context, status, confidence, and an evidence chain |
 | Entity Identity | Cross-source entity resolution with exact-match and evidence-first merging; fuzzy matches are candidates only, never silently merged |
 | Polyglot Projection | Same semantic object projected to Relational / Graph / Search / Vector; replaceable without exposing vendor types |
-| Semantic Query | Intent parsing â†’ joint retrieval across entities/relations/documents/metrics â†’ purpose-scoped KnowledgeView with conflicts/gaps |
+| Semantic Query | Intent parsing â†?joint retrieval across entities/relations/documents/metrics â†?purpose-scoped KnowledgeView with conflicts/gaps |
 | Grounding (Phase 1 in progress) | Purpose-scoped Bundle assembly: intent + assertions + evidence + policy + conflict/gap |
 
 ## Open Core (three repositories)
@@ -38,7 +38,7 @@ GNOSIVELA's answer: define semantic objects first (Ontology / Assertion / Identi
 | [GNOSIVELA](https://github.com/axisrobo/GNOSIVELA) | Product core (Semantic Kernel) | AGPL-3.0 |
 | [GNOSIVELA-ee](https://github.com/axisrobo/GNOSIVELA-ee) | Enterprise edition: governance, scale, industry packs | Enterprise |
 
-> License compliance: the SDK in this repository is Apache-2.0 and interacts with the core over HTTP â€” it never links the AGPL core.
+> License compliance: the SDK in this repository is Apache-2.0 and interacts with the core over HTTP â€?it never links the AGPL core.
 
 ## Repository layout
 
@@ -70,7 +70,7 @@ This repository is the community download surface.
 ./gnosivela-linux-amd64 -addr :8080
 
 # or via container image
-docker run --rm -p 8080:8080 ghcr.io/axisrobo/GNOSIVELA:1.0.0-beta.1
+docker run --rm -p 8080:8080 ghcr.io/axisrobo/GNOSIVELA:1.0.0-rc.1
 ```
 
 ## DSL compiler (SDK type generation)
