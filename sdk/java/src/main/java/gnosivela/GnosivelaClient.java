@@ -67,6 +67,10 @@ public final class GnosivelaClient {
         return request("POST", "/ontologies", dsl);
     }
 
+    public String ontologyCreateJSON(String json) {
+        return request("POST", "/ontologies", json);
+    }
+
     public String ontologyLatest(String namespace) {
         return get("/ontologies/" + enc(namespace) + "/latest");
     }

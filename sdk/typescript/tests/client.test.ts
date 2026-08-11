@@ -51,6 +51,27 @@ test.before(async () => {
     if (req.method === "POST" && path === "/entities") {
       return send({ namespace: "mdm", canonicalId: "C-1" }, 201);
     }
+    if (req.method === "POST" && path === "/ontologies") {
+      return send({ namespace: "acme", version: "2.0", status: "draft" }, 201);
+    }
+    if (req.method === "GET" && path === "/audit/verify") {
+      return send({ intact: true, brokenAt: -1 });
+    }
+    if (req.method === "GET" && path === "/audit") {
+      return send({ entries: [{ id: "AUD-1", action: "publish", actor: "alice" }] });
+    }
+    if (req.method === "GET" && path.startsWith("/approval/requests/")) {
+      return send({ id: path.split("/").pop(), status: "pending", steps: [] });
+    }
+    if (req.method === "POST" && path.endsWith("/reject")) {
+      return send({ id: path.split("/")[3], status: "rejected" });
+    }
+    if (req.method === "POST" && path === "/entities/merge-candidate") {
+      return send({ relation: { id: "rel:1", authority: "candidate" }, evidence: { status: "auto", score: 1 } }, 201);
+    }
+    if (req.method === "POST" && path === "/grounding/explain") {
+      return send({ intent: { query: "x" }, citations: [] });
+    }
     return send({ error: "not found" }, 404);
   });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -114,4 +135,22 @@ test("error surfaces status", async () => {
     assert.equal((err as GnosivelaError).status, 404);
     return true;
   });
+});
+
+test("api-surface parity methods", async () => {
+  const c = new Client(base);
+  const o = await c.ontologyCreateJSON({ namespace: "acme", version: "2.0" });
+  assert.equal(o.version, "2.0");
+  const approval = await c.approvalGet("AR-001");
+  assert.equal(approval.status, "pending");
+  const rejected = await c.approvalReject("AR-001", "alice", "steward", "nope");
+  assert.equal(rejected.status, "rejected");
+  const entries = await c.auditListFiltered("alice", "publish", "");
+  assert.equal(entries.entries[0].action, "publish");
+  const verify = await c.auditVerify();
+  assert.equal(verify.intact, true);
+  const mc = await c.entityMergeCandidate({ namespace: "crm", canonicalId: "ACME" }, { namespace: "mdm", canonicalId: "C-1042" }, "exactSameAs", "rule");
+  assert.equal(mc.relation.authority, "candidate");
+  const expl = await c.groundingExplain("ACME risk", "alice", "onboarding");
+  assert.ok(expl.intent);
 });

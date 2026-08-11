@@ -50,6 +50,8 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
             body = {}
         if self.path == "/entities":
             self._reply({"namespace": body.get("namespace"), "canonicalId": body.get("canonicalId")}, 201)
+        elif self.path == "/ontologies":
+            self._reply({"namespace": body.get("namespace"), "version": body.get("version"), "status": "draft"}, 201)
         elif self.path == "/assertions":
             self._reply({"assertionId": body.get("assertionId")}, 201)
         elif self.path == "/events/ingest":
@@ -91,6 +93,12 @@ class TestClient(unittest.TestCase):
         c = Client(self.base)
         o = c.ontology_latest("acme")
         self.assertEqual(o["version"], "1.2")
+
+    def test_ontology_create_json(self):
+        c = Client(self.base)
+        o = c.ontology_create_json({"namespace": "acme", "version": "2.0"})
+        self.assertEqual(o["namespace"], "acme")
+        self.assertEqual(o["version"], "2.0")
 
     def test_entity_and_assertion_roundtrip(self):
         c = Client(self.base)
