@@ -13,6 +13,10 @@ property riskScore: Decimal [0..1]
   const created = await c.ontologyCreate(dsl);
   console.log("ontology:", created.ontology?.namespace, created.ontology?.version);
 
+  // publish so contract export / bridge queries work
+  await c.ontologyPublish("procurement.supplier", created.ontology?.version ?? "1.0");
+  console.log("ontology published");
+
   const ent = await c.entitySave({ namespace: "mdm", canonicalId: "S-1042", type: "Supplier", aliases: ["ACME"] });
   console.log("entity:", ent.canonicalId);
 
@@ -30,7 +34,7 @@ property riskScore: Decimal [0..1]
   console.log("consistency failures:", report.failures);
 
   const conflicts = await c.consistencyConflicts();
-  console.log("conflicts:", conflicts.conflicts.length);
+  console.log("conflicts:", (conflicts.conflicts as unknown[] | undefined)?.length ?? 0);
 
   const view = await c.bridgeQuery("procurement.supplier", "ACME risk", "risk-officer", "onboarding");
   console.log("bridge view assertions:", (view.assertions as unknown[] | undefined)?.length ?? 0);
@@ -51,13 +55,13 @@ property riskScore: Decimal [0..1]
     id: "e-1", type: "price.updated", source: "market-feed",
     payload: { company: "ACME", amount: 12.5 },
   });
-  console.log("event ingest assertions:", ing.assertions.length, "resolved:", ing.resolved.length);
+  console.log("event ingest assertions:", (ing.assertions ?? []).length, "resolved:", (ing.resolved ?? []).length);
 
   const q = await c.quality("");
   console.log("quality citation:", q.citationCompleteness, "conflicts:", q.conflicts);
   await c.incidentRuleAdd({ id: "r-conflicts", metric: "conflicts", operator: ">=", threshold: 0, severity: "warning" });
   const opened = await c.incidentCheck();
-  console.log("incidents opened:", opened.opened.length);
+  console.log("incidents opened:", (opened.opened ?? []).length);
   const counts = await c.metrics();
   console.log("metrics:", counts.counts);
 }

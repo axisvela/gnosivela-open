@@ -19,6 +19,9 @@ public final class Quickstart {
                 + "property riskScore: Decimal [0..1]\n";
         System.out.println("ontology: " + c.ontologyCreate(dsl));
 
+        // 1b. publish so contract export / bridge queries work
+        System.out.println("publish: " + c.ontologyPublish("procurement.supplier", "1.0", null));
+
         // 2. entity + assertion
         System.out.println("entity: " + c.entitySave(
                 "{\"namespace\":\"mdm\",\"canonicalId\":\"S-1042\",\"type\":\"Supplier\",\"aliases\":[\"ACME\"]}"));

@@ -37,6 +37,12 @@ func main() {
 	fmt.Printf("ontology %s@%s status=%s concepts=%d\n",
 		res.Ontology.Namespace, res.Ontology.Version, res.Ontology.Status, len(res.Ontology.Concepts))
 
+	// 1b. Publish the ontology so contract export / bridge queries work.
+	if err := c.OntologyPublish(ctx, res.Ontology.Namespace, res.Ontology.Version); err != nil {
+		log.Fatalf("publish ontology: %v", err)
+	}
+	fmt.Printf("ontology published\n")
+
 	// 2. Register a canonical entity with aliases.
 	_, err = c.EntitySave(ctx, &gnosivela.EntityRef{
 		Namespace: "mdm", CanonicalID: "C-1042", Type: "Supplier",

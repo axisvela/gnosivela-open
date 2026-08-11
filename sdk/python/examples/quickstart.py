@@ -17,6 +17,10 @@ property riskScore: Decimal [0..1]
 result = c.ontology_create(dsl)
 print("ontology:", result["ontology"]["namespace"], result["ontology"]["version"])
 
+# 1b. publish the ontology so contract export / bridge queries work
+c.ontology_publish("procurement.supplier", result["ontology"]["version"])
+print("ontology published")
+
 # 2. register a canonical entity and resolve a hint
 ent = c.entity_save(EntityRef(namespace="mdm", canonical_id="S-1042", type="Supplier", aliases=["ACME"]))
 print("entity:", ent["canonicalId"])
