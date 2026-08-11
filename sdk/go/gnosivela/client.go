@@ -250,6 +250,26 @@ func (c *Client) AuditList(ctx context.Context) ([]*AuditEntry, error) {
 	return out.Entries, err
 }
 
+// AuditListFiltered returns the audit trail filtered by actor/action/resource
+// (empty fields match everything).
+func (c *Client) AuditListFiltered(ctx context.Context, actor, action, resource string) ([]*AuditEntry, error) {
+	q := url.Values{}
+	if actor != "" {
+		q.Set("actor", actor)
+	}
+	if action != "" {
+		q.Set("action", action)
+	}
+	if resource != "" {
+		q.Set("resource", resource)
+	}
+	var out struct {
+		Entries []*AuditEntry `json:"entries"`
+	}
+	err := c.do(ctx, http.MethodGet, "/audit?"+q.Encode(), "", nil, &out)
+	return out.Entries, err
+}
+
 // AuditAttest pins a sha256 digest over content against an audit entry.
 func (c *Client) AuditAttest(ctx context.Context, entryID, ref, content, by string) (*AuditEntry, error) {
 	body, _ := json.Marshal(map[string]any{"entryId": entryID, "ref": ref, "content": content, "by": by})
