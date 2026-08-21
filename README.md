@@ -70,7 +70,7 @@ This repository is the community download surface.
 ./gnosivela-linux-amd64 -addr :8080
 
 # or via container image
-docker run --rm -p 8080:8080 ghcr.io/axisrobo/GNOSIVELA:1.0.0-rc.1
+docker run --rm -p 8080:8080 ghcr.io/axisrobo/GNOSIVELA:1.0.0
 ```
 
 ## DSL compiler (SDK type generation)

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gnosivela"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 description = "GNOSIVELA Semantic Control Plane Python client (Apache-2.0)"
 readme = "README.md"
 requires-python = ">=3.8"
