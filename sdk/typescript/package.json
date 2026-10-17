@@ -1,5 +1,5 @@
 {
-  "name": "@axisrobo/gnosivela",
+  "name": "@axisvela/gnosivela",
   "version": "1.0.0",
   "description": "GNOSIVELA Semantic Control Plane TypeScript client (Apache-2.0)",
   "type": "module",

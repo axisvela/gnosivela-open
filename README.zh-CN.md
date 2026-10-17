@@ -35,8 +35,8 @@ GNOSIVELA 的答案是：先定义语义对象（Ontology / Assertion / Identity
 | 仓库 | 定位 | License |
 | --- | --- | --- |
 | **GNOSIVELA-open（本仓库）** | SDK、示例、API 契约、二进制 | Apache-2.0 |
-| [GNOSIVELA](https://github.com/axisrobo/GNOSIVELA) | 产品核心代码（Semantic Kernel） | AGPL-3.0 |
-| [GNOSIVELA-ee](https://github.com/axisrobo/GNOSIVELA-ee) | 企业版：治理、规模化、行业包 | Enterprise |
+| [GNOSIVELA](https://github.com/axisvela/GNOSIVELA) | 产品核心代码（Semantic Kernel） | AGPL-3.0 |
+| [GNOSIVELA-ee](https://github.com/axisvela/GNOSIVELA-ee) | 企业版：治理、规模化、行业包 | Enterprise |
 
 > License 合规：本仓库 SDK 为 Apache-2.0，通过 HTTP 与核心交互，不链接 AGPL 核心。
 
@@ -74,7 +74,7 @@ go run ./examples/quickstart
 ## 使用 SDK
 
 ```go
-import gnosivela "github.com/axisrobo/GNOSIVELA-open/sdk/go/gnosivela"
+import gnosivela "github.com/axisvela/GNOSIVELA-open/sdk/go/gnosivela"
 
 c := gnosivela.New("http://localhost:8080")
 
