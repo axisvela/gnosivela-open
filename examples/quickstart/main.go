@@ -14,7 +14,7 @@ import (
 	"log"
 	"os"
 
-	gnosivela "github.com/axisrobo/GNOSIVELA-open/sdk/go/gnosivela"
+	gnosivela "github.com/axisvela/GNOSIVELA-open/sdk/go/gnosivela"
 )
 
 func main() {

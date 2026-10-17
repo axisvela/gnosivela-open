@@ -35,8 +35,8 @@ GNOSIVELA's answer: define semantic objects first (Ontology / Assertion / Identi
 | Repository | Role | License |
 | --- | --- | --- |
 | **GNOSIVELA-open (this repo)** | SDK, examples, API contract, binaries | Apache-2.0 |
-| [GNOSIVELA](https://github.com/axisrobo/GNOSIVELA) | Product core (Semantic Kernel) | AGPL-3.0 |
-| [GNOSIVELA-ee](https://github.com/axisrobo/GNOSIVELA-ee) | Enterprise edition: governance, scale, industry packs | Enterprise |
+| [GNOSIVELA](https://github.com/axisvela/GNOSIVELA) | Product core (Semantic Kernel) | AGPL-3.0 |
+| [GNOSIVELA-ee](https://github.com/axisvela/GNOSIVELA-ee) | Enterprise edition: governance, scale, industry packs | Enterprise |
 
 > License compliance: the SDK in this repository is Apache-2.0 and interacts with the core over HTTP â€?it never links the AGPL core.
 
@@ -60,7 +60,7 @@ This repository is the community download surface.
 
 | Artifact | Where |
 | --- | --- |
-| Prebuilt server binaries (linux-amd64 / linux-arm64 / darwin-arm64 / windows-amd64) | [GNOSIVELA Core Releases](https://github.com/axisrobo/GNOSIVELA/releases) (attach `gnosivela-*`, `sha256sums.txt`) |
+| Prebuilt server binaries (linux-amd64 / linux-arm64 / darwin-arm64 / windows-amd64) | [GNOSIVELA Core Releases](https://github.com/axisvela/GNOSIVELA/releases) (attach `gnosivela-*`, `sha256sums.txt`) |
 | Container image | `ghcr.io/axisrobo/GNOSIVELA:<tag>` (tagged on every `v*` release; `latest` on the newest) |
 | Go / Python / TypeScript / Java SDKs | this repository (`sdk/`, published to pypi/npm/maven) |
 | API contract | `contracts/openapi.yaml` (this repository) |
@@ -105,7 +105,7 @@ go run ./examples/quickstart
 ## Using the SDK
 
 ```go
-import gnosivela "github.com/axisrobo/GNOSIVELA-open/sdk/go/gnosivela"
+import gnosivela "github.com/axisvela/GNOSIVELA-open/sdk/go/gnosivela"
 
 c := gnosivela.New("http://localhost:8080")
 

@@ -5,7 +5,7 @@
 import type { Event, EventContract, KnowledgeAssertion, PolicyRequest, PipelineRequest } from "./types.ts";
 
 // Re-export the shared contract types from the package entry point so
-// consumers can import them as `import type { EntityRef } from "@axisrobo/gnosivela"`.
+// consumers can import them as `import type { EntityRef } from "@axisvela/gnosivela"`.
 export type {
   EntityRef,
   AssertionContext,

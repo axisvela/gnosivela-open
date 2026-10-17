@@ -1,3 +1,3 @@
-module github.com/axisrobo/GNOSIVELA-open
+module github.com/axisvela/GNOSIVELA-open
 
 go 1.25

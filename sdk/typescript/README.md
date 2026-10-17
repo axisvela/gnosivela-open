@@ -24,7 +24,7 @@ npm run build
 ## Usage
 
 ```typescript
-import { Client } from "@axisrobo/gnosivela";
+import { Client } from "@axisvela/gnosivela";
 
 const c = new Client("http://localhost:8080");
 const o = await c.ontologyLatest("procurement.supplier");
