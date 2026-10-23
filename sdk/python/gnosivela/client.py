@@ -45,7 +45,8 @@ class Client:
                 data = json.dumps(body).encode("utf-8")
             elif isinstance(body, str):
                 data = body.encode("utf-8")
-                content_type = "text/plain"
+                if content_type == "application/json":
+                    content_type = "text/plain"
             else:
                 data = body
             req_headers["Content-Type"] = content_type
@@ -61,6 +62,18 @@ class Client:
 
     def _request_text(self, method: str, path: str) -> str:
         req = urllib.request.Request(self.base_url + path, method=method)
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return resp.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            raise GnosivelaError(e.code, e.read().decode("utf-8"), path)
+
+    def _request_text_body(self, method: str, path: str, body: str,
+                           content_type: str = "text/plain") -> str:
+        req = urllib.request.Request(
+            self.base_url + path, data=body.encode("utf-8"), method=method,
+            headers={"Content-Type": content_type},
+        )
         try:
             with urllib.request.urlopen(req) as resp:
                 return resp.read().decode("utf-8")
@@ -142,11 +155,52 @@ class Client:
     def sparql_query(self, query: str) -> Dict[str, Any]:
         return self._request("POST", "/sparql", {"query": query})
 
+    def sparql_query_text(self, query: str) -> str:
+        return self._request_text_body("POST", "/sparql", query, "application/sparql-query")
+
     def shacl_export(self, namespace: str, version: str = "") -> str:
         path = "/interop/shacl/" + urllib.parse.quote(namespace)
         if version:
             path += "?version=" + urllib.parse.quote(version)
         return self._request_text("GET", path)
+
+    def shacl_import(self, namespace: str, turtle: str, version: str = "") -> Dict[str, Any]:
+        path = "/interop/shacl/" + urllib.parse.quote(namespace)
+        if version:
+            path += "?version=" + urllib.parse.quote(version)
+        return self._request("POST", path, turtle, content_type="text/turtle")
+
+    def shacl_validate(self, namespace: str, assertions=None, version: str = "") -> Dict[str, Any]:
+        path = "/interop/shacl/%s/validate" % urllib.parse.quote(namespace)
+        if version:
+            path += "?version=" + urllib.parse.quote(version)
+        if assertions is None:
+            return self._request("POST", path)
+        return self._request("POST", path, {"assertions": assertions})
+
+    def shacl_validate_stored(self, namespace: str, version: str = "") -> Dict[str, Any]:
+        path = "/interop/shacl/%s/validate" % urllib.parse.quote(namespace)
+        if version:
+            path += "?version=" + urllib.parse.quote(version)
+        return self._request("GET", path)
+
+    def owl_export(self, namespace: str, version: str = "") -> str:
+        path = "/interop/owl/" + urllib.parse.quote(namespace)
+        if version:
+            path += "?version=" + urllib.parse.quote(version)
+        return self._request_text("GET", path)
+
+    def owl_infer(self, namespace: str, version: str = "") -> str:
+        path = "/interop/owl/%s/infer" % urllib.parse.quote(namespace)
+        if version:
+            path += "?version=" + urllib.parse.quote(version)
+        return self._request_text("GET", path)
+
+    def graphql_query(self, query: str, variables=None) -> Dict[str, Any]:
+        return self._request("POST", "/graphql", {"query": query, "variables": variables or {}})
+
+    def graphql_schema(self) -> str:
+        return self._request_text("GET", "/graphql/schema")
 
     def actions(self) -> Dict[str, Any]:
         return self._request("GET", "/actions")

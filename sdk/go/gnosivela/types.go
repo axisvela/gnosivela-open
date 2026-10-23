@@ -681,6 +681,30 @@ type ActionRun struct {
 	StartedAt      time.Time `json:"startedAt"`
 	FinishedAt     time.Time `json:"finishedAt"`
 	DurationMillis int64     `json:"durationMillis"`
+	Output         any       `json:"output,omitempty"`
+	StoreError     string    `json:"storeError,omitempty"`
+}
+
+// ShaclViolation is one SHACL-style validation result.
+type ShaclViolation struct {
+	AssertionID string `json:"assertionId,omitempty"`
+	Subject     string `json:"subject,omitempty"`
+	Path        string `json:"path,omitempty"`
+	Constraint  string `json:"constraint"`
+	Severity    string `json:"severity"`
+	Message     string `json:"message"`
+}
+
+// ShaclValidationReport is the read-only SHACL validation result.
+type ShaclValidationReport struct {
+	Conforms bool             `json:"conforms"`
+	Results  []ShaclViolation `json:"results"`
+}
+
+// GraphQLResponse is the read-only GraphQL response envelope.
+type GraphQLResponse struct {
+	Data   map[string]any `json:"data"`
+	Errors []string       `json:"errors,omitempty"`
 }
 
 // ConnectorInfo describes a registered source connector.

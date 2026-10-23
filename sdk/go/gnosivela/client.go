@@ -379,13 +379,87 @@ func (c *Client) ShaclExport(ctx context.Context, namespace, version string) (st
 	return c.doText(ctx, http.MethodGet, path)
 }
 
-// SparqlQuery runs a read-only SPARQL 1.1 subset query and returns the
-// SPARQL JSON result as a decoded map.
+// SparqlQuery runs a read-only SELECT/ASK query and returns the SPARQL JSON
+// result as a decoded map.
 func (c *Client) SparqlQuery(ctx context.Context, query string) (map[string]any, error) {
 	body, _ := json.Marshal(map[string]string{"query": query})
 	var out map[string]any
 	err := c.do(ctx, http.MethodPost, "/sparql", "application/json", body, &out)
 	return out, err
+}
+
+// SparqlQueryText runs a CONSTRUCT query and returns Turtle.
+func (c *Client) SparqlQueryText(ctx context.Context, query string) (string, error) {
+	return c.doTextBody(ctx, http.MethodPost, "/sparql", "application/sparql-query", "text/turtle", []byte(query))
+}
+
+// ShaclImport maps SHACL Shapes (Turtle) back to an ontology draft.
+func (c *Client) ShaclImport(ctx context.Context, namespace, version, turtle string) (*Ontology, error) {
+	path := "/interop/shacl/" + url.PathEscape(namespace)
+	if version != "" {
+		path += "?version=" + url.QueryEscape(version)
+	}
+	var out Ontology
+	err := c.do(ctx, http.MethodPost, path, "text/turtle", []byte(turtle), &out)
+	return &out, err
+}
+
+// ShaclValidateStored validates the stored assertions of a namespace.
+func (c *Client) ShaclValidateStored(ctx context.Context, namespace, version string) (*ShaclValidationReport, error) {
+	path := "/interop/shacl/" + url.PathEscape(namespace) + "/validate"
+	if version != "" {
+		path += "?version=" + url.QueryEscape(version)
+	}
+	var out ShaclValidationReport
+	err := c.do(ctx, http.MethodGet, path, "", nil, &out)
+	return &out, err
+}
+
+// ShaclValidate validates a supplied assertion batch. A nil slice validates
+// the stored assertions instead.
+func (c *Client) ShaclValidate(ctx context.Context, namespace, version string, assertions []*KnowledgeAssertion) (*ShaclValidationReport, error) {
+	path := "/interop/shacl/" + url.PathEscape(namespace) + "/validate"
+	if version != "" {
+		path += "?version=" + url.QueryEscape(version)
+	}
+	var body []byte
+	if assertions != nil {
+		body, _ = json.Marshal(map[string]any{"assertions": assertions})
+	}
+	var out ShaclValidationReport
+	err := c.do(ctx, http.MethodPost, path, "application/json", body, &out)
+	return &out, err
+}
+
+// OwlExport exports an ontology as OWL 2 Turtle.
+func (c *Client) OwlExport(ctx context.Context, namespace, version string) (string, error) {
+	path := "/interop/owl/" + url.PathEscape(namespace)
+	if version != "" {
+		path += "?version=" + url.QueryEscape(version)
+	}
+	return c.doText(ctx, http.MethodGet, path)
+}
+
+// OwlInfer returns the read-only RDFS/OWL RL inference closure as Turtle.
+func (c *Client) OwlInfer(ctx context.Context, namespace, version string) (string, error) {
+	path := "/interop/owl/" + url.PathEscape(namespace) + "/infer"
+	if version != "" {
+		path += "?version=" + url.QueryEscape(version)
+	}
+	return c.doText(ctx, http.MethodGet, path)
+}
+
+// GraphQLQuery runs a read-only GraphQL query.
+func (c *Client) GraphQLQuery(ctx context.Context, query string, variables map[string]any) (*GraphQLResponse, error) {
+	body, _ := json.Marshal(map[string]any{"query": query, "variables": variables})
+	var out GraphQLResponse
+	err := c.do(ctx, http.MethodPost, "/graphql", "application/json", body, &out)
+	return &out, err
+}
+
+// GraphQLSchema returns the read-only GraphQL SDL.
+func (c *Client) GraphQLSchema(ctx context.Context) (string, error) {
+	return c.doText(ctx, http.MethodGet, "/graphql/schema")
 }
 
 // StudioModel returns the read-only Studio model for one ontology namespace.
@@ -709,6 +783,32 @@ func (c *Client) doText(ctx context.Context, method, path string) (string, error
 	req, err := http.NewRequestWithContext(ctx, method, c.baseURL+path, nil)
 	if err != nil {
 		return "", err
+	}
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode >= 300 {
+		return "", fmt.Errorf("gnosivela: %s %s -> %d: %s", method, path, resp.StatusCode, strings.TrimSpace(string(data)))
+	}
+	return string(data), nil
+}
+
+func (c *Client) doTextBody(ctx context.Context, method, path, contentType, accept string, body []byte) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, method, c.baseURL+path, bytes.NewReader(body))
+	if err != nil {
+		return "", err
+	}
+	if contentType != "" {
+		req.Header.Set("Content-Type", contentType)
+	}
+	if accept != "" {
+		req.Header.Set("Accept", accept)
 	}
 	resp, err := c.http.Do(req)
 	if err != nil {
