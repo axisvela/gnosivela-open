@@ -58,6 +58,17 @@ public final class GnosivelaClientTest {
                 status = 201;
             } else if ("/grounding/explain".equals(path) || "/grounding/redact".equals(path)) {
                 body = "{\"intent\":{\"query\":\"x\"},\"citations\":[]}";
+            } else if ("/query/hybrid".equals(path)) {
+                body = "{\"query\":\"supplier risk\",\"fusion\":\"rrf\",\"hits\":[{\"id\":\"ka:risk-1\",\"score\":0.5}]}";
+            } else if ("/studio/model".equals(path)) {
+                body = "{\"namespace\":\"acme\",\"version\":\"1.2\",\"concepts\":[{\"id\":\"Supplier\",\"assertionCount\":2}],\"relations\":[]}";
+            } else if ("/connectors".equals(path)) {
+                body = "{\"connectors\":[{\"kind\":\"api\"},{\"kind\":\"streaming\"}]}";
+            } else if ("/connectors/introspect".equals(path)) {
+                body = "{\"kind\":\"streaming\",\"connector\":\"streaming\",\"fields\":[{\"name\":\"eventId\",\"dataType\":\"string\"}]}";
+            } else if ("/connectors/documents".equals(path)) {
+                body = "{\"id\":\"doc:p1\",\"docId\":\"p1\",\"bindingState\":\"bound\",\"chunks\":[{\"id\":\"c1\"}]}";
+                status = 201;
             } else if ("/query/subgraph".equals(path)) {
                 body = "[{\"id\":\"r1\",\"kind\":\"exactSameAs\"}]";
             } else {
@@ -95,6 +106,11 @@ public final class GnosivelaClientTest {
             check(c.groundingExplain("ACME", "alice", "onboarding").contains("\"intent\""), "groundingExplain");
             check(c.groundingRedact("ACME", "alice", "onboarding").contains("\"intent\""), "groundingRedact");
             check(c.subgraphQuery("capability:C-2").contains("\"r1\""), "subgraphQuery");
+            check(c.hybridQuery("supplier risk", 5).contains("\"ka:risk-1\""), "hybridQuery");
+            check(c.studioModel("acme").contains("\"Supplier\""), "studioModel");
+            check(c.connectors().contains("\"streaming\""), "connectors");
+            check(c.connectorIntrospect("streaming", "{\"options\":{\"inlineSchema\":\"{}\"}}").contains("\"eventId\""), "connectorIntrospect");
+            check(c.connectorBindDocument("p1", "must review").contains("\"doc:p1\""), "connectorBindDocument");
 
             try {
                 c.ontologyLatest("missing");

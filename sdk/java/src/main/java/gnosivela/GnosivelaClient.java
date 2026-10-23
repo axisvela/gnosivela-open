@@ -124,6 +124,31 @@ public final class GnosivelaClient {
         return post("/query/semantic", "{\"query\":\"" + escape(query) + "\",\"principal\":\"" + escape(principal) + "\",\"purpose\":\"" + escape(purpose) + "\"}");
     }
 
+    public String hybridQuery(String query, int limit) {
+        return post("/query/hybrid", "{\"query\":\"" + escape(query) + "\",\"limit\":" + limit + "}");
+    }
+
+    public String studioModel(String namespace) {
+        return get("/studio/model?namespace=" + enc(namespace));
+    }
+
+    public String connectors() {
+        return get("/connectors");
+    }
+
+    public String connectorIntrospect(String kind, String specJson) {
+        return post("/connectors/introspect", "{\"kind\":\"" + escape(kind) + "\",\"spec\":" + specJson + "}");
+    }
+
+    public String connectorBindDocument(String docId, String content) {
+        return connectorBindDocument(docId, content, "markdown");
+    }
+
+    public String connectorBindDocument(String docId, String content, String contentType) {
+        return post("/connectors/documents", "{\"docId\":\"" + escape(docId) + "\",\"contentType\":\"" + escape(contentType) +
+                "\",\"content\":\"" + escape(content) + "\"}");
+    }
+
     public String pathQuery(String from, String to) {
         return post("/query/path", "{\"from\":\"" + escape(from) + "\",\"to\":\"" + escape(to) + "\"}");
     }
