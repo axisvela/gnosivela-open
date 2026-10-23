@@ -4,6 +4,13 @@ All notable changes to GNOSIVELA-open (SDKs, examples, API contract) are
 documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 
+## [1.4.0] - 2026-10-23
+
+### Changed
+
+- Version aligned with GNOSIVELA Core v1.4.0 (`pkg/kernel` facade and public
+  `Connector` SPI). No SDK API changes in this release.
+
 ## [1.3.0] - 2026-10-23
 
 ### Added

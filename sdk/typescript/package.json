@@ -1,6 +1,6 @@
 {
   "name": "@axisvela/gnosivela",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "GNOSIVELA Semantic Control Plane TypeScript client (Apache-2.0)",
   "type": "module",
   "license": "Apache-2.0",
