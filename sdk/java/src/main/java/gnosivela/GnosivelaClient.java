@@ -132,6 +132,18 @@ public final class GnosivelaClient {
         return get("/studio/model?namespace=" + enc(namespace));
     }
 
+    public String studioImpact(String namespace) {
+        return get("/studio/impact?namespace=" + enc(namespace));
+    }
+
+    public String shaclExport(String namespace) {
+        return get("/interop/shacl/" + enc(namespace));
+    }
+
+    public String shaclExport(String namespace, String version) {
+        return get("/interop/shacl/" + enc(namespace) + "?version=" + enc(version));
+    }
+
     public String connectors() {
         return get("/connectors");
     }

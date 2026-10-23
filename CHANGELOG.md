@@ -19,8 +19,10 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
   relational, catalog, OpenAPI/JSON Schema, Schema Registry (Avro), S3 object
   stores and Databricks Unity Catalog. Document binding accepts markdown,
   plain text or HTML via `contentType`.
-- `StudioModel` in all four SDKs, backed by the read-only `GET /studio/model`
-  endpoint.
+- `StudioModel` and `StudioImpact` in all four SDKs, backed by the read-only
+  `GET /studio/model` and `GET /studio/impact` endpoints, including an optional
+  change-impact summary for unpublished versions.
+- `ShaclExport` in all four SDKs, backed by `GET /interop/shacl/{namespace}`.
 
 ## [1.0.0] — 2026-08-21
 
@@ -28,7 +30,7 @@ General availability SDK baseline, aligned with the Core 1.0.0 GA release.
 
 ### Changed
 - All SDK package versions unified to `1.0.0` (no pre-release suffix; see `VERSION`).
-- Container image tag reference updated to `ghcr.io/axisrobo/GNOSIVELA:1.0.0`.
+- Container image tag reference updated to `ghcr.io/axisvela/GNOSIVELA:1.0.0`.
 
 ## [1.0.0-rc.1] — 2026-08-11
 

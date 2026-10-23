@@ -47,6 +47,14 @@ export class Client {
     this.headers = { "Content-Type": "application/json", ...(opts.headers ?? {}) };
   }
 
+  private async requestText(method: string, path: string): Promise<string> {
+    const resp = await fetch(this.baseURL + path, { method, headers: { ...this.headers } });
+    if (!resp.ok) {
+      throw new GnosivelaError(resp.status, await resp.text(), path);
+    }
+    return resp.text();
+  }
+
   private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const url = this.baseURL + path;
     const init: RequestInit = { method, headers: { ...this.headers } };
@@ -119,6 +127,13 @@ export class Client {
   }
   studioModel(namespace: string): Promise<Record<string, unknown>> {
     return this.request("GET", `/studio/model?namespace=${encodeURIComponent(namespace)}`);
+  }
+  studioImpact(namespace: string): Promise<Record<string, unknown>> {
+    return this.request("GET", `/studio/impact?namespace=${encodeURIComponent(namespace)}`);
+  }
+  shaclExport(namespace: string, version = ""): Promise<string> {
+    const suffix = version ? `?version=${encodeURIComponent(version)}` : "";
+    return this.requestText("GET", `/interop/shacl/${encodeURIComponent(namespace)}${suffix}`);
   }
   connectors(): Promise<{ connectors: Array<Record<string, unknown>> }> {
     return this.request("GET", "/connectors");

@@ -779,6 +779,20 @@ type StudioModel struct {
 	EntityCount    int              `json:"entityCount"`
 	StatusCounts   map[string]int   `json:"statusCounts,omitempty"`
 	Sources        []StudioSource   `json:"sources,omitempty"`
+	Impact         *StudioImpact    `json:"impact,omitempty"`
+}
+
+// StudioImpact summarizes change impact of the latest version against the
+// currently published version.
+type StudioImpact struct {
+	FromVersion        string `json:"fromVersion,omitempty"`
+	ToVersion          string `json:"toVersion"`
+	Breaking           int    `json:"breaking"`
+	Additive           int    `json:"additive"`
+	Deprecations       int    `json:"deprecations"`
+	AffectedAssertions int    `json:"affectedAssertions"`
+	AffectedEntities   int    `json:"affectedEntities"`
+	Blocking           bool   `json:"blocking"`
 }
 
 // HybridWeights configures the fusion contribution of each retrieval mode.
