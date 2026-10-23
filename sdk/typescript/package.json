@@ -8,13 +8,17 @@
     ".": {
       "types": "./src/client.ts",
       "import": "./src/client.ts"
+    },
+    "./integrations": {
+      "types": "./src/integrations.ts",
+      "import": "./src/integrations.ts"
     }
   },
   "files": [
     "src"
   ],
   "scripts": {
-    "test": "node --test tests/client.test.ts",
+    "test": "node --test tests/client.test.ts tests/integrations.test.ts",
     "typecheck": "tsc -p tsconfig.json"
   },
   "engines": {
