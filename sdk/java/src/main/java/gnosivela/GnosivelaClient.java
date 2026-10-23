@@ -136,6 +136,24 @@ public final class GnosivelaClient {
         return get("/studio/impact?namespace=" + enc(namespace));
     }
 
+    public String actions() {
+        return get("/actions");
+    }
+
+    public String actionRegister(String definitionJson) {
+        return post("/actions", definitionJson);
+    }
+
+    public String actionRun(String actionId, String principal, String approvalId, String inputJson) {
+        String input = (inputJson == null || inputJson.isEmpty()) ? "{}" : inputJson;
+        return post("/actions/" + enc(actionId) + "/run", "{\"principal\":\"" + escape(principal) +
+                "\",\"approvalId\":\"" + escape(approvalId) + "\",\"input\":" + input + "}");
+    }
+
+    public String actionRuns() {
+        return get("/actions/runs");
+    }
+
     public String shaclExport(String namespace) {
         return get("/interop/shacl/" + enc(namespace));
     }

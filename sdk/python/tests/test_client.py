@@ -48,6 +48,10 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
             self._reply({"definitions": [{"id": "m:1", "formula": "sum(x)"}]})
         elif self.path.startswith("/interop/shacl/"):
             self._reply_text('@prefix sh: <http://www.w3.org/ns/shacl#> .\nex:SupplierShape a sh:NodeShape .\n')
+        elif self.path == "/actions":
+            self._reply({"actions": [{"id": "notify", "kind": "webhook"}]})
+        elif self.path == "/actions/runs":
+            self._reply({"runs": [{"id": "ACT-1", "status": "succeeded"}]})
         elif self.path == "/connectors":
             self._reply({"connectors": [{"kind": "api"}, {"kind": "streaming"}]})
         elif self.path.startswith("/studio/impact"):
@@ -100,6 +104,11 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
                 self._reply({"id": "m:1", "formula": "sum(x)"}, 201)
             else:
                 self._reply({"definitions": [{"id": "m:1", "formula": "sum(x)"}]})
+        elif self.path == "/actions":
+            self._reply({"id": body.get("id"), "kind": body.get("kind")}, 201)
+        elif self.path.startswith("/actions/") and self.path.endswith("/run"):
+            self._reply({"id": "ACT-1", "actionId": self.path.split("/")[2], "status": "succeeded",
+                         "principal": body.get("principal")})
         elif self.path == "/connectors/introspect":
             self._reply({"kind": body.get("kind"), "connector": body.get("kind"), "fields": [{"name": "eventId", "dataType": "string", "required": True}]})
         elif self.path == "/connectors/documents":
@@ -186,6 +195,16 @@ class TestClient(unittest.TestCase):
         self.assertEqual(report["fromVersion"], "1.0")
         self.assertFalse(report["blocking"])
         self.assertEqual(report["additive"][0]["id"], "Contract")
+
+    def test_actions(self):
+        c = Client(self.base)
+        self.assertEqual(c.actions()["actions"][0]["id"], "notify")
+        created = c.action_register({"id": "notify", "kind": "webhook", "url": "https://example.com"})
+        self.assertEqual(created["id"], "notify")
+        run = c.action_run("notify", principal="alice", input_data={"x": 1})
+        self.assertEqual(run["status"], "succeeded")
+        self.assertEqual(run["principal"], "alice")
+        self.assertEqual(c.action_runs()["runs"][0]["id"], "ACT-1")
 
     def test_shacl_export(self):
         c = Client(self.base)

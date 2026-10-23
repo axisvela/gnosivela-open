@@ -135,6 +135,18 @@ export class Client {
     const suffix = version ? `?version=${encodeURIComponent(version)}` : "";
     return this.requestText("GET", `/interop/shacl/${encodeURIComponent(namespace)}${suffix}`);
   }
+  actions(): Promise<{ actions: Array<Record<string, unknown>> }> {
+    return this.request("GET", "/actions");
+  }
+  actionRegister(definition: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.request("POST", "/actions", definition);
+  }
+  actionRun(actionId: string, principal = "", approvalId = "", input?: unknown): Promise<Record<string, unknown>> {
+    return this.request("POST", `/actions/${encodeURIComponent(actionId)}/run`, { principal, approvalId, input });
+  }
+  actionRuns(): Promise<{ runs: Array<Record<string, unknown>> }> {
+    return this.request("GET", "/actions/runs");
+  }
   connectors(): Promise<{ connectors: Array<Record<string, unknown>> }> {
     return this.request("GET", "/connectors");
   }

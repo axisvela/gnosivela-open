@@ -644,6 +644,42 @@ type SemanticResult struct {
 	Metrics        []*MetricDefinition `json:"metrics,omitempty"`
 }
 
+// ActionDefinition declares a governed action (webhook runtime).
+type ActionDefinition struct {
+	ID               string            `json:"id"`
+	Name             string            `json:"name,omitempty"`
+	Kind             string            `json:"kind"`
+	URL              string            `json:"url"`
+	Method           string            `json:"method,omitempty"`
+	Headers          map[string]string `json:"headers,omitempty"`
+	TimeoutSeconds   int               `json:"timeoutSeconds,omitempty"`
+	RequiresApproval bool              `json:"requiresApproval,omitempty"`
+	ApprovalAction   string            `json:"approvalAction,omitempty"`
+	AllowPrivate     bool              `json:"allowPrivate,omitempty"`
+	Enabled          *bool             `json:"enabled,omitempty"`
+}
+
+// ActionRunRequest is the input of an action invocation.
+type ActionRunRequest struct {
+	Principal  string `json:"principal,omitempty"`
+	ApprovalID string `json:"approvalId,omitempty"`
+	Input      any    `json:"input,omitempty"`
+}
+
+// ActionRun is one action invocation record.
+type ActionRun struct {
+	ID             string    `json:"id"`
+	ActionID       string    `json:"actionId"`
+	Principal      string    `json:"principal,omitempty"`
+	ApprovalID     string    `json:"approvalId,omitempty"`
+	Status         string    `json:"status"`
+	StatusCode     int       `json:"statusCode,omitempty"`
+	Error          string    `json:"error,omitempty"`
+	StartedAt      time.Time `json:"startedAt"`
+	FinishedAt     time.Time `json:"finishedAt"`
+	DurationMillis int64     `json:"durationMillis"`
+}
+
 // ConnectorInfo describes a registered source connector.
 type ConnectorInfo struct {
 	Kind        string `json:"kind"`

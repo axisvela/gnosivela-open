@@ -335,6 +335,40 @@ func (c *Client) FederationDomainAdd(ctx context.Context, name, baseURL string) 
 	return c.do(ctx, http.MethodPost, "/federation/domains", "application/json", body, nil)
 }
 
+// Actions lists registered governed actions.
+func (c *Client) Actions(ctx context.Context) ([]ActionDefinition, error) {
+	var out struct {
+		Actions []ActionDefinition `json:"actions"`
+	}
+	err := c.do(ctx, http.MethodGet, "/actions", "", nil, &out)
+	return out.Actions, err
+}
+
+// ActionRegister registers (or replaces) a governed action.
+func (c *Client) ActionRegister(ctx context.Context, def ActionDefinition) (*ActionDefinition, error) {
+	body, _ := json.Marshal(def)
+	var out ActionDefinition
+	err := c.do(ctx, http.MethodPost, "/actions", "application/json", body, &out)
+	return &out, err
+}
+
+// ActionRun invokes an action with the optional approval binding.
+func (c *Client) ActionRun(ctx context.Context, id string, req ActionRunRequest) (*ActionRun, error) {
+	body, _ := json.Marshal(req)
+	var out ActionRun
+	err := c.do(ctx, http.MethodPost, "/actions/"+url.PathEscape(id)+"/run", "application/json", body, &out)
+	return &out, err
+}
+
+// ActionRuns lists invocation records (newest first).
+func (c *Client) ActionRuns(ctx context.Context) ([]ActionRun, error) {
+	var out struct {
+		Runs []ActionRun `json:"runs"`
+	}
+	err := c.do(ctx, http.MethodGet, "/actions/runs", "", nil, &out)
+	return out.Runs, err
+}
+
 // ShaclExport exports an ontology as SHACL Shapes (Turtle). An empty version
 // selects the latest version.
 func (c *Client) ShaclExport(ctx context.Context, namespace, version string) (string, error) {

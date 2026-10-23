@@ -91,6 +91,18 @@ test.before(async () => {
     if (req.method === "GET" && path.startsWith("/interop/shacl/")) {
       return sendText("@prefix sh: <http://www.w3.org/ns/shacl#> .\nex:SupplierShape a sh:NodeShape .\n");
     }
+    if (req.method === "GET" && path === "/actions") {
+      return send({ actions: [{ id: "notify", kind: "webhook" }] });
+    }
+    if (req.method === "GET" && path === "/actions/runs") {
+      return send({ runs: [{ id: "ACT-1", status: "succeeded" }] });
+    }
+    if (req.method === "POST" && path === "/actions") {
+      return send({ id: "notify", kind: "webhook" }, 201);
+    }
+    if (req.method === "POST" && path.startsWith("/actions/") && path.endsWith("/run")) {
+      return send({ id: "ACT-1", actionId: "notify", status: "succeeded" });
+    }
     if (req.method === "POST" && path === "/connectors/introspect") {
       return send({ kind: "streaming", connector: "streaming", fields: [{ name: "eventId", dataType: "string", required: true }] });
     }
@@ -172,6 +184,18 @@ test("studio impact", async () => {
   const report = await c.studioImpact("acme");
   assert.equal(report.fromVersion, "1.0");
   assert.equal((report.additive as Array<Record<string, unknown>>)[0].id, "Contract");
+});
+
+test("actions", async () => {
+  const c = new Client(base);
+  const list = await c.actions();
+  assert.equal(list.actions[0].id, "notify");
+  const created = await c.actionRegister({ id: "notify", kind: "webhook", url: "https://example.com" });
+  assert.equal(created.id, "notify");
+  const run = await c.actionRun("notify", "alice", "", { x: 1 });
+  assert.equal(run.status, "succeeded");
+  const runs = await c.actionRuns();
+  assert.equal(runs.runs[0].id, "ACT-1");
 });
 
 test("shacl export", async () => {
