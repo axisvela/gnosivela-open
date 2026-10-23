@@ -17,8 +17,8 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
   `ConnectorBindDocument`) in all four SDKs, backed by `/connectors`,
   `/connectors/introspect` and `/connectors/documents`. Introspection covers
   relational, catalog, OpenAPI/JSON Schema, Schema Registry (Avro), S3 object
-  stores and Databricks Unity Catalog. Document binding accepts markdown,
-  plain text or HTML via `contentType`.
+  stores, Databricks Unity Catalog and Snowflake. Document binding accepts
+  markdown, plain text or HTML via `contentType`.
 - `StudioModel` and `StudioImpact` in all four SDKs, backed by the read-only
   `GET /studio/model` and `GET /studio/impact` endpoints, including an optional
   change-impact summary for unpublished versions.
