@@ -413,7 +413,7 @@ paths:
       description: |
         Supported kinds are `relational`, `catalog`, `api`, `streaming`,
         `objectstore`, `warehouse`, `snowflake`, `iceberg`, `salesforce` and
-        `sharepoint`. `api` reads an OpenAPI 3 / JSON Schema document from
+        `sharepoint`, `glue`. `api` reads an OpenAPI 3 / JSON Schema document from
         `spec.options.url` and selects `spec.options.schema`; `streaming`
         accepts an inline JSON Schema (`spec.options.inlineSchema`) or a Schema
         Registry subject (`spec.options.subject`); `objectstore` lists an
@@ -421,8 +421,9 @@ paths:
         `warehouse` introspects a Databricks Unity Catalog table; `snowflake`
         runs `DESCRIBE TABLE` through the Snowflake SQL API; `iceberg` reads an
         Iceberg REST Catalog table; `salesforce` reads an sObject describe;
-        `sharepoint` reads list columns through Microsoft Graph. Only schemas
-        and metadata are read, never records or data files.
+        `sharepoint` reads list columns through Microsoft Graph; `glue` reads an
+        AWS Glue Data Catalog table with SigV4. Only schemas and metadata are
+        read, never records or data files.
       tags: [connector]
       requestBody:
         required: true
@@ -1801,7 +1802,7 @@ components:
     ConnectorInfo:
       type: object
       properties:
-        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake, iceberg, salesforce, sharepoint] }
+        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake, iceberg, salesforce, sharepoint, glue] }
         description: { type: string }
       required: [kind]
     ConnectorSpec:
@@ -1818,7 +1819,7 @@ components:
     ConnectorIntrospect:
       type: object
       properties:
-        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake, iceberg, salesforce, sharepoint] }
+        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake, iceberg, salesforce, sharepoint, glue] }
         spec: { $ref: '#/components/schemas/ConnectorSpec' }
       required: [kind, spec]
     SourceField:
