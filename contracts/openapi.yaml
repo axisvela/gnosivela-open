@@ -448,6 +448,72 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/DocumentBinding' }
         '400': { description: Missing docId or content }
+  /actions:
+    get:
+      summary: List governed actions (webhook / function runtime)
+      tags: [action]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  actions:
+                    type: array
+                    items: { $ref: '#/components/schemas/ActionDefinition' }
+    post:
+      summary: Register a governed webhook action
+      tags: [action]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActionDefinition' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActionDefinition' }
+        '400': { description: Invalid definition }
+  /actions/{id}/run:
+    post:
+      summary: Run an action (approval-bound when required, fully audited)
+      description: |
+        Webhook actions run with a timeout and an SSRF guard (private targets
+        require `allowPrivate`). When `requiresApproval` is set, a fully
+        approved `action.run` request for the same resource is required.
+        Every attempt is recorded in the audit hash-chain.
+      tags: [action]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActionRunRequest' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActionRun' }
+        '404': { description: Action not found }
+        '409': { description: Approval required or action disabled }
+        '502': { description: Webhook failed (run record included) }
+  /actions/runs:
+    get:
+      summary: List action invocation records (newest first)
+      tags: [action]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runs:
+                    type: array
+                    items: { $ref: '#/components/schemas/ActionRun' }
   /interop/shacl/{namespace}:
     get:
       summary: Export an ontology as SHACL Shapes (Turtle)
@@ -1895,3 +1961,40 @@ components:
         affectedEntities: { type: integer }
         blocking: { type: boolean }
       required: [toVersion, breaking, additive, blocking]
+    ActionDefinition:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        kind: { type: string, enum: [webhook] }
+        url: { type: string }
+        method: { type: string, enum: [POST, PUT, PATCH] }
+        headers:
+          type: object
+          additionalProperties: { type: string }
+        timeoutSeconds: { type: integer }
+        requiresApproval: { type: boolean }
+        approvalAction: { type: string, description: "default action.run" }
+        allowPrivate: { type: boolean }
+        enabled: { type: boolean }
+      required: [id, kind, url]
+    ActionRunRequest:
+      type: object
+      properties:
+        principal: { type: string }
+        approvalId: { type: string }
+        input: {}
+    ActionRun:
+      type: object
+      properties:
+        id: { type: string }
+        actionId: { type: string }
+        principal: { type: string }
+        approvalId: { type: string }
+        status: { type: string, enum: [succeeded, failed, blocked] }
+        statusCode: { type: integer }
+        error: { type: string }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+        durationMillis: { type: integer }
+      required: [id, actionId, status]

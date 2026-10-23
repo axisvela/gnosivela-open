@@ -145,6 +145,21 @@ class Client:
             path += "?version=" + urllib.parse.quote(version)
         return self._request_text("GET", path)
 
+    def actions(self) -> Dict[str, Any]:
+        return self._request("GET", "/actions")
+
+    def action_register(self, definition: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request("POST", "/actions", definition)
+
+    def action_run(self, action_id: str, principal: str = "", approval_id: str = "",
+                   input_data: Optional[Any] = None) -> Dict[str, Any]:
+        return self._request("POST", "/actions/%s/run" % urllib.parse.quote(action_id), {
+            "principal": principal, "approvalId": approval_id, "input": input_data,
+        })
+
+    def action_runs(self) -> Dict[str, Any]:
+        return self._request("GET", "/actions/runs")
+
     def connectors(self) -> Dict[str, Any]:
         return self._request("GET", "/connectors")
 

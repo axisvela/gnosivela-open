@@ -66,6 +66,12 @@ public final class GnosivelaClientTest {
                 body = "{\"namespace\":\"acme\",\"fromVersion\":\"1.0\",\"toVersion\":\"1.1\",\"additive\":[{\"id\":\"Contract\"}],\"blocking\":false}";
             } else if (path.startsWith("/interop/shacl/")) {
                 body = "@prefix sh: <http://www.w3.org/ns/shacl#> .\nex:SupplierShape a sh:NodeShape .\n";
+            } else if ("/actions".equals(path)) {
+                body = "{\"actions\":[{\"id\":\"notify\",\"kind\":\"webhook\"}]}";
+            } else if ("/actions/runs".equals(path)) {
+                body = "{\"runs\":[{\"id\":\"ACT-1\",\"status\":\"succeeded\"}]}";
+            } else if (path.startsWith("/actions/") && path.endsWith("/run")) {
+                body = "{\"id\":\"ACT-1\",\"actionId\":\"notify\",\"status\":\"succeeded\"}";
             } else if ("/connectors".equals(path)) {
                 body = "{\"connectors\":[{\"kind\":\"api\"},{\"kind\":\"streaming\"}]}";
             } else if ("/connectors/introspect".equals(path)) {
@@ -114,6 +120,10 @@ public final class GnosivelaClientTest {
             check(c.studioModel("acme").contains("\"Supplier\""), "studioModel");
             check(c.studioImpact("acme").contains("\"Contract\""), "studioImpact");
             check(c.shaclExport("acme").contains("ex:SupplierShape"), "shaclExport");
+            check(c.actions().contains("\"notify\""), "actions");
+            check(c.actionRegister("{\"id\":\"notify\",\"kind\":\"webhook\",\"url\":\"https://example.com\"}").contains("notify"), "actionRegister");
+            check(c.actionRun("notify", "alice", "", "{\"x\":1}").contains("\"succeeded\""), "actionRun");
+            check(c.actionRuns().contains("\"ACT-1\""), "actionRuns");
             check(c.connectors().contains("\"streaming\""), "connectors");
             check(c.connectorIntrospect("streaming", "{\"options\":{\"inlineSchema\":\"{}\"}}").contains("\"eventId\""), "connectorIntrospect");
             check(c.connectorBindDocument("p1", "must review").contains("\"doc:p1\""), "connectorBindDocument");

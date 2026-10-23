@@ -229,6 +229,52 @@ func TestStudioModel(t *testing.T) {
 	}
 }
 
+func TestActionMethods(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/actions":
+			writeJSON(w, http.StatusOK, map[string]any{"actions": []ActionDefinition{{ID: "notify", Kind: "webhook", URL: "https://example.com"}}})
+		case r.Method == http.MethodPost && r.URL.Path == "/actions":
+			var def ActionDefinition
+			if err := json.NewDecoder(r.Body).Decode(&def); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			writeJSON(w, http.StatusCreated, def)
+		case r.Method == http.MethodPost && r.URL.Path == "/actions/notify/run":
+			var req ActionRunRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			writeJSON(w, http.StatusOK, ActionRun{ID: "ACT-1", ActionID: "notify", Status: "succeeded", Principal: req.Principal})
+		case r.Method == http.MethodGet && r.URL.Path == "/actions/runs":
+			writeJSON(w, http.StatusOK, map[string]any{"runs": []ActionRun{{ID: "ACT-1", ActionID: "notify", Status: "succeeded"}}})
+		default:
+			http.Error(w, "not found", http.StatusNotFound)
+		}
+	}))
+	defer ts.Close()
+	ctx := context.Background()
+	c := New(ts.URL)
+	list, err := c.Actions(ctx)
+	if err != nil || len(list) != 1 {
+		t.Fatalf("actions = %+v, %v", list, err)
+	}
+	def, err := c.ActionRegister(ctx, ActionDefinition{ID: "notify", Kind: "webhook", URL: "https://example.com"})
+	if err != nil || def.ID != "notify" {
+		t.Fatalf("register = %+v, %v", def, err)
+	}
+	run, err := c.ActionRun(ctx, "notify", ActionRunRequest{Principal: "alice", Input: map[string]any{"x": 1}})
+	if err != nil || run.Status != "succeeded" || run.Principal != "alice" {
+		t.Fatalf("run = %+v, %v", run, err)
+	}
+	runs, err := c.ActionRuns(ctx)
+	if err != nil || len(runs) != 1 {
+		t.Fatalf("runs = %+v, %v", runs, err)
+	}
+}
+
 func TestShaclExport(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet || r.URL.Path != "/interop/shacl/acme" {
