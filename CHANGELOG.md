@@ -23,6 +23,11 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
   `GET /studio/model` and `GET /studio/impact` endpoints, including an optional
   change-impact summary for unpublished versions.
 - `ShaclExport` in all four SDKs, backed by `GET /interop/shacl/{namespace}`.
+- Dependency-free agent framework adapters: Python `gnosivela.integrations`
+  (`tool_specs`, `langchain_tools`, `llama_index_tools`) and TypeScript
+  `@axisvela/gnosivela/integrations` (`toolSpecs`, `openAIToolDefinitions`,
+  `toolHandlers`). Native framework objects are returned when available;
+  neutral specs otherwise.
 
 ## [1.0.0] — 2026-08-21
 
