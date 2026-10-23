@@ -412,15 +412,17 @@ paths:
       summary: Introspect an external source into a SourceSchema
       description: |
         Supported kinds are `relational`, `catalog`, `api`, `streaming`,
-        `objectstore`, `warehouse` and `snowflake`. `api` reads an OpenAPI 3 /
-        JSON Schema document from `spec.options.url` and selects
-        `spec.options.schema`; `streaming` accepts an inline JSON Schema
-        (`spec.options.inlineSchema`) or a Schema Registry subject
-        (`spec.options.subject`); `objectstore` lists an S3-compatible bucket
-        and infers a schema from a sample object; `warehouse` introspects a
-        Databricks Unity Catalog table; `snowflake` runs `DESCRIBE TABLE`
-        through the Snowflake SQL API. Only schemas and metadata are read,
-        never data rows/objects.
+        `objectstore`, `warehouse`, `snowflake`, `iceberg`, `salesforce` and
+        `sharepoint`. `api` reads an OpenAPI 3 / JSON Schema document from
+        `spec.options.url` and selects `spec.options.schema`; `streaming`
+        accepts an inline JSON Schema (`spec.options.inlineSchema`) or a Schema
+        Registry subject (`spec.options.subject`); `objectstore` lists an
+        S3-compatible bucket and infers a schema from a sample object;
+        `warehouse` introspects a Databricks Unity Catalog table; `snowflake`
+        runs `DESCRIBE TABLE` through the Snowflake SQL API; `iceberg` reads an
+        Iceberg REST Catalog table; `salesforce` reads an sObject describe;
+        `sharepoint` reads list columns through Microsoft Graph. Only schemas
+        and metadata are read, never records or data files.
       tags: [connector]
       requestBody:
         required: true
@@ -1799,7 +1801,7 @@ components:
     ConnectorInfo:
       type: object
       properties:
-        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake, iceberg] }
+        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake, iceberg, salesforce, sharepoint] }
         description: { type: string }
       required: [kind]
     ConnectorSpec:
@@ -1816,7 +1818,7 @@ components:
     ConnectorIntrospect:
       type: object
       properties:
-        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake, iceberg] }
+        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake, iceberg, salesforce, sharepoint] }
         spec: { $ref: '#/components/schemas/ConnectorSpec' }
       required: [kind, spec]
     SourceField:
