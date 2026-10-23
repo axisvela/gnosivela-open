@@ -14,6 +14,10 @@ test.before(async () => {
       res.writeHead(status, { "Content-Type": "application/json" });
       res.end(body);
     };
+    const sendText = (body: string, status = 200) => {
+      res.writeHead(status, { "Content-Type": "text/turtle" });
+      res.end(body);
+    };
     const path = (req.url ?? "").split("?")[0];
     if (req.method === "GET" && path === "/ontologies/acme/latest") {
       return send({ namespace: "acme", version: "1.2", status: "published" });
@@ -80,6 +84,12 @@ test.before(async () => {
     }
     if (req.method === "GET" && path === "/studio/model") {
       return send({ namespace: "acme", version: "1.2", status: "published", concepts: [{ id: "Supplier", assertionCount: 2 }], relations: [] });
+    }
+    if (req.method === "GET" && path === "/studio/impact") {
+      return send({ namespace: "acme", fromVersion: "1.0", toVersion: "1.1", additive: [{ kind: "added", type: "concept", id: "Contract" }], blocking: false });
+    }
+    if (req.method === "GET" && path.startsWith("/interop/shacl/")) {
+      return sendText("@prefix sh: <http://www.w3.org/ns/shacl#> .\nex:SupplierShape a sh:NodeShape .\n");
     }
     if (req.method === "POST" && path === "/connectors/introspect") {
       return send({ kind: "streaming", connector: "streaming", fields: [{ name: "eventId", dataType: "string", required: true }] });
@@ -155,6 +165,19 @@ test("studio model", async () => {
   const model = await c.studioModel("acme");
   assert.equal(model.namespace, "acme");
   assert.equal((model.concepts as Array<Record<string, unknown>>)[0].assertionCount, 2);
+});
+
+test("studio impact", async () => {
+  const c = new Client(base);
+  const report = await c.studioImpact("acme");
+  assert.equal(report.fromVersion, "1.0");
+  assert.equal((report.additive as Array<Record<string, unknown>>)[0].id, "Contract");
+});
+
+test("shacl export", async () => {
+  const c = new Client(base);
+  const text = await c.shaclExport("acme", "1.2");
+  assert.ok(text.includes("ex:SupplierShape"));
 });
 
 test("connectors", async () => {

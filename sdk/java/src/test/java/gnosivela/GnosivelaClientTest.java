@@ -62,6 +62,10 @@ public final class GnosivelaClientTest {
                 body = "{\"query\":\"supplier risk\",\"fusion\":\"rrf\",\"hits\":[{\"id\":\"ka:risk-1\",\"score\":0.5}]}";
             } else if ("/studio/model".equals(path)) {
                 body = "{\"namespace\":\"acme\",\"version\":\"1.2\",\"concepts\":[{\"id\":\"Supplier\",\"assertionCount\":2}],\"relations\":[]}";
+            } else if ("/studio/impact".equals(path)) {
+                body = "{\"namespace\":\"acme\",\"fromVersion\":\"1.0\",\"toVersion\":\"1.1\",\"additive\":[{\"id\":\"Contract\"}],\"blocking\":false}";
+            } else if (path.startsWith("/interop/shacl/")) {
+                body = "@prefix sh: <http://www.w3.org/ns/shacl#> .\nex:SupplierShape a sh:NodeShape .\n";
             } else if ("/connectors".equals(path)) {
                 body = "{\"connectors\":[{\"kind\":\"api\"},{\"kind\":\"streaming\"}]}";
             } else if ("/connectors/introspect".equals(path)) {
@@ -108,6 +112,8 @@ public final class GnosivelaClientTest {
             check(c.subgraphQuery("capability:C-2").contains("\"r1\""), "subgraphQuery");
             check(c.hybridQuery("supplier risk", 5).contains("\"ka:risk-1\""), "hybridQuery");
             check(c.studioModel("acme").contains("\"Supplier\""), "studioModel");
+            check(c.studioImpact("acme").contains("\"Contract\""), "studioImpact");
+            check(c.shaclExport("acme").contains("ex:SupplierShape"), "shaclExport");
             check(c.connectors().contains("\"streaming\""), "connectors");
             check(c.connectorIntrospect("streaming", "{\"options\":{\"inlineSchema\":\"{}\"}}").contains("\"eventId\""), "connectorIntrospect");
             check(c.connectorBindDocument("p1", "must review").contains("\"doc:p1\""), "connectorBindDocument");

@@ -59,6 +59,14 @@ class Client:
         except urllib.error.HTTPError as e:
             raise GnosivelaError(e.code, e.read().decode("utf-8"), path)
 
+    def _request_text(self, method: str, path: str) -> str:
+        req = urllib.request.Request(self.base_url + path, method=method)
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return resp.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            raise GnosivelaError(e.code, e.read().decode("utf-8"), path)
+
     # ---- ontology ----
 
     def ontology_create(self, dsl: str) -> Dict[str, Any]:
@@ -127,6 +135,15 @@ class Client:
 
     def studio_model(self, namespace: str) -> Dict[str, Any]:
         return self._request("GET", "/studio/model?namespace=" + urllib.parse.quote(namespace))
+
+    def studio_impact(self, namespace: str) -> Dict[str, Any]:
+        return self._request("GET", "/studio/impact?namespace=" + urllib.parse.quote(namespace))
+
+    def shacl_export(self, namespace: str, version: str = "") -> str:
+        path = "/interop/shacl/" + urllib.parse.quote(namespace)
+        if version:
+            path += "?version=" + urllib.parse.quote(version)
+        return self._request_text("GET", path)
 
     def connectors(self) -> Dict[str, Any]:
         return self._request("GET", "/connectors")

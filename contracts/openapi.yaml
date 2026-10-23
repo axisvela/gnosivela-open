@@ -448,6 +448,21 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/DocumentBinding' }
         '400': { description: Missing docId or content }
+  /interop/shacl/{namespace}:
+    get:
+      summary: Export an ontology as SHACL Shapes (Turtle)
+      description: Concepts become NodeShapes, properties become PropertyShapes (datatype, min/max count, enum, unit comment), and relations become sh:class property shapes. The semantic object model remains authoritative.
+      tags: [interop]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: query, required: false, schema: { type: string }, description: "Defaults to the latest version" }
+      responses:
+        '200':
+          description: SHACL Shapes in Turtle
+          content:
+            text/turtle:
+              schema: { type: string }
+        '404': { description: Ontology namespace/version not found }
   /bridge/{namespace}/contract:
     get:
       summary: Export the signed semantic contract of the latest published ontology
@@ -537,6 +552,20 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/StudioModel' }
+        '400': { description: Missing namespace }
+        '404': { description: Ontology namespace not found }
+  /studio/impact:
+    get:
+      summary: Read-only Studio change-impact detail (affected items)
+      description: Compares the latest version against the currently published version using the same analyzer as the publish guard.
+      tags: [studio]
+      parameters:
+        - { name: namespace, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ImpactReport' }
         '400': { description: Missing namespace }
         '404': { description: Ontology namespace not found }
   /metrics:
@@ -1852,4 +1881,17 @@ components:
         sources:
           type: array
           items: { $ref: '#/components/schemas/StudioSource' }
+        impact: { $ref: '#/components/schemas/StudioImpact' }
       required: [namespace, version, status, concepts, relations]
+    StudioImpact:
+      type: object
+      properties:
+        fromVersion: { type: string }
+        toVersion: { type: string }
+        breaking: { type: integer }
+        additive: { type: integer }
+        deprecations: { type: integer }
+        affectedAssertions: { type: integer }
+        affectedEntities: { type: integer }
+        blocking: { type: boolean }
+      required: [toVersion, breaking, additive, blocking]

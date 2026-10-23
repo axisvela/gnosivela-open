@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // Client is a thin HTTP client for the GNOSIVELA Semantic Control Plane API.
@@ -334,10 +335,27 @@ func (c *Client) FederationDomainAdd(ctx context.Context, name, baseURL string) 
 	return c.do(ctx, http.MethodPost, "/federation/domains", "application/json", body, nil)
 }
 
+// ShaclExport exports an ontology as SHACL Shapes (Turtle). An empty version
+// selects the latest version.
+func (c *Client) ShaclExport(ctx context.Context, namespace, version string) (string, error) {
+	path := "/interop/shacl/" + url.PathEscape(namespace)
+	if version != "" {
+		path += "?version=" + url.QueryEscape(version)
+	}
+	return c.doText(ctx, http.MethodGet, path)
+}
+
 // StudioModel returns the read-only Studio model for one ontology namespace.
 func (c *Client) StudioModel(ctx context.Context, namespace string) (*StudioModel, error) {
 	var out StudioModel
 	err := c.do(ctx, http.MethodGet, "/studio/model?namespace="+url.QueryEscape(namespace), "", nil, &out)
+	return &out, err
+}
+
+// StudioImpact returns the full change-impact detail for the latest version.
+func (c *Client) StudioImpact(ctx context.Context, namespace string) (*ImpactReport, error) {
+	var out ImpactReport
+	err := c.do(ctx, http.MethodGet, "/studio/impact?namespace="+url.QueryEscape(namespace), "", nil, &out)
 	return &out, err
 }
 
@@ -642,6 +660,26 @@ func (c *Client) GroundingRedact(ctx context.Context, query, principal, purpose 
 	var out GroundingBundle
 	err := c.do(ctx, http.MethodPost, "/grounding/redact", "application/json", body, &out)
 	return &out, err
+}
+
+func (c *Client) doText(ctx context.Context, method, path string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, method, c.baseURL+path, nil)
+	if err != nil {
+		return "", err
+	}
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode >= 300 {
+		return "", fmt.Errorf("gnosivela: %s %s -> %d: %s", method, path, resp.StatusCode, strings.TrimSpace(string(data)))
+	}
+	return string(data), nil
 }
 
 func (c *Client) do(ctx context.Context, method, path, contentType string, body []byte, out any) error {

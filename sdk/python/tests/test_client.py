@@ -21,6 +21,14 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _reply_text(self, text, status=200, content_type="text/turtle"):
+        body = text.encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
         if self.path == "/ontologies/acme/latest":
             self._reply({"namespace": "acme", "version": "1.2", "status": "published"})
@@ -38,8 +46,13 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
             self._reply({"id": "procurement.supplier@1.2", "signature": "a" * 64, "concepts": []})
         elif self.path == "/metrics/definitions":
             self._reply({"definitions": [{"id": "m:1", "formula": "sum(x)"}]})
+        elif self.path.startswith("/interop/shacl/"):
+            self._reply_text('@prefix sh: <http://www.w3.org/ns/shacl#> .\nex:SupplierShape a sh:NodeShape .\n')
         elif self.path == "/connectors":
             self._reply({"connectors": [{"kind": "api"}, {"kind": "streaming"}]})
+        elif self.path.startswith("/studio/impact"):
+            self._reply({"namespace": "acme", "fromVersion": "1.0", "toVersion": "1.1",
+                         "additive": [{"kind": "added", "type": "concept", "id": "Contract"}], "blocking": False})
         elif self.path.startswith("/studio/model"):
             self._reply({"namespace": "acme", "version": "1.2", "status": "published",
                          "concepts": [{"id": "Supplier", "assertionCount": 2}],
@@ -166,6 +179,18 @@ class TestClient(unittest.TestCase):
         model = c.studio_model("acme")
         self.assertEqual(model["namespace"], "acme")
         self.assertEqual(model["concepts"][0]["assertionCount"], 2)
+
+    def test_studio_impact(self):
+        c = Client(self.base)
+        report = c.studio_impact("acme")
+        self.assertEqual(report["fromVersion"], "1.0")
+        self.assertFalse(report["blocking"])
+        self.assertEqual(report["additive"][0]["id"], "Contract")
+
+    def test_shacl_export(self):
+        c = Client(self.base)
+        text = c.shacl_export("acme", "1.2")
+        self.assertIn("ex:SupplierShape", text)
 
     def test_connectors(self):
         c = Client(self.base)

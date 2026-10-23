@@ -229,6 +229,50 @@ func TestStudioModel(t *testing.T) {
 	}
 }
 
+func TestShaclExport(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/interop/shacl/acme" {
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+		if r.URL.Query().Get("version") != "1.2" {
+			http.Error(w, "version", http.StatusBadRequest)
+			return
+		}
+		w.Header().Set("Content-Type", "text/turtle")
+		_, _ = w.Write([]byte("@prefix sh: <http://www.w3.org/ns/shacl#> .\nex:SupplierShape a sh:NodeShape .\n"))
+	}))
+	defer ts.Close()
+	out, err := New(ts.URL).ShaclExport(context.Background(), "acme", "1.2")
+	if err != nil {
+		t.Fatalf("shacl export: %v", err)
+	}
+	if !strings.Contains(out, "ex:SupplierShape") {
+		t.Errorf("output = %q", out)
+	}
+}
+
+func TestStudioImpact(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/studio/impact" {
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+		writeJSON(w, http.StatusOK, ImpactReport{
+			Namespace: "acme", FromVersion: "1.0", ToVersion: "1.1",
+			Additive: []Change{{Kind: "added", Type: "concept", ID: "Contract"}},
+		})
+	}))
+	defer ts.Close()
+	report, err := New(ts.URL).StudioImpact(context.Background(), "acme")
+	if err != nil {
+		t.Fatalf("studio impact: %v", err)
+	}
+	if report.FromVersion != "1.0" || len(report.Additive) != 1 {
+		t.Errorf("report = %+v", report)
+	}
+}
+
 func TestConnectorMethods(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
