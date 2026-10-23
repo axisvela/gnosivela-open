@@ -4,6 +4,13 @@ All notable changes to GNOSIVELA-open (SDKs, examples, API contract) are
 documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 
+## [1.4.1] - 2026-10-23
+
+### Changed
+
+- Version aligned with GNOSIVELA Core v1.4.1 (Salesforce connector moved to
+  EE). No SDK API changes.
+
 ## [1.4.0] - 2026-10-23
 
 ### Changed
