@@ -655,8 +655,11 @@ type ActionDefinition struct {
 	TimeoutSeconds   int               `json:"timeoutSeconds,omitempty"`
 	RequiresApproval bool              `json:"requiresApproval,omitempty"`
 	ApprovalAction   string            `json:"approvalAction,omitempty"`
-	AllowPrivate     bool              `json:"allowPrivate,omitempty"`
-	Enabled          *bool             `json:"enabled,omitempty"`
+	AllowPrivate      bool              `json:"allowPrivate,omitempty"`
+	Enabled           *bool             `json:"enabled,omitempty"`
+	Schedule          string            `json:"schedule,omitempty"`
+	SchedulePrincipal string            `json:"schedulePrincipal,omitempty"`
+	ScheduleInput     any               `json:"scheduleInput,omitempty"`
 }
 
 // ActionRunRequest is the input of an action invocation.
