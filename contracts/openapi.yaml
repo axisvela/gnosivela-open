@@ -1979,6 +1979,9 @@ components:
         approvalAction: { type: string, description: "default action.run" }
         allowPrivate: { type: boolean }
         enabled: { type: boolean }
+        schedule: { type: string, description: "Go duration (e.g. 5m); empty = manual only" }
+        schedulePrincipal: { type: string, description: "Principal for scheduled runs (default system)" }
+        scheduleInput: { description: "JSON payload for scheduled runs" }
       required: [id, kind, url]
     ActionRunRequest:
       type: object
