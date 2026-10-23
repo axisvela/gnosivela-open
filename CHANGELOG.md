@@ -23,6 +23,8 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
   `GET /studio/model` and `GET /studio/impact` endpoints, including an optional
   change-impact summary for unpublished versions.
 - `ShaclExport` in all four SDKs, backed by `GET /interop/shacl/{namespace}`.
+- `SparqlQuery` in all four SDKs, backed by the read-only `POST /sparql`
+  endpoint (SPARQL 1.1 subset).
 - Action methods (`Actions`, `ActionRegister`, `ActionRun`, `ActionRuns`) in all
   four SDKs, backed by the governed webhook runtime (`/actions*`). Action
   definitions accept `schedule`, `schedulePrincipal` and `scheduleInput`.

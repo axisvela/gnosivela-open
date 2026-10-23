@@ -33,6 +33,7 @@ GNOSIVELA's answer: define semantic objects first (Ontology / Assertion / Identi
 | Connector Hub | Schema-first introspection (`relational` / `catalog` / `api` / `streaming` / `objectstore` / `warehouse`) and markdown/text/HTML document binding without copying data |
 | Ontology Studio | Read-only model/lineage/usage and change-impact view (`GET /studio`, `/studio/model`, `/studio/impact`) |
 | SHACL Export | Deterministic Turtle NodeShapes/PropertyShapes from ontology concepts, properties and relations (`GET /interop/shacl/{namespace}`) |
+| SPARQL | Read-only SPARQL 1.1 subset (SELECT/BGP/FILTER/PREFIX/LIMIT) over assertions (`GET/POST /sparql`) |
 | Action Runtime | Governed webhook actions with approval binding, SSRF guard and full audit (`/actions*`) |
 | Grounding (Phase 1 in progress) | Purpose-scoped Bundle assembly: intent + assertions + evidence + policy + conflict/gap |
 

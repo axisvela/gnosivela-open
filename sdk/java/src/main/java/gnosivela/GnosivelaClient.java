@@ -154,6 +154,10 @@ public final class GnosivelaClient {
         return get("/actions/runs");
     }
 
+    public String sparqlQuery(String query) {
+        return post("/sparql", "{\"query\":\"" + escape(query) + "\"}");
+    }
+
     public String shaclExport(String namespace) {
         return get("/interop/shacl/" + enc(namespace));
     }

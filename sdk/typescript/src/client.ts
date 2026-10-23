@@ -131,6 +131,9 @@ export class Client {
   studioImpact(namespace: string): Promise<Record<string, unknown>> {
     return this.request("GET", `/studio/impact?namespace=${encodeURIComponent(namespace)}`);
   }
+  sparqlQuery(query: string): Promise<Record<string, unknown>> {
+    return this.request("POST", "/sparql", { query });
+  }
   shaclExport(namespace: string, version = ""): Promise<string> {
     const suffix = version ? `?version=${encodeURIComponent(version)}` : "";
     return this.requestText("GET", `/interop/shacl/${encodeURIComponent(namespace)}${suffix}`);

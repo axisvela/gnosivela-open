@@ -275,6 +275,35 @@ func TestActionMethods(t *testing.T) {
 	}
 }
 
+func TestSparqlQuery(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost || r.URL.Path != "/sparql" {
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+		var body struct {
+			Query string `json:"query"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{
+			"head":    map[string]any{"vars": []string{"s"}},
+			"results": map[string]any{"bindings": []any{map[string]any{"s": map[string]any{"type": "uri", "value": "https://example/C-1"}}}},
+		})
+	}))
+	defer ts.Close()
+	out, err := New(ts.URL).SparqlQuery(context.Background(), `SELECT ?s WHERE { ?s ?p ?o }`)
+	if err != nil {
+		t.Fatalf("sparql: %v", err)
+	}
+	head, _ := out["head"].(map[string]any)
+	if head == nil {
+		t.Fatalf("result = %+v", out)
+	}
+}
+
 func TestShaclExport(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet || r.URL.Path != "/interop/shacl/acme" {

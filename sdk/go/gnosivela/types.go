@@ -646,15 +646,15 @@ type SemanticResult struct {
 
 // ActionDefinition declares a governed action (webhook runtime).
 type ActionDefinition struct {
-	ID               string            `json:"id"`
-	Name             string            `json:"name,omitempty"`
-	Kind             string            `json:"kind"`
-	URL              string            `json:"url"`
-	Method           string            `json:"method,omitempty"`
-	Headers          map[string]string `json:"headers,omitempty"`
-	TimeoutSeconds   int               `json:"timeoutSeconds,omitempty"`
-	RequiresApproval bool              `json:"requiresApproval,omitempty"`
-	ApprovalAction   string            `json:"approvalAction,omitempty"`
+	ID                string            `json:"id"`
+	Name              string            `json:"name,omitempty"`
+	Kind              string            `json:"kind"`
+	URL               string            `json:"url"`
+	Method            string            `json:"method,omitempty"`
+	Headers           map[string]string `json:"headers,omitempty"`
+	TimeoutSeconds    int               `json:"timeoutSeconds,omitempty"`
+	RequiresApproval  bool              `json:"requiresApproval,omitempty"`
+	ApprovalAction    string            `json:"approvalAction,omitempty"`
 	AllowPrivate      bool              `json:"allowPrivate,omitempty"`
 	Enabled           *bool             `json:"enabled,omitempty"`
 	Schedule          string            `json:"schedule,omitempty"`

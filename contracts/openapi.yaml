@@ -519,6 +519,41 @@ paths:
                   runs:
                     type: array
                     items: { $ref: '#/components/schemas/ActionRun' }
+  /sparql:
+    get:
+      summary: Read-only SPARQL 1.1 subset (SELECT)
+      description: Supports basic graph patterns, simple FILTER (= / !=), PREFIX, LIMIT and OFFSET over assertions and rdf:type triples. Unsupported syntax is rejected with 400.
+      tags: [interop]
+      parameters:
+        - { name: query, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          content:
+            application/sparql-results+json:
+              schema: { $ref: '#/components/schemas/SparqlResult' }
+        '400': { description: Query missing or unsupported }
+    post:
+      summary: Read-only SPARQL 1.1 subset (SELECT) via body
+      tags: [interop]
+      requestBody:
+        required: true
+        content:
+          application/sparql-query:
+            schema: { type: string }
+          text/plain:
+            schema: { type: string }
+          application/json:
+            schema:
+              type: object
+              properties:
+                query: { type: string }
+              required: [query]
+      responses:
+        '200':
+          content:
+            application/sparql-results+json:
+              schema: { $ref: '#/components/schemas/SparqlResult' }
+        '400': { description: Query missing or unsupported }
   /interop/shacl/{namespace}:
     get:
       summary: Export an ontology as SHACL Shapes (Turtle)
@@ -2006,3 +2041,28 @@ components:
         finishedAt: { type: string, format: date-time }
         durationMillis: { type: integer }
       required: [id, actionId, status]
+    SparqlTerm:
+      type: object
+      properties:
+        type: { type: string, enum: [uri, literal, bnode] }
+        value: { type: string }
+        datatype: { type: string }
+      required: [type, value]
+    SparqlResult:
+      type: object
+      properties:
+        head:
+          type: object
+          properties:
+            vars: { type: array, items: { type: string } }
+          required: [vars]
+        results:
+          type: object
+          properties:
+            bindings:
+              type: array
+              items:
+                type: object
+                additionalProperties: { $ref: '#/components/schemas/SparqlTerm' }
+          required: [bindings]
+      required: [head, results]
