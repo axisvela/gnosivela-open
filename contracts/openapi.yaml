@@ -2040,6 +2040,7 @@ components:
         startedAt: { type: string, format: date-time }
         finishedAt: { type: string, format: date-time }
         durationMillis: { type: integer }
+        storeError: { type: string, description: "Set when durable run persistence failed" }
       required: [id, actionId, status]
     SparqlTerm:
       type: object
