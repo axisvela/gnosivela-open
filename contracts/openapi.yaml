@@ -1799,7 +1799,7 @@ components:
     ConnectorInfo:
       type: object
       properties:
-        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake] }
+        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake, iceberg] }
         description: { type: string }
       required: [kind]
     ConnectorSpec:
@@ -1816,7 +1816,7 @@ components:
     ConnectorIntrospect:
       type: object
       properties:
-        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake] }
+        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse, snowflake, iceberg] }
         spec: { $ref: '#/components/schemas/ConnectorSpec' }
       required: [kind, spec]
     SourceField:
