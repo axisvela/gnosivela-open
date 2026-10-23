@@ -122,6 +122,25 @@ class Client:
     def semantic_query(self, query: str, principal: str = "", purpose: str = "") -> Dict[str, Any]:
         return self._request("POST", "/query/semantic", {"query": query, "principal": principal, "purpose": purpose})
 
+    def hybrid_query(self, query: str, limit: int = 10, weights: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
+        return self._request("POST", "/query/hybrid", {"query": query, "limit": limit, "weights": weights or {}})
+
+    def studio_model(self, namespace: str) -> Dict[str, Any]:
+        return self._request("GET", "/studio/model?namespace=" + urllib.parse.quote(namespace))
+
+    def connectors(self) -> Dict[str, Any]:
+        return self._request("GET", "/connectors")
+
+    def connector_introspect(self, kind: str, spec: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request("POST", "/connectors/introspect", {"kind": kind, "spec": spec})
+
+    def connector_bind_document(self, doc_id: str, content: str, uri: str = "", version: str = "",
+                                content_type: str = "markdown", extract_claims: bool = False) -> Dict[str, Any]:
+        return self._request("POST", "/connectors/documents", {
+            "docId": doc_id, "content": content, "uri": uri,
+            "version": version, "contentType": content_type, "extractClaims": extract_claims,
+        })
+
     def path_query(self, frm: str, to: str) -> Dict[str, Any]:
         return self._request("POST", "/query/path", {"from": frm, "to": to})
 

@@ -334,6 +334,39 @@ func (c *Client) FederationDomainAdd(ctx context.Context, name, baseURL string) 
 	return c.do(ctx, http.MethodPost, "/federation/domains", "application/json", body, nil)
 }
 
+// StudioModel returns the read-only Studio model for one ontology namespace.
+func (c *Client) StudioModel(ctx context.Context, namespace string) (*StudioModel, error) {
+	var out StudioModel
+	err := c.do(ctx, http.MethodGet, "/studio/model?namespace="+url.QueryEscape(namespace), "", nil, &out)
+	return &out, err
+}
+
+// Connectors lists registered semantic source connectors.
+func (c *Client) Connectors(ctx context.Context) ([]ConnectorInfo, error) {
+	var out struct {
+		Connectors []ConnectorInfo `json:"connectors"`
+	}
+	err := c.do(ctx, http.MethodGet, "/connectors", "", nil, &out)
+	return out.Connectors, err
+}
+
+// ConnectorIntrospect reads an external source schema without copying data.
+func (c *Client) ConnectorIntrospect(ctx context.Context, kind string, spec ConnectorSpec) (*SourceSchema, error) {
+	body, _ := json.Marshal(ConnectorIntrospectRequest{Kind: kind, Spec: spec})
+	var out SourceSchema
+	err := c.do(ctx, http.MethodPost, "/connectors/introspect", "application/json", body, &out)
+	return &out, err
+}
+
+// ConnectorBindDocument binds a markdown document into citation-preserving
+// chunks (and optional claim candidates).
+func (c *Client) ConnectorBindDocument(ctx context.Context, req DocumentBindingRequest) (*DocumentBinding, error) {
+	body, _ := json.Marshal(req)
+	var out DocumentBinding
+	err := c.do(ctx, http.MethodPost, "/connectors/documents", "application/json", body, &out)
+	return &out, err
+}
+
 // BridgeContractExport fetches the signed semantic contract of the latest
 // published ontology version of a namespace.
 func (c *Client) BridgeContractExport(ctx context.Context, namespace string) (*BridgeContract, error) {
@@ -424,7 +457,7 @@ func (c *Client) IncidentRuleAdd(ctx context.Context, rule IncidentRule) error {
 // returns the incidents opened on the failing edge.
 func (c *Client) IncidentCheck(ctx context.Context) ([]*Incident, *QualityReport, error) {
 	var out struct {
-		Opened  []*Incident   `json:"opened"`
+		Opened  []*Incident    `json:"opened"`
 		Quality *QualityReport `json:"quality"`
 	}
 	err := c.do(ctx, http.MethodPost, "/incidents/check", "", nil, &out)
@@ -551,6 +584,17 @@ func (c *Client) SemanticQuery(ctx context.Context, query, principal, purpose st
 	})
 	var out SemanticResult
 	err := c.do(ctx, http.MethodPost, "/query/semantic", "application/json", body, &out)
+	return &out, err
+}
+
+// HybridQuery runs hybrid lexical/vector/graph retrieval fused with RRF.
+// A nil weights selects the server defaults.
+func (c *Client) HybridQuery(ctx context.Context, query string, limit int, weights *HybridWeights) (*HybridResult, error) {
+	body, _ := json.Marshal(map[string]any{
+		"query": query, "limit": limit, "weights": weights,
+	})
+	var out HybridResult
+	err := c.do(ctx, http.MethodPost, "/query/hybrid", "application/json", body, &out)
 	return &out, err
 }
 

@@ -38,6 +38,12 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
             self._reply({"id": "procurement.supplier@1.2", "signature": "a" * 64, "concepts": []})
         elif self.path == "/metrics/definitions":
             self._reply({"definitions": [{"id": "m:1", "formula": "sum(x)"}]})
+        elif self.path == "/connectors":
+            self._reply({"connectors": [{"kind": "api"}, {"kind": "streaming"}]})
+        elif self.path.startswith("/studio/model"):
+            self._reply({"namespace": "acme", "version": "1.2", "status": "published",
+                         "concepts": [{"id": "Supplier", "assertionCount": 2}],
+                         "relations": [], "sources": [{"source": "erp", "count": 2}]})
         else:
             self._reply({"error": "not found"}, 404)
 
@@ -58,6 +64,14 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
             self._reply({"assertions": [{"assertionId": "ev:e-1:p"}], "resolved": ["ev:e-1:p"], "gaps": []}, 201)
         elif self.path == "/policy/evaluate":
             self._reply({"allowed": True, "reason": "open default"})
+        elif self.path == "/query/hybrid":
+            self._reply({
+                "query": body.get("query"),
+                "provider": "hashing/256",
+                "fusion": "rrf",
+                "hits": [{"id": "ka:risk-1", "kind": "assertion", "score": 0.5, "lexicalRank": 1}],
+                "lexicalCandidates": 1,
+            })
         elif self.path == "/federation/query":
             self._reply({"query": body.get("query"), "domainsQueried": 1, "domainHits": {"local": 1}})
         elif self.path == "/quality":
@@ -73,6 +87,11 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
                 self._reply({"id": "m:1", "formula": "sum(x)"}, 201)
             else:
                 self._reply({"definitions": [{"id": "m:1", "formula": "sum(x)"}]})
+        elif self.path == "/connectors/introspect":
+            self._reply({"kind": body.get("kind"), "connector": body.get("kind"), "fields": [{"name": "eventId", "dataType": "string", "required": True}]})
+        elif self.path == "/connectors/documents":
+            self._reply({"id": "doc:" + body.get("docId", ""), "docId": body.get("docId"), "bindingState": "bound",
+                         "chunks": [{"id": "c1", "docId": body.get("docId"), "content": body.get("content"), "locator": "p#c"}]}, 201)
         else:
             self._reply({"error": "not found"}, 404)
 
@@ -135,6 +154,29 @@ class TestClient(unittest.TestCase):
         c = Client(self.base)
         view = c.federation_query("ACME", "auditor", "review")
         self.assertEqual(view["domainsQueried"], 1)
+
+    def test_hybrid_query(self):
+        c = Client(self.base)
+        result = c.hybrid_query("supplier risk", limit=5, weights={"lexical": 1, "vector": 1, "graph": 0.5})
+        self.assertEqual(result["fusion"], "rrf")
+        self.assertEqual(result["hits"][0]["id"], "ka:risk-1")
+
+    def test_studio_model(self):
+        c = Client(self.base)
+        model = c.studio_model("acme")
+        self.assertEqual(model["namespace"], "acme")
+        self.assertEqual(model["concepts"][0]["assertionCount"], 2)
+
+    def test_connectors(self):
+        c = Client(self.base)
+        kinds = [x["kind"] for x in c.connectors()["connectors"]]
+        self.assertIn("streaming", kinds)
+        schema = c.connector_introspect("streaming", {"options": {"inlineSchema": "{}"}})
+        self.assertEqual(schema["kind"], "streaming")
+        self.assertEqual(schema["fields"][0]["name"], "eventId")
+        binding = c.connector_bind_document("p1", "Suppliers must be reviewed.", extract_claims=True)
+        self.assertEqual(binding["docId"], "p1")
+        self.assertEqual(len(binding["chunks"]), 1)
 
     def test_operations_endpoints(self):
         c = Client(self.base)

@@ -72,6 +72,21 @@ test.before(async () => {
     if (req.method === "POST" && path === "/grounding/explain") {
       return send({ intent: { query: "x" }, citations: [] });
     }
+    if (req.method === "POST" && path === "/query/hybrid") {
+      return send({ query: "supplier risk", provider: "hashing/256", fusion: "rrf", hits: [{ id: "ka:risk-1", score: 0.5 }] });
+    }
+    if (req.method === "GET" && path === "/connectors") {
+      return send({ connectors: [{ kind: "api" }, { kind: "streaming" }] });
+    }
+    if (req.method === "GET" && path === "/studio/model") {
+      return send({ namespace: "acme", version: "1.2", status: "published", concepts: [{ id: "Supplier", assertionCount: 2 }], relations: [] });
+    }
+    if (req.method === "POST" && path === "/connectors/introspect") {
+      return send({ kind: "streaming", connector: "streaming", fields: [{ name: "eventId", dataType: "string", required: true }] });
+    }
+    if (req.method === "POST" && path === "/connectors/documents") {
+      return send({ id: "doc:p1", docId: "p1", bindingState: "bound", chunks: [{ id: "c1", docId: "p1", locator: "p#c" }] }, 201);
+    }
     return send({ error: "not found" }, 404);
   });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -126,6 +141,30 @@ test("operations endpoints", async () => {
   await c.metricDefinitionRegister({ id: "m:1", formula: "sum(x)" });
   const defs = await c.metricDefinitions();
   assert.equal(defs.definitions[0].id, "m:1");
+});
+
+test("hybrid query", async () => {
+  const c = new Client(base);
+  const res = await c.hybridQuery("supplier risk", 5, { lexical: 1, vector: 1, graph: 0.5 });
+  assert.equal(res.fusion, "rrf");
+  assert.equal((res.hits as Array<Record<string, unknown>>)[0].id, "ka:risk-1");
+});
+
+test("studio model", async () => {
+  const c = new Client(base);
+  const model = await c.studioModel("acme");
+  assert.equal(model.namespace, "acme");
+  assert.equal((model.concepts as Array<Record<string, unknown>>)[0].assertionCount, 2);
+});
+
+test("connectors", async () => {
+  const c = new Client(base);
+  const list = await c.connectors();
+  assert.equal(list.connectors.length, 2);
+  const schema = await c.connectorIntrospect("streaming", { options: { inlineSchema: "{}" } });
+  assert.equal(schema.kind, "streaming");
+  const binding = await c.connectorBindDocument("p1", "Suppliers must be reviewed.", "", "", true);
+  assert.equal(binding.docId, "p1");
 });
 
 test("error surfaces status", async () => {

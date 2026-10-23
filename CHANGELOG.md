@@ -4,6 +4,24 @@ All notable changes to GNOSIVELA-open (SDKs, examples, API contract) are
 documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 
+## [Unreleased]
+
+### Added
+
+- `HybridQuery` in the Go / Python / TypeScript / Java SDKs, backed by Core's
+  new `POST /query/hybrid` endpoint (BM25 + vector + graph, RRF fusion).
+- OpenAPI contract updated with `/query/hybrid` and `/mcp` (Model Context
+  Protocol JSON-RPC endpoint), plus `HybridWeights` / `HybridHit` /
+  `HybridResult` / `MCPRequest` / `MCPResponse` schemas.
+- Connector methods (`Connectors`, `ConnectorIntrospect`,
+  `ConnectorBindDocument`) in all four SDKs, backed by `/connectors`,
+  `/connectors/introspect` and `/connectors/documents`. Introspection covers
+  relational, catalog, OpenAPI/JSON Schema, Schema Registry (Avro), S3 object
+  stores and Databricks Unity Catalog. Document binding accepts markdown,
+  plain text or HTML via `contentType`.
+- `StudioModel` in all four SDKs, backed by the read-only `GET /studio/model`
+  endpoint.
+
 ## [1.0.0] — 2026-08-21
 
 General availability SDK baseline, aligned with the Core 1.0.0 GA release.

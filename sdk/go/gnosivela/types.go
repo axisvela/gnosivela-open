@@ -484,12 +484,12 @@ type QualityReport struct {
 
 // IncidentRule is an SLO threshold over a quality metric.
 type IncidentRule struct {
-	ID       string  `json:"id"`
-	Metric   string  `json:"metric"`
-	Operator string  `json:"operator"` // >= | > | <= | < | ==
+	ID        string  `json:"id"`
+	Metric    string  `json:"metric"`
+	Operator  string  `json:"operator"` // >= | > | <= | < | ==
 	Threshold float64 `json:"threshold"`
-	Severity string  `json:"severity"`
-	Message  string  `json:"message,omitempty"`
+	Severity  string  `json:"severity"`
+	Message   string  `json:"message,omitempty"`
 }
 
 // Incident is one open or resolved SLO violation.
@@ -642,6 +642,177 @@ type SemanticResult struct {
 	Paths          []*Path             `json:"paths,omitempty"`
 	EvidenceChains []EvidenceChain     `json:"evidenceChains,omitempty"`
 	Metrics        []*MetricDefinition `json:"metrics,omitempty"`
+}
+
+// ConnectorInfo describes a registered source connector.
+type ConnectorInfo struct {
+	Kind        string `json:"kind"`
+	Description string `json:"description,omitempty"`
+}
+
+// ConnectorSpec parameterizes a source introspection.
+type ConnectorSpec struct {
+	ID      string            `json:"id,omitempty"`
+	Driver  string            `json:"driver,omitempty"`
+	DSN     string            `json:"dsn,omitempty"`
+	Name    string            `json:"name,omitempty"`
+	Options map[string]string `json:"options,omitempty"`
+}
+
+// ConnectorIntrospectRequest is the input of /connectors/introspect.
+type ConnectorIntrospectRequest struct {
+	Kind string        `json:"kind"`
+	Spec ConnectorSpec `json:"spec"`
+}
+
+// SourceField describes one column/field of an external source schema.
+type SourceField struct {
+	Name       string `json:"name"`
+	DataType   string `json:"dataType"`
+	Required   bool   `json:"required,omitempty"`
+	PrimaryKey bool   `json:"primaryKey,omitempty"`
+}
+
+// SourceSchema describes an external data structure (semantic binding point).
+type SourceSchema struct {
+	ID          string        `json:"id"`
+	Kind        string        `json:"kind"`
+	Name        string        `json:"name"`
+	Namespace   string        `json:"namespace,omitempty"`
+	Fields      []SourceField `json:"fields"`
+	Connector   string        `json:"connector"`
+	RetrievedAt time.Time     `json:"retrievedAt"`
+}
+
+// DocumentBindingRequest is the input of /connectors/documents.
+type DocumentBindingRequest struct {
+	DocID         string `json:"docId"`
+	URI           string `json:"uri,omitempty"`
+	Version       string `json:"version,omitempty"`
+	ContentType   string `json:"contentType,omitempty"`
+	Content       string `json:"content"`
+	ExtractClaims bool   `json:"extractClaims,omitempty"`
+}
+
+// DocumentChunk is a citation-preserving fragment of a bound document.
+type DocumentChunk struct {
+	ID      string `json:"id"`
+	DocID   string `json:"docId"`
+	Heading string `json:"heading,omitempty"`
+	Content string `json:"content"`
+	Order   int    `json:"order"`
+	Locator string `json:"locator"`
+}
+
+// ClaimCandidate is a candidate knowledge claim extracted from a document.
+type ClaimCandidate struct {
+	ID          string       `json:"id"`
+	ChunkID     string       `json:"chunkId"`
+	Text        string       `json:"text"`
+	Predicate   string       `json:"predicate,omitempty"`
+	SubjectHint string       `json:"subjectHint,omitempty"`
+	Status      string       `json:"status"`
+	Confidence  float64      `json:"confidence,omitempty"`
+	Evidence    *EvidenceRef `json:"evidence,omitempty"`
+}
+
+// DocumentBinding binds a document to chunks and extracted candidates without
+// copying the source document into the control plane.
+type DocumentBinding struct {
+	ID           string           `json:"id"`
+	DocID        string           `json:"docId"`
+	URI          string           `json:"uri,omitempty"`
+	Version      string           `json:"version,omitempty"`
+	CapturedAt   time.Time        `json:"capturedAt"`
+	Chunks       []DocumentChunk  `json:"chunks,omitempty"`
+	Candidates   []ClaimCandidate `json:"candidates,omitempty"`
+	BindingState string           `json:"bindingState"`
+}
+
+// StudioProperty is one concept property in the read-only Studio model.
+type StudioProperty struct {
+	Name        string `json:"name"`
+	DataType    string `json:"dataType"`
+	Unit        string `json:"unit,omitempty"`
+	Required    bool   `json:"required,omitempty"`
+	Cardinality string `json:"cardinality,omitempty"`
+}
+
+// StudioConcept is one concept with usage counts.
+type StudioConcept struct {
+	ID             string           `json:"id"`
+	Label          string           `json:"label,omitempty"`
+	Definition     string           `json:"definition,omitempty"`
+	Scope          string           `json:"scope,omitempty"`
+	Owner          string           `json:"owner,omitempty"`
+	DeprecatedBy   string           `json:"deprecatedBy,omitempty"`
+	Properties     []StudioProperty `json:"properties,omitempty"`
+	AssertionCount int              `json:"assertionCount"`
+	EntityCount    int              `json:"entityCount"`
+}
+
+// StudioRelation is one declared relation type.
+type StudioRelation struct {
+	ID          string `json:"id"`
+	Domain      string `json:"domain,omitempty"`
+	Range       string `json:"range,omitempty"`
+	Cardinality string `json:"cardinality,omitempty"`
+}
+
+// StudioSource is one assertion source with its contribution count.
+type StudioSource struct {
+	Source string `json:"source"`
+	Count  int    `json:"count"`
+}
+
+// StudioModel is the read-only Studio view of one ontology namespace.
+type StudioModel struct {
+	Namespace      string           `json:"namespace"`
+	Version        string           `json:"version"`
+	Status         string           `json:"status"`
+	Published      string           `json:"publishedVersion,omitempty"`
+	Owner          string           `json:"owner,omitempty"`
+	Concepts       []StudioConcept  `json:"concepts"`
+	Relations      []StudioRelation `json:"relations"`
+	Dependencies   []string         `json:"dependencies,omitempty"`
+	AssertionCount int              `json:"assertionCount"`
+	EntityCount    int              `json:"entityCount"`
+	StatusCounts   map[string]int   `json:"statusCounts,omitempty"`
+	Sources        []StudioSource   `json:"sources,omitempty"`
+}
+
+// HybridWeights configures the fusion contribution of each retrieval mode.
+type HybridWeights struct {
+	Lexical float64 `json:"lexical,omitempty"`
+	Vector  float64 `json:"vector,omitempty"`
+	Graph   float64 `json:"graph,omitempty"`
+}
+
+// HybridHit is one ranked retrieval candidate with component scores.
+type HybridHit struct {
+	ID          string            `json:"id"`
+	Kind        string            `json:"kind,omitempty"`
+	Text        string            `json:"text,omitempty"`
+	Fields      map[string]string `json:"fields,omitempty"`
+	Score       float64           `json:"score"`
+	Lexical     float64           `json:"lexicalScore,omitempty"`
+	Vector      float64           `json:"vectorScore,omitempty"`
+	Graph       float64           `json:"graphScore,omitempty"`
+	LexicalRank int               `json:"lexicalRank,omitempty"`
+	VectorRank  int               `json:"vectorRank,omitempty"`
+	GraphRank   int               `json:"graphRank,omitempty"`
+}
+
+// HybridResult is the outcome of a hybrid lexical/vector/graph search.
+type HybridResult struct {
+	Query             string        `json:"query"`
+	Provider          string        `json:"provider"`
+	Fusion            string        `json:"fusion"`
+	Weights           HybridWeights `json:"weights"`
+	Hits              []HybridHit   `json:"hits"`
+	LexicalCandidates int           `json:"lexicalCandidates"`
+	VectorCandidates  int           `json:"vectorCandidates"`
+	GraphCandidates   int           `json:"graphCandidates"`
 }
 
 // SemanticContract carries the ontology/mapping versions behind a bundle.

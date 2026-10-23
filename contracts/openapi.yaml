@@ -7,7 +7,7 @@ info:
     contract binds to semantic objects, never to a graph/vector/search vendor.
   version: 0.1.0
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:1836
 tags:
   - name: ontology
   - name: assertion
@@ -392,6 +392,62 @@ paths:
               required: [name, baseUrl]
       responses:
         '201': { description: Registered }
+  /connectors:
+    get:
+      summary: List registered semantic source connectors
+      description: Connectors are semantic binders, not replicators; they read source schemas only and never copy data into the control plane.
+      tags: [connector]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connectors:
+                    type: array
+                    items: { $ref: '#/components/schemas/ConnectorInfo' }
+  /connectors/introspect:
+    post:
+      summary: Introspect an external source into a SourceSchema
+      description: |
+        Supported kinds are `relational`, `catalog`, `api`, `streaming`,
+        `objectstore` and `warehouse`. `api` reads an OpenAPI 3 / JSON Schema
+        document from `spec.options.url` and selects `spec.options.schema`;
+        `streaming` accepts an inline JSON Schema (`spec.options.inlineSchema`)
+        or a Schema Registry subject (`spec.options.subject`);
+        `objectstore` lists an S3-compatible bucket and infers a schema from a
+        sample object; `warehouse` introspects a Databricks Unity Catalog
+        table. Only schemas and metadata are read, never data rows/objects.
+      tags: [connector]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConnectorIntrospect' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SourceSchema' }
+        '404': { description: Unknown connector kind }
+        '422': { description: Introspection failed (invalid schema or upstream error) }
+  /connectors/documents:
+    post:
+      summary: Bind a markdown, text or HTML document into citation-preserving chunks and claim candidates
+      description: The source document is not copied into GNOSIVELA; only chunk locators, bindings and extracted candidates are returned. HTML scripts/styles are dropped and entities decoded.
+      tags: [connector]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentBindingRequest' }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DocumentBinding' }
+        '400': { description: Missing docId or content }
   /bridge/{namespace}/contract:
     get:
       summary: Export the signed semantic contract of the latest published ontology
@@ -459,6 +515,30 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/IngestResult' }
         '404': { description: Event contract not found }
+  /studio:
+    get:
+      summary: Read-only Ontology Studio (self-contained HTML)
+      description: A no-build, no-external-asset page for model, lineage and usage inspection. All writes still go through Registry, Impact and approval gates.
+      tags: [studio]
+      responses:
+        '200':
+          description: Studio HTML page
+          content:
+            text/html:
+              schema: { type: string }
+  /studio/model:
+    get:
+      summary: Read-only Studio model (concepts, relations, lineage, usage counts)
+      tags: [studio]
+      parameters:
+        - { name: namespace, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StudioModel' }
+        '400': { description: Missing namespace }
+        '404': { description: Ontology namespace not found }
   /metrics:
     get:
       summary: Operational counters (queries, publish, ingest, governance)
@@ -771,6 +851,55 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Relation' }
+  /query/hybrid:
+    post:
+      summary: Hybrid retrieval (BM25 + vector + graph, fused with RRF)
+      description: |
+        Produces candidate rankings over current concepts and assertions.
+        Retrieval never merges identities or promotes candidates; grounding and
+        governance remain owned by the semantic query executor. The default
+        embedding provider is deterministic and offline; a hosted provider can
+        replace it through the embedding SPI.
+      tags: [query]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query: { type: string, example: "supplier risk" }
+                limit: { type: integer, default: 10 }
+                seedDepth: { type: integer, default: 10, description: "seeds per mode for graph expansion" }
+                weights: { $ref: '#/components/schemas/HybridWeights' }
+              required: [query]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HybridResult' }
+        '400': { description: Missing or invalid query }
+  /mcp:
+    post:
+      summary: Model Context Protocol endpoint (JSON-RPC 2.0)
+      description: |
+        Stateless MCP server exposing the governed semantic tools `ground`,
+        `cite`, `search`, `hybrid_search` and `resolve_entity`. Supports the
+        `initialize`, `tools/list` and `tools/call` methods. Tool execution
+        errors are returned inside the tool result with `isError: true`.
+      tags: [agent]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MCPRequest' }
+      responses:
+        '200':
+          description: JSON-RPC response
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MCPResponse' }
+        '202': { description: Notification accepted (no response body) }
   /grounding/assemble:
     post:
       summary: Assemble an evidence-backed, purpose-scoped grounding bundle
@@ -1500,3 +1629,227 @@ components:
         gaps: { type: array, items: { type: string } }
         policy: { type: string }
         citationCompleteness: { type: number }
+    HybridWeights:
+      type: object
+      properties:
+        lexical: { type: number, default: 1 }
+        vector: { type: number, default: 1 }
+        graph: { type: number, default: 0.5 }
+    HybridHit:
+      type: object
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [concept, assertion] }
+        text: { type: string }
+        fields:
+          type: object
+          additionalProperties: { type: string }
+        score: { type: number }
+        lexicalScore: { type: number }
+        vectorScore: { type: number }
+        graphScore: { type: number }
+        lexicalRank: { type: integer }
+        vectorRank: { type: integer }
+        graphRank: { type: integer }
+      required: [id, score]
+    HybridResult:
+      type: object
+      properties:
+        query: { type: string }
+        provider: { type: string }
+        fusion: { type: string, enum: [rrf] }
+        weights: { $ref: '#/components/schemas/HybridWeights' }
+        hits:
+          type: array
+          items: { $ref: '#/components/schemas/HybridHit' }
+        lexicalCandidates: { type: integer }
+        vectorCandidates: { type: integer }
+        graphCandidates: { type: integer }
+      required: [query, fusion, hits]
+    MCPRequest:
+      type: object
+      properties:
+        jsonrpc: { type: string, enum: ['2.0'] }
+        id:
+          oneOf:
+            - { type: string }
+            - { type: integer }
+        method: { type: string, example: tools/call }
+        params:
+          type: object
+          additionalProperties: true
+      required: [jsonrpc, method]
+    MCPError:
+      type: object
+      properties:
+        code: { type: integer }
+        message: { type: string }
+        data: {}
+      required: [code, message]
+    MCPResponse:
+      type: object
+      properties:
+        jsonrpc: { type: string, enum: ['2.0'] }
+        id:
+          oneOf:
+            - { type: string }
+            - { type: integer }
+        result:
+          type: object
+          additionalProperties: true
+        error: { $ref: '#/components/schemas/MCPError' }
+      required: [jsonrpc]
+    ConnectorInfo:
+      type: object
+      properties:
+        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse] }
+        description: { type: string }
+      required: [kind]
+    ConnectorSpec:
+      type: object
+      properties:
+        id: { type: string }
+        driver: { type: string, description: "database/sql driver (relational)" }
+        dsn: { type: string }
+        name: { type: string }
+        options:
+          type: object
+          additionalProperties: { type: string }
+          description: "url/schema for api, inlineSchema/schemaName for streaming, table/schema for relational. Private schema URLs require allowPrivate=true (SSRF guard)."
+    ConnectorIntrospect:
+      type: object
+      properties:
+        kind: { type: string, enum: [relational, catalog, api, streaming, objectstore, warehouse] }
+        spec: { $ref: '#/components/schemas/ConnectorSpec' }
+      required: [kind, spec]
+    SourceField:
+      type: object
+      properties:
+        name: { type: string }
+        dataType: { type: string }
+        required: { type: boolean }
+        primaryKey: { type: boolean }
+      required: [name, dataType]
+    SourceSchema:
+      type: object
+      properties:
+        id: { type: string }
+        kind: { type: string }
+        name: { type: string }
+        namespace: { type: string }
+        fields:
+          type: array
+          items: { $ref: '#/components/schemas/SourceField' }
+        connector: { type: string }
+        retrievedAt: { type: string, format: date-time }
+      required: [kind, fields, connector]
+    DocumentBindingRequest:
+      type: object
+      properties:
+        docId: { type: string }
+        uri: { type: string }
+        version: { type: string }
+        contentType: { type: string, enum: [markdown, text, html], description: "Content format; default markdown" }
+        content: { type: string }
+        extractClaims: { type: boolean }
+      required: [docId, content]
+    DocumentChunk:
+      type: object
+      properties:
+        id: { type: string }
+        docId: { type: string }
+        heading: { type: string }
+        content: { type: string }
+        order: { type: integer }
+        locator: { type: string }
+      required: [id, docId, content, locator]
+    ClaimCandidate:
+      type: object
+      properties:
+        id: { type: string }
+        chunkId: { type: string }
+        text: { type: string }
+        predicate: { type: string }
+        subjectHint: { type: string }
+        status: { type: string, enum: [extracted, mapped, validated, published, contested, superseded, revoked] }
+        confidence: { type: number }
+        evidence: { $ref: '#/components/schemas/EvidenceRef' }
+      required: [id, chunkId, text, status]
+    DocumentBinding:
+      type: object
+      properties:
+        id: { type: string }
+        docId: { type: string }
+        uri: { type: string }
+        version: { type: string }
+        capturedAt: { type: string, format: date-time }
+        chunks:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentChunk' }
+        candidates:
+          type: array
+          items: { $ref: '#/components/schemas/ClaimCandidate' }
+        bindingState: { type: string }
+      required: [id, docId, bindingState]
+    StudioProperty:
+      type: object
+      properties:
+        name: { type: string }
+        dataType: { type: string }
+        unit: { type: string }
+        required: { type: boolean }
+        cardinality: { type: string }
+      required: [name, dataType]
+    StudioConcept:
+      type: object
+      properties:
+        id: { type: string }
+        label: { type: string }
+        definition: { type: string }
+        scope: { type: string }
+        owner: { type: string }
+        deprecatedBy: { type: string }
+        properties:
+          type: array
+          items: { $ref: '#/components/schemas/StudioProperty' }
+        assertionCount: { type: integer }
+        entityCount: { type: integer }
+      required: [id]
+    StudioRelation:
+      type: object
+      properties:
+        id: { type: string }
+        domain: { type: string }
+        range: { type: string }
+        cardinality: { type: string }
+      required: [id]
+    StudioSource:
+      type: object
+      properties:
+        source: { type: string }
+        count: { type: integer }
+      required: [source, count]
+    StudioModel:
+      type: object
+      properties:
+        namespace: { type: string }
+        version: { type: string }
+        status: { type: string }
+        publishedVersion: { type: string }
+        owner: { type: string }
+        concepts:
+          type: array
+          items: { $ref: '#/components/schemas/StudioConcept' }
+        relations:
+          type: array
+          items: { $ref: '#/components/schemas/StudioRelation' }
+        dependencies: { type: array, items: { type: string } }
+        assertionCount: { type: integer }
+        entityCount: { type: integer }
+        statusCounts:
+          type: object
+          additionalProperties: { type: integer }
+        sources:
+          type: array
+          items: { $ref: '#/components/schemas/StudioSource' }
+      required: [namespace, version, status, concepts, relations]

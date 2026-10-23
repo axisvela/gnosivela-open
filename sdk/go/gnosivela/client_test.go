@@ -166,6 +166,125 @@ func TestAssertionAndResolve(t *testing.T) {
 	}
 }
 
+func TestHybridQuery(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost || r.URL.Path != "/query/hybrid" {
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+		var body struct {
+			Query   string        `json:"query"`
+			Limit   int           `json:"limit"`
+			Weights HybridWeights `json:"weights"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		writeJSON(w, http.StatusOK, HybridResult{
+			Query: body.Query, Provider: "hashing/256", Fusion: "rrf",
+			Weights: body.Weights,
+			Hits:    []HybridHit{{ID: "ka:risk-1", Kind: "assertion", Score: 0.5, LexicalRank: 1}},
+		})
+	}))
+	defer ts.Close()
+
+	c := New(ts.URL)
+	res, err := c.HybridQuery(context.Background(), "supplier risk", 5, &HybridWeights{Lexical: 1, Vector: 1, Graph: 0.5})
+	if err != nil {
+		t.Fatalf("hybrid query: %v", err)
+	}
+	if res.Fusion != "rrf" || len(res.Hits) != 1 || res.Hits[0].ID != "ka:risk-1" {
+		t.Errorf("result = %+v", res)
+	}
+	if res.Weights.Graph != 0.5 {
+		t.Errorf("weights = %+v", res.Weights)
+	}
+}
+
+func TestStudioModel(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/studio/model" {
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+		if r.URL.Query().Get("namespace") != "acme" {
+			http.Error(w, "bad namespace", http.StatusBadRequest)
+			return
+		}
+		writeJSON(w, http.StatusOK, StudioModel{
+			Namespace: "acme", Version: "1.2", Status: "published",
+			Concepts:  []StudioConcept{{ID: "Supplier", AssertionCount: 2}},
+			Relations: []StudioRelation{{ID: "supplies"}},
+			Sources:   []StudioSource{{Source: "erp", Count: 2}},
+		})
+	}))
+	defer ts.Close()
+	model, err := New(ts.URL).StudioModel(context.Background(), "acme")
+	if err != nil {
+		t.Fatalf("studio model: %v", err)
+	}
+	if model.Namespace != "acme" || len(model.Concepts) != 1 || model.Concepts[0].AssertionCount != 2 {
+		t.Errorf("model = %+v", model)
+	}
+}
+
+func TestConnectorMethods(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/connectors":
+			writeJSON(w, http.StatusOK, map[string]any{"connectors": []ConnectorInfo{{Kind: "api"}, {Kind: "streaming"}}})
+		case r.Method == http.MethodPost && r.URL.Path == "/connectors/introspect":
+			var req ConnectorIntrospectRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			writeJSON(w, http.StatusOK, SourceSchema{
+				Kind: req.Kind, Connector: req.Kind,
+				Fields: []SourceField{{Name: "eventId", DataType: "string", Required: true}},
+			})
+		case r.Method == http.MethodPost && r.URL.Path == "/connectors/documents":
+			var req DocumentBindingRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			writeJSON(w, http.StatusCreated, DocumentBinding{
+				ID: "doc:" + req.DocID, DocID: req.DocID, BindingState: "bound",
+				Chunks: []DocumentChunk{{ID: "c1", DocID: req.DocID, Content: req.Content, Locator: "p#c"}},
+			})
+		default:
+			http.Error(w, "not found", http.StatusNotFound)
+		}
+	}))
+	defer ts.Close()
+
+	ctx := context.Background()
+	c := New(ts.URL)
+	list, err := c.Connectors(ctx)
+	if err != nil {
+		t.Fatalf("connectors: %v", err)
+	}
+	if len(list) != 2 || list[0].Kind != "api" {
+		t.Errorf("connectors = %+v", list)
+	}
+	schema, err := c.ConnectorIntrospect(ctx, "streaming", ConnectorSpec{Options: map[string]string{"inlineSchema": "{}"}})
+	if err != nil {
+		t.Fatalf("introspect: %v", err)
+	}
+	if schema.Kind != "streaming" || len(schema.Fields) != 1 {
+		t.Errorf("schema = %+v", schema)
+	}
+	binding, err := c.ConnectorBindDocument(ctx, DocumentBindingRequest{DocID: "p1", Content: "must review"})
+	if err != nil {
+		t.Fatalf("bind: %v", err)
+	}
+	if binding.ID != "doc:p1" || len(binding.Chunks) != 1 {
+		t.Errorf("binding = %+v", binding)
+	}
+}
+
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

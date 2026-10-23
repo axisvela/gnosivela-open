@@ -114,6 +114,21 @@ export class Client {
   semanticQuery(query: string, principal = "", purpose = ""): Promise<Record<string, unknown>> {
     return this.request("POST", "/query/semantic", { query, principal, purpose });
   }
+  hybridQuery(query: string, limit = 10, weights: Record<string, number> = {}): Promise<Record<string, unknown>> {
+    return this.request("POST", "/query/hybrid", { query, limit, weights });
+  }
+  studioModel(namespace: string): Promise<Record<string, unknown>> {
+    return this.request("GET", `/studio/model?namespace=${encodeURIComponent(namespace)}`);
+  }
+  connectors(): Promise<{ connectors: Array<Record<string, unknown>> }> {
+    return this.request("GET", "/connectors");
+  }
+  connectorIntrospect(kind: string, spec: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.request("POST", "/connectors/introspect", { kind, spec });
+  }
+  connectorBindDocument(docId: string, content: string, uri = "", version = "", extractClaims = false, contentType = "markdown"): Promise<Record<string, unknown>> {
+    return this.request("POST", "/connectors/documents", { docId, content, uri, version, extractClaims, contentType });
+  }
   pathQuery(from: string, to: string): Promise<Record<string, unknown>> {
     return this.request("POST", "/query/path", { from, to });
   }
