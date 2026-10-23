@@ -97,6 +97,9 @@ test.before(async () => {
     if (req.method === "GET" && path === "/actions/runs") {
       return send({ runs: [{ id: "ACT-1", status: "succeeded" }] });
     }
+    if (req.method === "POST" && path === "/sparql") {
+      return send({ head: { vars: ["s"] }, results: { bindings: [{ s: { type: "uri", value: "https://example/C-1" } }] } });
+    }
     if (req.method === "POST" && path === "/actions") {
       return send({ id: "notify", kind: "webhook" }, 201);
     }
@@ -196,6 +199,12 @@ test("actions", async () => {
   assert.equal(run.status, "succeeded");
   const runs = await c.actionRuns();
   assert.equal(runs.runs[0].id, "ACT-1");
+});
+
+test("sparql query", async () => {
+  const c = new Client(base);
+  const result = await c.sparqlQuery("SELECT ?s WHERE { ?s ?p ?o }");
+  assert.deepEqual((result.head as Record<string, unknown>).vars, ["s"]);
 });
 
 test("shacl export", async () => {

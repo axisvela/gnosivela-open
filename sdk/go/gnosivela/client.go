@@ -379,6 +379,15 @@ func (c *Client) ShaclExport(ctx context.Context, namespace, version string) (st
 	return c.doText(ctx, http.MethodGet, path)
 }
 
+// SparqlQuery runs a read-only SPARQL 1.1 subset query and returns the
+// SPARQL JSON result as a decoded map.
+func (c *Client) SparqlQuery(ctx context.Context, query string) (map[string]any, error) {
+	body, _ := json.Marshal(map[string]string{"query": query})
+	var out map[string]any
+	err := c.do(ctx, http.MethodPost, "/sparql", "application/json", body, &out)
+	return out, err
+}
+
 // StudioModel returns the read-only Studio model for one ontology namespace.
 func (c *Client) StudioModel(ctx context.Context, namespace string) (*StudioModel, error) {
 	var out StudioModel

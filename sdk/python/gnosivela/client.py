@@ -139,6 +139,9 @@ class Client:
     def studio_impact(self, namespace: str) -> Dict[str, Any]:
         return self._request("GET", "/studio/impact?namespace=" + urllib.parse.quote(namespace))
 
+    def sparql_query(self, query: str) -> Dict[str, Any]:
+        return self._request("POST", "/sparql", {"query": query})
+
     def shacl_export(self, namespace: str, version: str = "") -> str:
         path = "/interop/shacl/" + urllib.parse.quote(namespace)
         if version:

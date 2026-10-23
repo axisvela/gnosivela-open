@@ -66,6 +66,8 @@ public final class GnosivelaClientTest {
                 body = "{\"namespace\":\"acme\",\"fromVersion\":\"1.0\",\"toVersion\":\"1.1\",\"additive\":[{\"id\":\"Contract\"}],\"blocking\":false}";
             } else if (path.startsWith("/interop/shacl/")) {
                 body = "@prefix sh: <http://www.w3.org/ns/shacl#> .\nex:SupplierShape a sh:NodeShape .\n";
+            } else if ("/sparql".equals(path)) {
+                body = "{\"head\":{\"vars\":[\"s\"]},\"results\":{\"bindings\":[{\"s\":{\"type\":\"uri\",\"value\":\"https://example/C-1\"}}]}}";
             } else if ("/actions".equals(path)) {
                 body = "{\"actions\":[{\"id\":\"notify\",\"kind\":\"webhook\"}]}";
             } else if ("/actions/runs".equals(path)) {
@@ -120,6 +122,7 @@ public final class GnosivelaClientTest {
             check(c.studioModel("acme").contains("\"Supplier\""), "studioModel");
             check(c.studioImpact("acme").contains("\"Contract\""), "studioImpact");
             check(c.shaclExport("acme").contains("ex:SupplierShape"), "shaclExport");
+            check(c.sparqlQuery("SELECT ?s WHERE { ?s ?p ?o }").contains("\"vars\":[\"s\"]"), "sparqlQuery");
             check(c.actions().contains("\"notify\""), "actions");
             check(c.actionRegister("{\"id\":\"notify\",\"kind\":\"webhook\",\"url\":\"https://example.com\"}").contains("notify"), "actionRegister");
             check(c.actionRun("notify", "alice", "", "{\"x\":1}").contains("\"succeeded\""), "actionRun");

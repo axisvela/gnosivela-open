@@ -104,6 +104,8 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
                 self._reply({"id": "m:1", "formula": "sum(x)"}, 201)
             else:
                 self._reply({"definitions": [{"id": "m:1", "formula": "sum(x)"}]})
+        elif self.path == "/sparql":
+            self._reply({"head": {"vars": ["s"]}, "results": {"bindings": [{"s": {"type": "uri", "value": "https://example/C-1"}}]}})
         elif self.path == "/actions":
             self._reply({"id": body.get("id"), "kind": body.get("kind")}, 201)
         elif self.path.startswith("/actions/") and self.path.endswith("/run"):
@@ -205,6 +207,11 @@ class TestClient(unittest.TestCase):
         self.assertEqual(run["status"], "succeeded")
         self.assertEqual(run["principal"], "alice")
         self.assertEqual(c.action_runs()["runs"][0]["id"], "ACT-1")
+
+    def test_sparql_query(self):
+        c = Client(self.base)
+        result = c.sparql_query("SELECT ?s WHERE { ?s ?p ?o }")
+        self.assertEqual(result["head"]["vars"], ["s"])
 
     def test_shacl_export(self):
         c = Client(self.base)
