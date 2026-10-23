@@ -4,7 +4,7 @@
 
 [English](./README.md)
 
-GNOSIVELA 是 AxisRobo 的 **Enterprise Semantic & Knowledge Fabric**：把企业"概念如何定义、实体如何统一引用、关系如何解释、主张如何证据化、冲突如何治理"沉淀为可消费的语义层。本仓库承载对外发行面：**SDK、示例、API 契约、参考 Ontology 与二进制发行**。
+GNOSIVELA 是 AxisVela 的 **Enterprise Semantic & Knowledge Fabric**：把企业"概念如何定义、实体如何统一引用、关系如何解释、主张如何证据化、冲突如何治理"沉淀为可消费的语义层。本仓库承载对外发行面：**SDK、示例、API 契约、参考 Ontology 与二进制发行**。
 
 ## 解决的问题
 

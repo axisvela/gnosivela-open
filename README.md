@@ -4,7 +4,7 @@
 
 [中文文档](./README.zh-CN.md)
 
-GNOSIVELA is AxisRobo's **Enterprise Semantic & Knowledge Fabric**: it turns how an enterprise defines concepts, unifies entity references, interprets relations, evidences claims, and governs conflicts into a consumable semantic layer. This repository is the public distribution surface: **SDKs, examples, API contract, reference ontology, and binary releases**.
+GNOSIVELA is AxisVela's **Enterprise Semantic & Knowledge Fabric**: it turns how an enterprise defines concepts, unifies entity references, interprets relations, evidences claims, and governs conflicts into a consumable semantic layer. This repository is the public distribution surface: **SDKs, examples, API contract, reference ontology, and binary releases**.
 
 ## The problem it solves
 
@@ -31,7 +31,9 @@ GNOSIVELA's answer: define semantic objects first (Ontology / Assertion / Identi
 | Hybrid Retrieval | BM25 + vector + graph recall fused with RRF; component scores/ranks via `POST /query/hybrid` |
 | MCP Server | JSON-RPC 2.0 tools (`ground`, `cite`, `search`, `hybrid_search`, `resolve_entity`) over HTTP or stdio |
 | Connector Hub | Schema-first introspection (`relational` / `catalog` / `api` / `streaming` / `objectstore` / `warehouse`) and markdown/text/HTML document binding without copying data |
-| Ontology Studio | Read-only model/lineage/usage view served as a self-contained page and JSON model (`GET /studio`, `GET /studio/model`) |
+| Ontology Studio | Read-only model/lineage/usage and change-impact view (`GET /studio`, `/studio/model`, `/studio/impact`) |
+| SHACL Export | Deterministic Turtle NodeShapes/PropertyShapes from ontology concepts, properties and relations (`GET /interop/shacl/{namespace}`) |
+| Action Runtime | Governed webhook actions with approval binding, SSRF guard and full audit (`/actions*`) |
 | Grounding (Phase 1 in progress) | Purpose-scoped Bundle assembly: intent + assertions + evidence + policy + conflict/gap |
 
 ## Open Core (three repositories)
@@ -65,7 +67,7 @@ This repository is the community download surface.
 | Artifact | Where |
 | --- | --- |
 | Prebuilt server binaries (linux-amd64 / linux-arm64 / darwin-arm64 / windows-amd64) | [GNOSIVELA Core Releases](https://github.com/axisvela/GNOSIVELA/releases) (attach `gnosivela-*`, `sha256sums.txt`) |
-| Container image | `ghcr.io/axisrobo/GNOSIVELA:<tag>` (tagged on every `v*` release; `latest` on the newest) |
+| Container image | `ghcr.io/axisvela/GNOSIVELA:<tag>` (tagged on every `v*` release; `latest` on the newest) |
 | Go / Python / TypeScript / Java SDKs | this repository (`sdk/`, published to pypi/npm/maven) |
 | API contract | `contracts/openapi.yaml` (this repository) |
 
@@ -74,7 +76,7 @@ This repository is the community download surface.
 ./gnosivela-linux-amd64 -addr :8080
 
 # or via container image
-docker run --rm -p 8080:8080 ghcr.io/axisrobo/GNOSIVELA:1.0.0
+docker run --rm -p 8080:8080 ghcr.io/axisvela/GNOSIVELA:1.0.0
 ```
 
 ## DSL compiler (SDK type generation)
@@ -117,6 +119,20 @@ res, err := c.OntologyCreate(ctx, dslDoc)      // create ontology from DSL
 matches, err := c.EntityResolve(ctx, "ACME")   // resolve an entity
 a, err := c.AssertionPropose(ctx, assertion)   // propose a knowledge claim
 ```
+
+## Agent framework adapters
+
+Dependency-free adapters call the governed control-plane API and never copy
+semantics into the agent framework:
+
+- Python: `gnosivela.integrations.tool_specs` (neutral), plus
+  `langchain_tools` / `llama_index_tools` which return native tools when those
+  packages are installed and neutral specs otherwise.
+- TypeScript: `@axisvela/gnosivela/integrations` exports `toolSpecs`,
+  `openAIToolDefinitions` (function-calling schema) and `toolHandlers`
+  (name → invoke map) for LangChain.js / LlamaIndex wrappers.
+
+Both expose `ground`, `cite`, `search`, `hybrid_search` and `resolve_entity`.
 
 ## API contract
 
