@@ -2,7 +2,7 @@
  * HTTP client for the GNOSIVELA Semantic Control Plane API.
  * Uses the global fetch (Node >= 18 / modern browsers). Never links the core.
  */
-import type { Event, EventContract, KnowledgeAssertion, PolicyRequest, PipelineRequest } from "./types.ts";
+import type { Event, EventContract, GraphQLResponse, KnowledgeAssertion, PolicyRequest, PipelineRequest, ShaclValidationReport } from "./types.ts";
 
 // Re-export the shared contract types from the package entry point so
 // consumers can import them as `import type { EntityRef } from "@axisvela/gnosivela"`.
@@ -19,6 +19,9 @@ export type {
   EventContract,
   EventTemplate,
   Event,
+  ShaclViolation,
+  ShaclValidationReport,
+  GraphQLResponse,
 } from "./types.ts";
 
 export class GnosivelaError extends Error {
@@ -49,6 +52,18 @@ export class Client {
 
   private async requestText(method: string, path: string): Promise<string> {
     const resp = await fetch(this.baseURL + path, { method, headers: { ...this.headers } });
+    if (!resp.ok) {
+      throw new GnosivelaError(resp.status, await resp.text(), path);
+    }
+    return resp.text();
+  }
+
+  private async requestTextBody(method: string, path: string, body: string, contentType: string): Promise<string> {
+    const resp = await fetch(this.baseURL + path, {
+      method,
+      headers: { ...this.headers, "Content-Type": contentType },
+      body,
+    });
     if (!resp.ok) {
       throw new GnosivelaError(resp.status, await resp.text(), path);
     }
@@ -134,9 +149,43 @@ export class Client {
   sparqlQuery(query: string): Promise<Record<string, unknown>> {
     return this.request("POST", "/sparql", { query });
   }
+  sparqlQueryText(query: string): Promise<string> {
+    return this.requestTextBody("POST", "/sparql", query, "application/sparql-query");
+  }
   shaclExport(namespace: string, version = ""): Promise<string> {
     const suffix = version ? `?version=${encodeURIComponent(version)}` : "";
     return this.requestText("GET", `/interop/shacl/${encodeURIComponent(namespace)}${suffix}`);
+  }
+  shaclImport(namespace: string, turtle: string, version = ""): Promise<Record<string, unknown>> {
+    const suffix = version ? `?version=${encodeURIComponent(version)}` : "";
+    return this.requestTextBody("POST", `/interop/shacl/${encodeURIComponent(namespace)}${suffix}`, turtle, "text/turtle")
+      .then((text) => JSON.parse(text) as Record<string, unknown>);
+  }
+  shaclValidate(namespace: string, assertions?: unknown[], version = ""): Promise<ShaclValidationReport> {
+    const suffix = version ? `?version=${encodeURIComponent(version)}` : "";
+    const path = `/interop/shacl/${encodeURIComponent(namespace)}/validate${suffix}`;
+    if (assertions === undefined) {
+      return this.request("POST", path);
+    }
+    return this.request("POST", path, { assertions });
+  }
+  shaclValidateStored(namespace: string, version = ""): Promise<ShaclValidationReport> {
+    const suffix = version ? `?version=${encodeURIComponent(version)}` : "";
+    return this.request("GET", `/interop/shacl/${encodeURIComponent(namespace)}/validate${suffix}`);
+  }
+  owlExport(namespace: string, version = ""): Promise<string> {
+    const suffix = version ? `?version=${encodeURIComponent(version)}` : "";
+    return this.requestText("GET", `/interop/owl/${encodeURIComponent(namespace)}${suffix}`);
+  }
+  owlInfer(namespace: string, version = ""): Promise<string> {
+    const suffix = version ? `?version=${encodeURIComponent(version)}` : "";
+    return this.requestText("GET", `/interop/owl/${encodeURIComponent(namespace)}/infer${suffix}`);
+  }
+  graphqlQuery(query: string, variables: Record<string, unknown> = {}): Promise<GraphQLResponse> {
+    return this.request("POST", "/graphql", { query, variables });
+  }
+  graphqlSchema(): Promise<string> {
+    return this.requestText("GET", "/graphql/schema");
   }
   actions(): Promise<{ actions: Array<Record<string, unknown>> }> {
     return this.request("GET", "/actions");

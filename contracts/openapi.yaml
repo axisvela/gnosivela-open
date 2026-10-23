@@ -456,6 +456,7 @@ paths:
   /actions:
     get:
       summary: List governed actions (webhook / function runtime)
+      description: Actions can be webhook side effects or external JSON functions. Both are approval-bound when required and fully audited.
       tags: [action]
       responses:
         '200':
@@ -468,7 +469,7 @@ paths:
                     type: array
                     items: { $ref: '#/components/schemas/ActionDefinition' }
     post:
-      summary: Register a governed webhook action
+      summary: Register a governed webhook or function action
       tags: [action]
       requestBody:
         required: true
@@ -521,8 +522,21 @@ paths:
                     items: { $ref: '#/components/schemas/ActionRun' }
   /sparql:
     get:
-      summary: Read-only SPARQL 1.1 subset (SELECT)
-      description: Supports basic graph patterns, simple FILTER (= / !=), PREFIX, LIMIT and OFFSET over assertions and rdf:type triples. Unsupported syntax is rejected with 400.
+      summary: Read-only SPARQL 1.1 subset (SELECT / ASK / CONSTRUCT)
+      description: |
+        Supports SELECT (DISTINCT, ORDER BY, LIMIT, OFFSET, expressions with
+        AS),         ASK and CONSTRUCT, GROUP BY/HAVING with COUNT/SUM/AVG/MIN/MAX/
+        SAMPLE/GROUP_CONCAT, basic graph patterns, property paths (sequence,
+        alternative, inverse, negation, *, +, ?), OPTIONAL, UNION, MINUS,
+        BIND, VALUES, subqueries, PREFIX and FILTER expressions (comparison,
+        &&/||/!, IN, BOUND, REGEX, STR/LANG/DATATYPE,
+        CONTAINS/STRSTARTS/STRENDS/STRLEN) over assertions and rdf:type
+        triples. SERVICE delegates a group to a remote SPARQL endpoint (SILENT
+        supported); loopback/private endpoints are refused, responses are size
+        and time bounded. Named graphs (GRAPH <iri> / GRAPH ?g) are derived
+        from assertion context domains (`https://gnosivela.dev/graph/<domain>`,
+        default `.../graph/default`); outside GRAPH the dataset is the union of
+        all graphs. CONSTRUCT returns Turtle; SELECT/ASK return SPARQL JSON.
       tags: [interop]
       parameters:
         - { name: query, in: query, required: true, schema: { type: string } }
@@ -531,9 +545,11 @@ paths:
           content:
             application/sparql-results+json:
               schema: { $ref: '#/components/schemas/SparqlResult' }
+            text/turtle:
+              schema: { type: string }
         '400': { description: Query missing or unsupported }
     post:
-      summary: Read-only SPARQL 1.1 subset (SELECT) via body
+      summary: Read-only SPARQL 1.1 subset (SELECT / ASK / CONSTRUCT) via body
       tags: [interop]
       requestBody:
         required: true
@@ -553,7 +569,49 @@ paths:
           content:
             application/sparql-results+json:
               schema: { $ref: '#/components/schemas/SparqlResult' }
+            text/turtle:
+              schema: { type: string }
         '400': { description: Query missing or unsupported }
+  /graphql:
+    get:
+      summary: Read-only GraphQL query via query parameter
+      description: |
+        Read-only ontology/knowledge facade. Supports the Query fields
+        ontology, ontologies, concepts, entities and assertions. Mutations,
+        subscriptions and fragments are rejected. Field-level execution
+        errors are returned in `errors` alongside partial data.
+      tags: [interop]
+      parameters:
+        - { name: query, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GraphQLResponse' }
+        '400': { description: Invalid or unsupported query }
+    post:
+      summary: Read-only GraphQL query
+      tags: [interop]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GraphQLRequest' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GraphQLResponse' }
+        '400': { description: Invalid or unsupported query }
+  /graphql/schema:
+    get:
+      summary: Read-only GraphQL schema (SDL)
+      tags: [interop]
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema: { type: string }
   /interop/shacl/{namespace}:
     get:
       summary: Export an ontology as SHACL Shapes (Turtle)
@@ -565,6 +623,101 @@ paths:
       responses:
         '200':
           description: SHACL Shapes in Turtle
+          content:
+            text/turtle:
+              schema: { type: string }
+        '404': { description: Ontology namespace/version not found }
+    post:
+      summary: Import SHACL Shapes (Turtle) into an ontology draft
+      description: |
+        Maps sh:targetClass to concepts, sh:path with sh:datatype/nodeKind,
+        minCount/maxCount and sh:in to properties, and sh:class to relations.
+        Import is a pure adapter: the returned draft is not written to the
+        semantic store. Unsupported constructs are rejected with 400.
+      tags: [interop]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: query, required: false, schema: { type: string }, description: "Draft version label (default imported)" }
+      requestBody:
+        required: true
+        content:
+          text/turtle:
+            schema: { type: string }
+      responses:
+        '200':
+          description: Ontology draft (not persisted)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ontology' }
+        '400': { description: Invalid Turtle/SHACL or payload too large }
+  /interop/shacl/{namespace}/validate:
+    get:
+      summary: Validate stored assertions against ontology constraints
+      description: |
+        Checks required/single-valued properties, datatypes, enums and relation
+        ranges. Unknown concepts and predicates are ignored (open-world). The
+        operation is read-only and returns a SHACL-style report.
+      tags: [interop]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: query, required: false, schema: { type: string }, description: "Defaults to the latest version" }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ShaclValidationReport' }
+        '404': { description: Ontology namespace/version not found }
+    post:
+      summary: Validate a supplied assertion batch against ontology constraints
+      description: An empty body validates stored assertions; otherwise pass `{"assertions":[...]}` or a bare array.
+      tags: [interop]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: query, required: false, schema: { type: string } }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assertions:
+                  type: array
+                  items: { $ref: '#/components/schemas/KnowledgeAssertion' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ShaclValidationReport' }
+        '400': { description: Invalid payload }
+  /interop/owl/{namespace}:
+    get:
+      summary: Export an ontology as OWL 2 Turtle
+      description: Concepts become owl:Class, datatype properties become owl:DatatypeProperty with rdfs:domain/range, and relations become owl:ObjectProperty (including owl:inverseOf when declared).
+      tags: [interop]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: query, required: false, schema: { type: string }, description: "Defaults to the latest version" }
+      responses:
+        '200':
+          content:
+            text/turtle:
+              schema: { type: string }
+        '404': { description: Ontology namespace/version not found }
+  /interop/owl/{namespace}/infer:
+    get:
+      summary: Derive a read-only RDFS/OWL RL subset closure
+      description: |
+        Applies rdfs:domain and rdfs:range typing plus owl:inverseOf over the
+        stored assertions. Inferred triples are returned as Turtle with a
+        comment naming the rule; nothing is persisted, so the semantic API
+        remains unchanged.
+      tags: [interop]
+      parameters:
+        - { name: namespace, in: path, required: true, schema: { type: string } }
+        - { name: version, in: query, required: false, schema: { type: string }, description: "Defaults to the latest version" }
+      responses:
+        '200':
           content:
             text/turtle:
               schema: { type: string }
@@ -2006,7 +2159,7 @@ components:
       properties:
         id: { type: string }
         name: { type: string }
-        kind: { type: string, enum: [webhook] }
+        kind: { type: string, enum: [webhook, function] }
         url: { type: string }
         method: { type: string, enum: [POST, PUT, PATCH] }
         headers:
@@ -2017,7 +2170,7 @@ components:
         approvalAction: { type: string, description: "default action.run" }
         allowPrivate: { type: boolean }
         enabled: { type: boolean }
-        schedule: { type: string, description: "Go duration (e.g. 5m); empty = manual only" }
+        schedule: { type: string, description: "Go duration (e.g. 5m) or 5-field cron (e.g. */5 * * * *); empty = manual only" }
         schedulePrincipal: { type: string, description: "Principal for scheduled runs (default system)" }
         scheduleInput: { description: "JSON payload for scheduled runs" }
       required: [id, kind, url]
@@ -2040,8 +2193,44 @@ components:
         startedAt: { type: string, format: date-time }
         finishedAt: { type: string, format: date-time }
         durationMillis: { type: integer }
+        output: { description: "JSON output for function actions" }
         storeError: { type: string, description: "Set when durable run persistence failed" }
       required: [id, actionId, status]
+    ShaclValidationReport:
+      type: object
+      properties:
+        conforms: { type: boolean }
+        results:
+          type: array
+          items: { $ref: '#/components/schemas/ShaclViolation' }
+      required: [conforms, results]
+    ShaclViolation:
+      type: object
+      properties:
+        assertionId: { type: string }
+        subject: { type: string }
+        path: { type: string }
+        constraint: { type: string, enum: [minCount, maxCount, datatype, enum, class] }
+        severity: { type: string }
+        message: { type: string }
+      required: [constraint, severity, message]
+    GraphQLRequest:
+      type: object
+      properties:
+        query: { type: string }
+        variables:
+          type: object
+          additionalProperties: true
+      required: [query]
+    GraphQLResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+        errors:
+          type: array
+          items: { type: string }
     SparqlTerm:
       type: object
       properties:

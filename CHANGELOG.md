@@ -4,7 +4,7 @@ All notable changes to GNOSIVELA-open (SDKs, examples, API contract) are
 documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 
-## [Unreleased]
+## [1.3.0] - 2026-10-23
 
 ### Added
 
@@ -28,6 +28,11 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 - Action methods (`Actions`, `ActionRegister`, `ActionRun`, `ActionRuns`) in all
   four SDKs, backed by the governed webhook runtime (`/actions*`). Action
   definitions accept `schedule`, `schedulePrincipal` and `scheduleInput`.
+- Interop methods in all four SDKs: `ShaclImport` / `ShaclValidate`
+  (`POST /interop/shacl/{namespace}` and `/validate`), `OwlExport` /
+  `OwlInfer` (`/interop/owl/*`), `GraphQLQuery` / `GraphQLSchema`
+  (`/graphql`), and `SparqlQueryText` for CONSTRUCT results. Action runs now
+  expose the `output` field for `kind=function`.
 - Dependency-free agent framework adapters: Python `gnosivela.integrations`
   (`tool_specs`, `langchain_tools`, `llama_index_tools`) and TypeScript
   `@axisvela/gnosivela/integrations` (`toolSpecs`, `openAIToolDefinitions`,

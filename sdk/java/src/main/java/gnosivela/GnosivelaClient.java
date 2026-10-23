@@ -57,6 +57,26 @@ public final class GnosivelaClient {
         }
     }
 
+    private String requestTextBody(String method, String path, String body, String contentType) {
+        HttpRequest.Builder b = HttpRequest.newBuilder()
+                .uri(URI.create(baseURL + path))
+                .timeout(Duration.ofSeconds(30))
+                .header("Content-Type", contentType)
+                .method(method, HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8));
+        try {
+            HttpResponse<String> resp = http.send(b.build(), HttpResponse.BodyHandlers.ofString());
+            if (resp.statusCode() >= 300) {
+                throw new GnosivelaException(resp.statusCode(), resp.body(), path);
+            }
+            return resp.body();
+        } catch (IOException e) {
+            throw new GnosivelaException(0, e.getMessage(), path);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new GnosivelaException(0, e.getMessage(), path);
+        }
+    }
+
     private static String enc(String s) {
         return URLEncoder.encode(s, StandardCharsets.UTF_8);
     }
@@ -158,12 +178,69 @@ public final class GnosivelaClient {
         return post("/sparql", "{\"query\":\"" + escape(query) + "\"}");
     }
 
+    public String sparqlQueryText(String query) {
+        return requestTextBody("POST", "/sparql", query, "application/sparql-query");
+    }
+
     public String shaclExport(String namespace) {
         return get("/interop/shacl/" + enc(namespace));
     }
 
     public String shaclExport(String namespace, String version) {
         return get("/interop/shacl/" + enc(namespace) + "?version=" + enc(version));
+    }
+
+    public String shaclImport(String namespace, String turtle) {
+        return requestTextBody("POST", "/interop/shacl/" + enc(namespace), turtle, "text/turtle");
+    }
+
+    public String shaclImport(String namespace, String version, String turtle) {
+        return requestTextBody("POST", "/interop/shacl/" + enc(namespace) + "?version=" + enc(version), turtle, "text/turtle");
+    }
+
+    public String shaclValidateStored(String namespace) {
+        return get("/interop/shacl/" + enc(namespace) + "/validate");
+    }
+
+    public String shaclValidateStored(String namespace, String version) {
+        return get("/interop/shacl/" + enc(namespace) + "/validate?version=" + enc(version));
+    }
+
+    public String shaclValidate(String namespace, String assertionsJson) {
+        return post("/interop/shacl/" + enc(namespace) + "/validate", "{\"assertions\":" + assertionsJson + "}");
+    }
+
+    public String shaclValidate(String namespace, String version, String assertionsJson) {
+        return post("/interop/shacl/" + enc(namespace) + "/validate?version=" + enc(version),
+                "{\"assertions\":" + assertionsJson + "}");
+    }
+
+    public String owlExport(String namespace) {
+        return get("/interop/owl/" + enc(namespace));
+    }
+
+    public String owlExport(String namespace, String version) {
+        return get("/interop/owl/" + enc(namespace) + "?version=" + enc(version));
+    }
+
+    public String owlInfer(String namespace) {
+        return get("/interop/owl/" + enc(namespace) + "/infer");
+    }
+
+    public String owlInfer(String namespace, String version) {
+        return get("/interop/owl/" + enc(namespace) + "/infer?version=" + enc(version));
+    }
+
+    public String graphqlQuery(String query) {
+        return post("/graphql", "{\"query\":\"" + escape(query) + "\"}");
+    }
+
+    public String graphqlQuery(String query, String variablesJson) {
+        return post("/graphql", "{\"query\":\"" + escape(query) + "\",\"variables\":" + variablesJson + "}");
+    }
+
+    public String graphqlSchema() {
+        return get("/graphql/schema");
     }
 
     public String connectors() {

@@ -102,6 +102,25 @@ export interface EventTemplate {
   status?: string;
 }
 
+export interface ShaclViolation {
+  assertionId?: string;
+  subject?: string;
+  path?: string;
+  constraint: "minCount" | "maxCount" | "datatype" | "enum" | "class";
+  severity: string;
+  message: string;
+}
+
+export interface ShaclValidationReport {
+  conforms: boolean;
+  results: ShaclViolation[];
+}
+
+export interface GraphQLResponse {
+  data: Record<string, unknown>;
+  errors?: string[];
+}
+
 export interface Event {
   id: string;
   type: string;
