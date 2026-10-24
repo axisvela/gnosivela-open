@@ -32,7 +32,7 @@ GNOSIVELA's answer: define semantic objects first (Ontology / Assertion / Identi
 | MCP Server | JSON-RPC 2.0 tools (`ground`, `cite`, `search`, `hybrid_search`, `resolve_entity`) over HTTP or stdio |
 | Connector Hub | Schema-first introspection (`relational` / `catalog` / `api` / `objectstore` / `iceberg` / `glue` / `hive`; EE adds `streaming` / `snowflake` / `salesforce` / `warehouse` / `sharepoint`) and markdown/text/HTML/PDF/image document binding with `artifactDigest`, a pluggable IE provider and an external OCR provider, without copying data |
 | Column Lineage | Source column → ontology concept/property with transform, confidence, unmapped columns and orphan rules (`POST /lineage/columns`) |
-| Ontology Studio | Read-only model/lineage/usage and change-impact view (`GET /studio`, `/studio/model`, `/studio/impact`) |
+| Ontology Studio | Model/lineage/usage and change-impact view plus a governed draft editor (`GET /studio`, `/studio/model`, `/studio/impact`; writes still go through Registry/Impact/approval) |
 | SHACL Export | Deterministic Turtle NodeShapes/PropertyShapes from ontology concepts, properties and relations (`GET /interop/shacl/{namespace}`) |
 | SPARQL | Read-only SPARQL 1.1 subset (SELECT/BGP/FILTER/PREFIX/LIMIT) over assertions (`GET/POST /sparql`) |
 | Action Runtime | Governed webhook actions with approval binding, SSRF guard and full audit (`/actions*`) |
@@ -47,7 +47,7 @@ GNOSIVELA's answer: define semantic objects first (Ontology / Assertion / Identi
 | [GNOSIVELA-ee](https://github.com/axisvela/GNOSIVELA-ee) | Advanced connectors, enterprise auth (Kerberos/SASL), HA/sharding/10B, multi-region, SLO/SLA, industry profiles | Enterprise |
 
 > License compliance: the SDK in this repository is Apache-2.0 and interacts with the core over HTTP — it never links the AGPL core.
-> Open-surface roadmap: [ROADMAP.md](ROADMAP.md).
+> Open-surface roadmap: [ROADMAP.md](ROADMAP.md). Ecosystem program: [docs/ecosystem/README.md](docs/ecosystem/README.md).
 
 ## Repository layout
 
@@ -78,6 +78,10 @@ v1.6.0.
 
 PyPI / npm / Maven Central publication is pending registry credentials; use the
 GitHub Release artifacts for now.
+
+> Main also contains post-v1.6.0 work: the core Studio draft editor, connector
+> live-gate and the ecosystem scaffolding in `docs/ecosystem/`. The downloads
+> above are the v1.6.0 release artifacts.
 
 ```bash
 # run the server from a released binary (in-memory store; add -pg-dsn for PostgreSQL)
@@ -143,7 +147,7 @@ Both expose `ground`, `cite`, `search`, `hybrid_search` and `resolve_entity`.
 
 Native adapter matrix tested locally:
 - Python 3.12.8: `langchain-core 1.7.0` (`StructuredTool`), `llama-index-core 0.14.25` (`FunctionTool`).
-- Node 22: `@langchain/core 1.3.0` (`DynamicStructuredTool`), `llamaindex 0.12.1` (`FunctionTool`).
+- Node 24.18.0: `@langchain/core 1.3.0` (`DynamicStructuredTool`), `llamaindex 0.12.1` (`FunctionTool`).
 
 Native tests skip automatically when a framework is absent. These adapters
 ship in v1.6.0.

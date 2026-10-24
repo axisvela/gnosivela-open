@@ -1,0 +1,62 @@
+name: Partner / connector listing
+description: Apply to list a connector, industry pack, benchmark or implementation service
+title: "[Partner] "
+labels: ["ecosystem", "partner"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for contributing to the GNOSIVELA ecosystem. Listings are evidence-based. Do not include credentials, tokens or source data.
+  - type: input
+    id: partner
+    attributes:
+      label: Partner / project name
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: Listing type
+      options:
+        - Connector
+        - Industry pack
+        - Benchmark reproduction
+        - Implementation service
+    validations:
+      required: true
+  - type: input
+    id: repository
+    attributes:
+      label: Repository or artifact URL
+      description: Public source, package, or commercial contact page.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Supported core/open version range
+      placeholder: ">=1.6.0,<2.0.0"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Tests, live verification, benchmark output, or certification checklist.
+    validations:
+      required: true
+  - type: input
+    id: licence
+    attributes:
+      label: Licence and maintenance contact
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmations
+      options:
+        - label: No credentials or source data are included in this issue.
+          required: true
+        - label: The listing follows the connector certification checklist.
+          required: true

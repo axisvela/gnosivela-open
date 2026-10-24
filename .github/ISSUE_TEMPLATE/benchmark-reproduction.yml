@@ -1,0 +1,57 @@
+name: Benchmark reproduction
+description: Submit an independent GKF-Bench or scale-benchmark result
+title: "[Benchmark] "
+labels: ["ecosystem", "benchmark"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Independent reproductions are part of the P4-M4 validation gate. Do not include credentials, tokens or source data.
+  - type: dropdown
+    id: track
+    attributes:
+      label: Benchmark track
+      options:
+        - GKF-Bench (B1–B11)
+        - Scale benchmark (assertions)
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Repository / commit / version
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Exact commands and parameters
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: CPU, memory, disk, OS, Go/PostgreSQL versions, key DB settings.
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Raw results
+      description: Paste output or link to a gist/artifact. Include P50/P95/P99 and sizes where applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: deviations
+    attributes:
+      label: Deviations and limitations
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmations
+      options:
+        - label: No credentials or source data are included in this issue.
+          required: true
+        - label: I ran the published tooling on the stated commit.
+          required: true

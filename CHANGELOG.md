@@ -6,6 +6,15 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 
 ## [Unreleased]
 
+### Added
+
+- Ecosystem scaffolding: partner program, connector certification checklist,
+  compatibility matrix, benchmark reproduction guide and issue templates under
+  `docs/ecosystem/` and `.github/ISSUE_TEMPLATE/`.
+- `scripts/publish-registry.sh` for PyPI / npm / Maven publication with a
+  `--dry-run` mode. PyPI and npm are ready; Maven Central still requires
+  `distributionManagement` and credentials.
+
 ## [1.6.0] - 2026-10-24
 
 ### Added
@@ -19,8 +28,8 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
   native tests skip when a framework is absent.
 - TypeScript `langchainTools` / `llamaIndexTools` return native
   `DynamicStructuredTool` / `FunctionTool` objects when `@langchain/core` or
-  `llamaindex` is installed, and neutral specs otherwise. Verified on Node 22
-  with `@langchain/core 1.3.0` and `llamaindex 0.12.1`.
+  `llamaindex` is installed, and neutral specs otherwise. Verified on Node
+  24.18.0 with `@langchain/core 1.3.0` and `llamaindex 0.12.1`.
 - `ColumnLineage` in the Go / Python / TypeScript / Java SDKs, backed by
   `POST /lineage/columns` (source column → ontology property, unmapped columns
   and orphan mapping rules).

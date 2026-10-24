@@ -1,0 +1,52 @@
+name: Connector certification
+description: Request certification for a connector implementing the public SPI
+title: "[Certification] "
+labels: ["ecosystem", "certification", "connector"]
+body:
+  - type: input
+    id: connector
+    attributes:
+      label: Connector name and kind
+      placeholder: "acme-warehouse / acme"
+    validations:
+      required: true
+  - type: input
+    id: repository
+    attributes:
+      label: Repository and commit
+    validations:
+      required: true
+  - type: input
+    id: core
+    attributes:
+      label: Core/open version used
+      placeholder: "1.6.0"
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Certification checklist
+      description: Paste the checklist from docs/ecosystem/connector-certification.md with results.
+    validations:
+      required: true
+  - type: textarea
+    id: live
+    attributes:
+      label: Live verification evidence
+      description: Provider/version, command and redacted output.
+    validations:
+      required: true
+  - type: textarea
+    id: limits
+    attributes:
+      label: Known limitations
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmations
+      options:
+        - label: No credentials or source data are included in this issue.
+          required: true
+        - label: The connector reads metadata only and does not copy source data.
+          required: true
