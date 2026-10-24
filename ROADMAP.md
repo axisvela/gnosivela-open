@@ -19,6 +19,7 @@ core repository's `docs/ROADMAP.md` and `docs/OPEN-CORE.md`.
   registry credentials. Container image publication is deferred.
 - Community verification issues are open: #5 tracking, #1 S3, #2 Iceberg,
   #3 Glue, #4 Hive.
+- Release evidence: [docs/releases/v1.7.0.md](docs/releases/v1.7.0.md).
 
 ## Repository division
 
