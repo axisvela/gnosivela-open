@@ -1,6 +1,6 @@
 # Compatibility Matrix
 
-This matrix records the versions exercised for the v1.6.0 release line. It is a
+This matrix records the versions exercised for the v1.7.0 release line. It is a
 tested baseline, not a promise that older or newer versions are unsupported.
 
 Machine-readable source: [`compatibility.json`](compatibility.json). Validate it
@@ -10,19 +10,19 @@ with `./scripts/ecosystem-gate.sh`.
 
 | Component | Version | Notes |
 | --- | --- | --- |
-| GNOSIVELA core | 1.6.0 | Go module `github.com/axisvela/GNOSIVELA/v3` |
-| GNOSIVELA-open | 1.6.0 | Same tag as core |
+| GNOSIVELA core | 1.7.0 | Go module `github.com/axisvela/GNOSIVELA/v3` |
+| GNOSIVELA-open | 1.7.0 | Same tag as core |
 | GNOSIVELA-EE | 1.36.1 | Independent tag; `CORE_COMPAT >=1.4.0,<2.0.0` |
-| OpenAPI contract | 1.6.0 | `contracts/openapi.yaml`, byte-identical in core/open |
+| OpenAPI contract | 1.7.0 | `contracts/openapi.yaml`, byte-identical in core/open |
 
 ## SDKs and runtimes
 
 | SDK | Version | Runtime tested |
 | --- | --- | --- |
-| Go | 1.6.0 | Go 1.26 toolchain (`go.mod`; local toolchain 1.26.9) |
-| Python | 1.6.0 | CPython 3.14.6 (SDK tests), 3.12.8 (native adapters); requires >=3.8 |
-| TypeScript | 1.6.0 | Node 24.18.0; `engines.node >=22.6` |
-| Java | 1.6.0 | OpenJDK 21.0.8, Maven 3.9.10; compiler target 17 |
+| Go | 1.7.0 | Go 1.26 toolchain (`go.mod`; local toolchain 1.26.9) |
+| Python | 1.7.0 | CPython 3.14.6 (SDK tests), 3.12.8 (native adapters); requires >=3.8 |
+| TypeScript | 1.7.0 | Node 24.18.0; `engines.node >=22.6` |
+| Java | 1.7.0 | OpenJDK 21.0.8, Maven 3.9.10; compiler target 17 |
 
 ## Agent framework adapters
 
@@ -57,7 +57,7 @@ Neutral tool specs are always available; native adapters are optional.
 - Hive enterprise authentication (Kerberos/SASL) and private-network packaging
   are EE scope.
 - OCR and IE require an external HTTP provider; no bundled model is shipped.
-- Container image publication is deferred for v1.6.0.
+- Container image publication is deferred for v1.7.0.
 - PyPI / npm / Maven Central publication is pending credentials; use the GitHub
   Release artifacts.
 

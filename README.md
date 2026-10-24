@@ -66,22 +66,22 @@ examples/             # End-to-end examples (quickstart)
 The control-plane server binaries are built from the **GNOSIVELA Core**
 repository (AGPL-3.0) and published on its GitHub Releases. SDK packages are
 published from this repository. Container image publication is deferred for
-v1.6.0.
+v1.7.0.
 
 | Artifact | Where |
 | --- | --- |
-| Prebuilt server binaries (linux-amd64 / linux-arm64 / darwin-arm64 / windows-amd64) | [GNOSIVELA Core v1.6.0](https://github.com/axisvela/GNOSIVELA/releases/tag/v1.6.0) (`gnosivela-*`, `sha256sums.txt`) |
-| Go / Python / TypeScript / Java SDKs | [GNOSIVELA-open v1.6.0](https://github.com/axisvela/GNOSIVELA-open/releases/tag/v1.6.0) (Python wheel/sdist, npm tgz, Java jar) |
-| Go module | `go get github.com/axisvela/GNOSIVELA-open/v3@v1.6.0` |
-| API contract | [OpenAPI 1.6.0](https://github.com/axisvela/GNOSIVELA-open/releases/download/v1.6.0/gnosivela-openapi-1.6.0.yaml) or `contracts/openapi.yaml` |
-| Container image | Deferred for v1.6.0; `ghcr.io/axisvela/GNOSIVELA` will resume on a later release |
+| Prebuilt server binaries (linux-amd64 / linux-arm64 / darwin-arm64 / windows-amd64) | [GNOSIVELA Core v1.7.0](https://github.com/axisvela/GNOSIVELA/releases/tag/v1.7.0) (`gnosivela-*`, `sha256sums.txt`) |
+| Go / Python / TypeScript / Java SDKs | [GNOSIVELA-open v1.7.0](https://github.com/axisvela/GNOSIVELA-open/releases/tag/v1.7.0) (Python wheel/sdist, npm tgz, Java jar) |
+| Go module | `go get github.com/axisvela/GNOSIVELA-open/v3@v1.7.0` |
+| API contract | [OpenAPI 1.7.0](https://github.com/axisvela/GNOSIVELA-open/releases/download/v1.7.0/gnosivela-openapi-1.7.0.yaml) or `contracts/openapi.yaml` |
+| Container image | Deferred for v1.7.0; `ghcr.io/axisvela/GNOSIVELA` will resume on a later release |
 
 PyPI / npm / Maven Central publication is pending registry credentials; use the
 GitHub Release artifacts for now.
 
-> Main also contains post-v1.6.0 work: the core Studio draft editor, connector
-> live-gate and the ecosystem scaffolding in `docs/ecosystem/`. The downloads
-> above are the v1.6.0 release artifacts.
+> v1.7.0 includes the core Studio draft/graph editor, connector live-gate,
+> `/readyz` and the ecosystem scaffolding in `docs/ecosystem/`. The downloads
+> above are the v1.7.0 release artifacts.
 
 ```bash
 # run the server from a released binary (in-memory store; add -pg-dsn for PostgreSQL)
@@ -150,7 +150,7 @@ Native adapter matrix tested locally:
 - Node 24.18.0: `@langchain/core 1.3.0` (`DynamicStructuredTool`), `llamaindex 0.12.1` (`FunctionTool`).
 
 Native tests skip automatically when a framework is absent. These adapters
-ship in v1.6.0.
+ship in v1.7.0.
 
 ## API contract
 

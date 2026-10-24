@@ -6,6 +6,8 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-10-24
+
 ### Added
 
 - Ecosystem scaffolding: partner program, connector certification checklist,

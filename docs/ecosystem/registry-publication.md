@@ -59,9 +59,9 @@ is mandatory for Maven Central.
 ## Verification after publication
 
 ```bash
-python -m pip download --no-deps gnosivela==1.6.0 -d /tmp/gnosivela-pypi
-npm view @axisvela/gnosivela@1.6.0 dist.integrity
-mvn dependency:get -Dartifact=com.axisvela:gnosivela:1.6.0
+python -m pip download --no-deps gnosivela==1.7.0 -d /tmp/gnosivela-pypi
+npm view @axisvela/gnosivela@1.7.0 dist.integrity
+mvn dependency:get -Dartifact=com.axisvela:gnosivela:1.7.0
 ```
 
 Compare hashes with the GitHub Release `sha256sums.txt`.

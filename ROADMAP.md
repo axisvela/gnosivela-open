@@ -6,9 +6,11 @@ core repository's `docs/ROADMAP.md` and `docs/OPEN-CORE.md`.
 
 ## Current release
 
-- **v1.6.0** (2026-10-24) — same tag as GNOSIVELA Core v1.6.0.
+- **v1.7.0** (2026-10-24) — same tag as GNOSIVELA Core v1.7.0.
 - SDKs expose document `artifactDigest`, IE/OCR providers, column lineage, and
   native Python/TypeScript LangChain/LlamaIndex adapters.
+- OpenAPI adds `GET /readyz`; ecosystem scaffolding lives in `docs/ecosystem/`
+  with `scripts/ecosystem-gate.sh` and `scripts/publish-registry.sh`.
 - Verified adapter matrix: Python 3.12.8 (`langchain-core 1.7.0`,
   `llama-index-core 0.14.25`); Node 24.18.0 (`@langchain/core 1.3.0`,
   `llamaindex 0.12.1`).
@@ -17,12 +19,6 @@ core repository's `docs/ROADMAP.md` and `docs/OPEN-CORE.md`.
   registry credentials. Container image publication is deferred.
 - Community verification issues are open: #5 tracking, #1 S3, #2 Iceberg,
   #3 Glue, #4 Hive.
-- **Unreleased on main**: core Studio draft + graph editor; ecosystem
-  scaffolding in `docs/ecosystem/` (partner program, connector certification,
-  machine-readable compatibility matrix, benchmark reproduction);
-  `scripts/ecosystem-gate.sh` and `scripts/publish-registry.sh` (`--check` /
-  `--dry-run`); credentials are still pending. These are not part of the
-  v1.6.0 artifacts.
 
 ## Repository division
 
@@ -36,9 +32,9 @@ core repository's `docs/ROADMAP.md` and `docs/OPEN-CORE.md`.
 
 | Version | Open-surface work | Gate |
 | --- | --- | --- |
-| v1.6.x | PyPI / npm / Maven Central publication (script ready); examples and MCP packaging; SDK parity checks; community connector verification | Registry artifacts installable; 3 real sources verified |
-| v1.7 | Studio SDK surface; OCR/IE compatibility hardening; compatibility matrix; distribution hardening | SDK parity with core APIs; reproducible examples |
-| v1.8 | Partner adapters and ecosystem packages (aligned with core P4-M4; see `docs/ecosystem/`) | 2 partner packages published + external benchmark reproduction |
+| v1.7.x | PyPI / npm / Maven Central publication (script ready); examples and MCP packaging; SDK parity checks; community connector verification | Registry artifacts installable; 3 real sources verified |
+| v1.8 | Studio SDK surface; OCR/IE compatibility hardening; distribution hardening | SDK parity with core APIs; reproducible examples |
+| v1.9 | Partner adapters and ecosystem packages (aligned with core P4-M4; see `docs/ecosystem/`) | 2 partner packages published + external benchmark reproduction |
 
 ## Notes
 
