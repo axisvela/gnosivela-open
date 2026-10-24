@@ -61,23 +61,25 @@ examples/             # End-to-end examples (quickstart)
 
 ## Downloads
 
-The control-plane server binary and container image are built from the
-**GNOSIVELA Core** repository (AGPL-3.0) and published on its GitHub Releases.
-This repository is the community download surface.
+The control-plane server binaries are built from the **GNOSIVELA Core**
+repository (AGPL-3.0) and published on its GitHub Releases. SDK packages are
+published from this repository. Container image publication is deferred for
+v1.4.2.
 
 | Artifact | Where |
 | --- | --- |
-| Prebuilt server binaries (linux-amd64 / linux-arm64 / darwin-arm64 / windows-amd64) | [GNOSIVELA Core Releases](https://github.com/axisvela/GNOSIVELA/releases) (attach `gnosivela-*`, `sha256sums.txt`) |
-| Container image | `ghcr.io/axisvela/GNOSIVELA:<tag>` (tagged on every `v*` release; `latest` on the newest) |
-| Go / Python / TypeScript / Java SDKs | this repository (`sdk/`, published to pypi/npm/maven) |
-| API contract | `contracts/openapi.yaml` (this repository) |
+| Prebuilt server binaries (linux-amd64 / linux-arm64 / darwin-arm64 / windows-amd64) | [GNOSIVELA Core v1.4.2](https://github.com/axisvela/GNOSIVELA/releases/tag/v1.4.2) (`gnosivela-*`, `sha256sums.txt`) |
+| Go / Python / TypeScript / Java SDKs | [GNOSIVELA-open v1.4.2](https://github.com/axisvela/GNOSIVELA-open/releases/tag/v1.4.2) (Python wheel/sdist, npm tgz, Java jar) |
+| Go module | `go get github.com/axisvela/GNOSIVELA-open/v3@v1.4.2` |
+| API contract | [OpenAPI 1.4.2](https://github.com/axisvela/GNOSIVELA-open/releases/download/v1.4.2/gnosivela-openapi-1.4.2.yaml) or `contracts/openapi.yaml` |
+| Container image | Deferred for v1.4.2; `ghcr.io/axisvela/GNOSIVELA` will resume on a later release |
+
+PyPI / npm / Maven Central publication is pending registry credentials; use the
+GitHub Release artifacts for now.
 
 ```bash
 # run the server from a released binary (in-memory store; add -pg-dsn for PostgreSQL)
 ./gnosivela-linux-amd64 -addr :8080
-
-# or via container image
-docker run --rm -p 8080:8080 ghcr.io/axisvela/GNOSIVELA:1.0.0
 ```
 
 ## DSL compiler (SDK type generation)
