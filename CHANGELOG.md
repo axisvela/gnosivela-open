@@ -4,6 +4,18 @@ All notable changes to GNOSIVELA-open (SDKs, examples, API contract) are
 documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 
+## [1.5.0] - 2026-10-24
+
+### Added
+
+- Document bindings expose a SHA-256 `artifactDigest` of the original input
+  content; claim candidates carry the same digest through `EvidenceRef`.
+- `DocumentBindingRequest` accepts an optional `extractor` (`keyword` or `http`)
+  to select a claim extraction provider. The Go/Python/TypeScript SDKs expose
+  the new field/parameter.
+- Connector documentation includes the `hive` Metastore connector and the new
+  IE provider.
+
 ## [1.4.2] - 2026-10-23
 
 ### Changed
