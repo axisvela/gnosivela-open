@@ -11,6 +11,17 @@ publication (PyPI / npm / Maven Central) is prepared but requires credentials.
 | npm | `@axisvela/gnosivela` | Script ready; npm auth required |
 | Maven Central | `com.axisvela:gnosivela` | Not configured; `distributionManagement` + settings required |
 
+## Check readiness
+
+Reports tools, credentials and Maven configuration without building or
+publishing:
+
+```bash
+./scripts/publish-registry.sh --check --target all
+```
+
+Expected current result: PyPI/npm/Maven credentials or configuration missing.
+
 ## Dry run
 
 Builds all packages without publishing:

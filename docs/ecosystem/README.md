@@ -11,10 +11,11 @@ operator: listings and certificates are evidence-based and link to source.
 | --- | --- | --- |
 | Partner program | Open | [partner-program.md](partner-program.md) |
 | Connector certification | Checklist ready | [connector-certification.md](connector-certification.md) |
-| Compatibility matrix | Published | [compatibility-matrix.md](compatibility-matrix.md) |
+| Compatibility matrix | Published + machine-readable | [compatibility-matrix.md](compatibility-matrix.md), [compatibility.json](compatibility.json) |
+| Ecosystem gate | Ready | `scripts/ecosystem-gate.sh` validates docs, versions, contracts and partners |
 | Third-party benchmark reproduction | Process ready | [benchmark-reproduction.md](benchmark-reproduction.md) |
-| Registry publication | Script ready; credentials pending | [registry-publication.md](registry-publication.md) |
-| Listed partners | **0** | Apply with the partner issue template |
+| Registry publication | Script + credential check ready; credentials pending | [registry-publication.md](registry-publication.md) |
+| Partner registry | **0 listed** | [partners.json](partners.json), [partners.schema.json](partners.schema.json) |
 | Third-party reproductions | **0** | Submit with the benchmark issue template |
 
 ## P4-M4 exit gate

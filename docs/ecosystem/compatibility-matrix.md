@@ -3,6 +3,9 @@
 This matrix records the versions exercised for the v1.6.0 release line. It is a
 tested baseline, not a promise that older or newer versions are unsupported.
 
+Machine-readable source: [`compatibility.json`](compatibility.json). Validate it
+with `./scripts/ecosystem-gate.sh`.
+
 ## Product versions
 
 | Component | Version | Notes |

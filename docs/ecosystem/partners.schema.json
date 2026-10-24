@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/axisvela/GNOSIVELA-open/docs/ecosystem/partners.schema.json",
+  "title": "GNOSIVELA ecosystem partner registry",
+  "type": "object",
+  "required": ["schemaVersion", "partners"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "partners": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "repository", "licence", "coreRange", "evidence"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "enum": ["connector", "industry_pack", "benchmark", "implementation"] },
+          "repository": { "type": "string" },
+          "licence": { "type": "string" },
+          "coreRange": { "type": "string", "pattern": "^>=[0-9]+\\.[0-9]+\\.[0-9]+,<[0-9]+\\.[0-9]+\\.[0-9]+$" },
+          "evidence": { "type": "string" },
+          "contact": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

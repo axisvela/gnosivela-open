@@ -9,11 +9,14 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 ### Added
 
 - Ecosystem scaffolding: partner program, connector certification checklist,
-  compatibility matrix, benchmark reproduction guide and issue templates under
-  `docs/ecosystem/` and `.github/ISSUE_TEMPLATE/`.
-- `scripts/publish-registry.sh` for PyPI / npm / Maven publication with a
-  `--dry-run` mode. PyPI and npm are ready; Maven Central still requires
-  `distributionManagement` and credentials.
+  machine-readable compatibility matrix (`compatibility.json`), partner
+  registry (`partners.json` + schema), benchmark reproduction guide and issue
+  templates under `docs/ecosystem/` and `.github/ISSUE_TEMPLATE/`.
+- `scripts/ecosystem-gate.sh` validates ecosystem docs, core/open versions,
+  SDK versions, OpenAPI contract parity and the partner registry.
+- `scripts/publish-registry.sh` for PyPI / npm / Maven publication with
+  `--check` and `--dry-run` modes. PyPI and npm are ready; Maven Central still
+  requires `distributionManagement` and credentials.
 
 ## [1.6.0] - 2026-10-24
 

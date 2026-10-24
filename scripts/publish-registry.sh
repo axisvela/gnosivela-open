@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Publish GNOSIVELA SDK artifacts to public registries.
 #
+#   ./scripts/publish-registry.sh --check --target all
 #   ./scripts/publish-registry.sh --dry-run --target all
 #   TWINE_USERNAME=__token__ TWINE_PASSWORD=... ./scripts/publish-registry.sh --target pypi
 #   npm login && ./scripts/publish-registry.sh --target npm
@@ -12,14 +13,16 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION="$(tr -d '[:space:]' < "$ROOT/VERSION")"
 TARGET="all"
 DRY_RUN=0
+CHECK=0
 
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
+    --check) CHECK=1; shift ;;
     --dry-run) DRY_RUN=1; shift ;;
     --target) TARGET="${2:-}"; shift 2 ;;
     --target=*) TARGET="${1#--target=}"; shift ;;
     -h|--help)
-      sed -n '2,12p' "$0"
+      sed -n '2,14p' "$0"
       exit 0
       ;;
     *)
@@ -43,6 +46,69 @@ for meta in "$PY_VERSION" "$TS_VERSION" "$JAVA_VERSION"; do
     exit 1
   }
 done
+
+check_pypi() {
+  local failed=0
+  if python -m twine --version >/dev/null 2>&1; then
+    echo "pypi: twine ok"
+  else
+    echo "pypi: twine missing (python -m pip install twine)"
+    failed=1
+  fi
+  if [[ -n "${TWINE_USERNAME:-}" && -n "${TWINE_PASSWORD:-}" ]]; then
+    echo "pypi: credentials ok"
+  else
+    echo "pypi: credentials missing (TWINE_USERNAME / TWINE_PASSWORD)"
+    failed=1
+  fi
+  return "$failed"
+}
+
+check_npm() {
+  if npm whoami >/dev/null 2>&1; then
+    echo "npm: authenticated as $(npm whoami)"
+  else
+    echo "npm: not authenticated (npm login or NODE_AUTH_TOKEN)"
+    return 1
+  fi
+}
+
+check_maven() {
+  local failed=0
+  if grep -q '<distributionManagement>' "$ROOT/sdk/java/pom.xml"; then
+    echo "maven: distributionManagement present"
+  else
+    echo "maven: distributionManagement missing in sdk/java/pom.xml"
+    failed=1
+  fi
+  if [[ -f "$HOME/.m2/settings.xml" ]]; then
+    echo "maven: ~/.m2/settings.xml present"
+  else
+    echo "maven: ~/.m2/settings.xml missing"
+    failed=1
+  fi
+  return "$failed"
+}
+
+if [[ "$CHECK" == "1" ]]; then
+  failed=0
+  case "$TARGET" in
+    all)
+      check_pypi || failed=1
+      check_npm || failed=1
+      check_maven || failed=1
+      ;;
+    pypi) check_pypi || failed=1 ;;
+    npm) check_npm || failed=1 ;;
+    maven) check_maven || failed=1 ;;
+  esac
+  if [[ "$failed" != "0" ]]; then
+    echo "==> registry check failed: credentials or configuration missing"
+    exit 1
+  fi
+  echo "==> registry check passed for $VERSION"
+  exit 0
+fi
 
 echo "==> building SDK artifacts for $VERSION"
 (cd "$ROOT/sdk/python" && python -m build --outdir "$ROOT/sdk/python/dist")

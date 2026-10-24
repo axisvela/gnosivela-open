@@ -33,8 +33,12 @@ we link to source and test evidence rather than endorsing a vendor.
 
 ## Current partners
 
-**None yet.** This is expected for the P4-M4 scaffolding. Once two partner
-connectors or packs are listed, the P4-M4 exit gate has its second condition.
+**None yet.** This is expected for the P4-M4 scaffolding. The machine-readable
+registry is [`partners.json`](partners.json) (schema:
+[`partners.schema.json`](partners.schema.json)); `scripts/ecosystem-gate.sh`
+validates it and checks that each partner's core range includes the current
+core version. Once two partner connectors or packs are listed, the P4-M4 exit
+gate has its second condition.
 
 ## Removal
 

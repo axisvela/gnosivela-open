@@ -18,9 +18,10 @@ core repository's `docs/ROADMAP.md` and `docs/OPEN-CORE.md`.
 - Community verification issues are open: #5 tracking, #1 S3, #2 Iceberg,
   #3 Glue, #4 Hive.
 - **Unreleased on main**: ecosystem scaffolding in `docs/ecosystem/` (partner
-  program, connector certification, compatibility matrix, benchmark
-  reproduction) and `scripts/publish-registry.sh`; credentials are still
-  pending. These are not part of the v1.6.0 artifacts.
+  program, connector certification, machine-readable compatibility matrix,
+  benchmark reproduction), `scripts/ecosystem-gate.sh` and
+  `scripts/publish-registry.sh` (`--check` / `--dry-run`); credentials are
+  still pending. These are not part of the v1.6.0 artifacts.
 
 ## Repository division
 
