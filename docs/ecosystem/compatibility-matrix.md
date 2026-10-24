@@ -4,7 +4,9 @@ This matrix records the versions exercised for the v1.7.0 release line. It is a
 tested baseline, not a promise that older or newer versions are unsupported.
 
 Machine-readable source: [`compatibility.json`](compatibility.json). Validate it
-with `./scripts/ecosystem-gate.sh`.
+with `./scripts/ecosystem-gate.sh`. After a version bump, refresh it with
+`python scripts/update-compatibility.py` (`--check` reports drift without
+writing).
 
 ## Product versions
 
