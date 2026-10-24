@@ -4,6 +4,15 @@ All notable changes to GNOSIVELA-open (SDKs, examples, API contract) are
 documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 
+## [Unreleased]
+
+### Added
+
+- `DocumentBindingRequest` supports `contentEncoding` and an `ocr` provider
+  (`kind=http`) for binary PDF/image document bindings. The Go/Python/
+  TypeScript SDKs expose the new fields/parameters; `artifactDigest` remains
+  the digest of the original bytes.
+
 ## [1.5.0] - 2026-10-24
 
 ### Added

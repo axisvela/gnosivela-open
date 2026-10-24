@@ -26,7 +26,7 @@ core repository's `docs/ROADMAP.md` and `docs/OPEN-CORE.md`.
 | Version | Open-surface work | Gate |
 | --- | --- | --- |
 | v1.5.x | PyPI / npm / Maven Central publication; LangChain / LlamaIndex version matrix; examples and MCP packaging; SDK parity checks | Registry artifacts installable; adapter matrix documented |
-| v1.6 | Studio / OCR / IE SDK surfaces; compatibility matrix; distribution hardening | SDK parity with core APIs; reproducible examples |
+| v1.6 | Studio SDK surface; OCR/IE compatibility hardening; compatibility matrix; distribution hardening | SDK parity with core APIs; reproducible examples |
 | v1.7 | Partner adapters and ecosystem packages (aligned with core P4-M4) | 2 partner packages published |
 
 ## Notes
