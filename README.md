@@ -138,6 +138,10 @@ semantics into the agent framework:
 
 Both expose `ground`, `cite`, `search`, `hybrid_search` and `resolve_entity`.
 
+Python native adapter matrix tested locally on Python 3.12.8 with
+`langchain-core 1.7.0` (`StructuredTool`) and `llama-index-core 0.14.25`
+(`FunctionTool`). Native tests skip automatically when a framework is absent.
+
 ## API contract
 
 See [contracts/openapi.yaml](contracts/openapi.yaml) for the full contract (bound to semantic objects, not to any graph/vector/search vendor).

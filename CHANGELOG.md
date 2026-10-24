@@ -12,6 +12,9 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
   (`kind=http`) for binary PDF/image document bindings. The Go/Python/
   TypeScript SDKs expose the new fields/parameters; `artifactDigest` remains
   the digest of the original bytes.
+- Verified the Python native adapters on Python 3.12.8 with `langchain-core
+  1.7.0` (`StructuredTool`) and `llama-index-core 0.14.25` (`FunctionTool`);
+  native tests skip when a framework is absent.
 
 ## [1.5.0] - 2026-10-24
 

@@ -29,6 +29,20 @@ report = c.consistency_report("procurement.supplier")
 
 See `examples/quickstart.py` for the full walkthrough.
 
+## Agent framework integrations
+
+`gnosivela.integrations` exposes neutral tool specs plus native wrappers:
+
+- `langchain_tools(client)` returns `langchain_core.tools.StructuredTool`
+  objects when `langchain-core` is installed.
+- `llama_index_tools(client)` returns `llama_index.core.tools.FunctionTool`
+  objects when `llama-index-core` is installed.
+- Without either package, both fall back to neutral `ToolSpec` objects.
+
+Tested locally on Python 3.12.8 with `langchain-core 1.7.0` and
+`llama-index-core 0.14.25`. Native tests skip automatically when the framework
+is absent.
+
 ## Tests
 
 ```bash
