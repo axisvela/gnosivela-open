@@ -9,4 +9,4 @@ and real-time events.
 from .client import Client, GnosivelaError
 
 __all__ = ["Client", "GnosivelaError"]
-__version__ = "1.5.0"
+__version__ = "1.6.0"

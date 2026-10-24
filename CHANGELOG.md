@@ -6,6 +6,8 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-24
+
 ### Added
 
 - `DocumentBindingRequest` supports `contentEncoding` and an `ocr` provider
@@ -19,6 +21,9 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
   `DynamicStructuredTool` / `FunctionTool` objects when `@langchain/core` or
   `llamaindex` is installed, and neutral specs otherwise. Verified on Node 22
   with `@langchain/core 1.3.0` and `llamaindex 0.12.1`.
+- `ColumnLineage` in the Go / Python / TypeScript / Java SDKs, backed by
+  `POST /lineage/columns` (source column → ontology property, unmapped columns
+  and orphan mapping rules).
 
 ## [1.5.0] - 2026-10-24
 
