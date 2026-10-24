@@ -73,3 +73,5 @@ jobs:
           echo "version consistent: $V"
       - name: Ecosystem gate
         run: ./scripts/ecosystem-gate.sh
+      - name: Partner registry example
+        run: ./scripts/ecosystem-gate.sh --partners-file docs/ecosystem/partners.example.json
