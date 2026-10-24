@@ -371,7 +371,8 @@ func TestConnectorMethods(t *testing.T) {
 			}
 			writeJSON(w, http.StatusCreated, DocumentBinding{
 				ID: "doc:" + req.DocID, DocID: req.DocID, BindingState: "bound",
-				Chunks: []DocumentChunk{{ID: "c1", DocID: req.DocID, Content: req.Content, Locator: "p#c"}},
+				ArtifactDigest: "abc123",
+				Chunks:         []DocumentChunk{{ID: "c1", DocID: req.DocID, Content: req.Content, Locator: "p#c"}},
 			})
 		default:
 			http.Error(w, "not found", http.StatusNotFound)
@@ -399,7 +400,7 @@ func TestConnectorMethods(t *testing.T) {
 	if err != nil {
 		t.Fatalf("bind: %v", err)
 	}
-	if binding.ID != "doc:p1" || len(binding.Chunks) != 1 {
+	if binding.ID != "doc:p1" || len(binding.Chunks) != 1 || binding.ArtifactDigest != "abc123" {
 		t.Errorf("binding = %+v", binding)
 	}
 }

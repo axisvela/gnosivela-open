@@ -782,14 +782,15 @@ type ClaimCandidate struct {
 // DocumentBinding binds a document to chunks and extracted candidates without
 // copying the source document into the control plane.
 type DocumentBinding struct {
-	ID           string           `json:"id"`
-	DocID        string           `json:"docId"`
-	URI          string           `json:"uri,omitempty"`
-	Version      string           `json:"version,omitempty"`
-	CapturedAt   time.Time        `json:"capturedAt"`
-	Chunks       []DocumentChunk  `json:"chunks,omitempty"`
-	Candidates   []ClaimCandidate `json:"candidates,omitempty"`
-	BindingState string           `json:"bindingState"`
+	ID             string           `json:"id"`
+	DocID          string           `json:"docId"`
+	URI            string           `json:"uri,omitempty"`
+	Version        string           `json:"version,omitempty"`
+	ArtifactDigest string           `json:"artifactDigest,omitempty"`
+	CapturedAt     time.Time        `json:"capturedAt"`
+	Chunks         []DocumentChunk  `json:"chunks,omitempty"`
+	Candidates     []ClaimCandidate `json:"candidates,omitempty"`
+	BindingState   string           `json:"bindingState"`
 }
 
 // StudioProperty is one concept property in the read-only Studio model.
