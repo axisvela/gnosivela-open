@@ -2070,6 +2070,7 @@ components:
         docId: { type: string }
         uri: { type: string }
         version: { type: string }
+        artifactDigest: { type: string, description: SHA-256 of the bound document content }
         capturedAt: { type: string, format: date-time }
         chunks:
           type: array
