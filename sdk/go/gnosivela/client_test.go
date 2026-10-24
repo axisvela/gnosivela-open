@@ -349,6 +349,7 @@ func TestStudioImpact(t *testing.T) {
 }
 
 func TestConnectorMethods(t *testing.T) {
+	var gotExtractor *DocumentExtractor
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/connectors":
@@ -369,6 +370,7 @@ func TestConnectorMethods(t *testing.T) {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
+			gotExtractor = req.Extractor
 			writeJSON(w, http.StatusCreated, DocumentBinding{
 				ID: "doc:" + req.DocID, DocID: req.DocID, BindingState: "bound",
 				ArtifactDigest: "abc123",
@@ -396,12 +398,18 @@ func TestConnectorMethods(t *testing.T) {
 	if schema.Kind != "streaming" || len(schema.Fields) != 1 {
 		t.Errorf("schema = %+v", schema)
 	}
-	binding, err := c.ConnectorBindDocument(ctx, DocumentBindingRequest{DocID: "p1", Content: "must review"})
+	binding, err := c.ConnectorBindDocument(ctx, DocumentBindingRequest{
+		DocID: "p1", Content: "must review",
+		Extractor: &DocumentExtractor{Kind: "http", URL: "https://ie.example/extract"},
+	})
 	if err != nil {
 		t.Fatalf("bind: %v", err)
 	}
 	if binding.ID != "doc:p1" || len(binding.Chunks) != 1 || binding.ArtifactDigest != "abc123" {
 		t.Errorf("binding = %+v", binding)
+	}
+	if gotExtractor == nil || gotExtractor.Kind != "http" || gotExtractor.URL != "https://ie.example/extract" {
+		t.Errorf("extractor = %+v", gotExtractor)
 	}
 }
 

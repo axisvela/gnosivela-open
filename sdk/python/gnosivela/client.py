@@ -224,11 +224,15 @@ class Client:
         return self._request("POST", "/connectors/introspect", {"kind": kind, "spec": spec})
 
     def connector_bind_document(self, doc_id: str, content: str, uri: str = "", version: str = "",
-                                content_type: str = "markdown", extract_claims: bool = False) -> Dict[str, Any]:
-        return self._request("POST", "/connectors/documents", {
+                                content_type: str = "markdown", extract_claims: bool = False,
+                                extractor: Dict[str, Any] = None) -> Dict[str, Any]:
+        payload = {
             "docId": doc_id, "content": content, "uri": uri,
             "version": version, "contentType": content_type, "extractClaims": extract_claims,
-        })
+        }
+        if extractor:
+            payload["extractor"] = extractor
+        return self._request("POST", "/connectors/documents", payload)
 
     def path_query(self, frm: str, to: str) -> Dict[str, Any]:
         return self._request("POST", "/query/path", {"from": frm, "to": to})

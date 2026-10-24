@@ -749,12 +749,21 @@ type SourceSchema struct {
 
 // DocumentBindingRequest is the input of /connectors/documents.
 type DocumentBindingRequest struct {
-	DocID         string `json:"docId"`
-	URI           string `json:"uri,omitempty"`
-	Version       string `json:"version,omitempty"`
-	ContentType   string `json:"contentType,omitempty"`
-	Content       string `json:"content"`
-	ExtractClaims bool   `json:"extractClaims,omitempty"`
+	DocID         string             `json:"docId"`
+	URI           string             `json:"uri,omitempty"`
+	Version       string             `json:"version,omitempty"`
+	ContentType   string             `json:"contentType,omitempty"`
+	Content       string             `json:"content"`
+	ExtractClaims bool               `json:"extractClaims,omitempty"`
+	Extractor     *DocumentExtractor `json:"extractor,omitempty"`
+}
+
+// DocumentExtractor configures claim extraction (keyword or external HTTP IE).
+type DocumentExtractor struct {
+	Kind         string `json:"kind,omitempty"`
+	URL          string `json:"url,omitempty"`
+	Token        string `json:"token,omitempty"`
+	AllowPrivate bool   `json:"allowPrivate,omitempty"`
 }
 
 // DocumentChunk is a citation-preserving fragment of a bound document.
