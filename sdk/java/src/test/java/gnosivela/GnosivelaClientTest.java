@@ -81,6 +81,8 @@ public final class GnosivelaClientTest {
             } else if ("/connectors/documents".equals(path)) {
                 body = "{\"id\":\"doc:p1\",\"docId\":\"p1\",\"bindingState\":\"bound\",\"chunks\":[{\"id\":\"c1\"}]}";
                 status = 201;
+            } else if ("/lineage/columns".equals(path)) {
+                body = "{\"sourceSchema\":\"glue://catalog/suppliers\",\"mappingId\":\"MAP-1\",\"mappingVersion\":\"1.0\",\"columns\":[{\"sourceField\":\"supplier_id\",\"targetProperty\":\"supplierId\",\"status\":\"mapped\"}],\"unmapped\":[\"active\"]}";
             } else if ("/query/subgraph".equals(path)) {
                 body = "[{\"id\":\"r1\",\"kind\":\"exactSameAs\"}]";
             } else {
@@ -130,6 +132,8 @@ public final class GnosivelaClientTest {
             check(c.connectors().contains("\"streaming\""), "connectors");
             check(c.connectorIntrospect("streaming", "{\"options\":{\"inlineSchema\":\"{}\"}}").contains("\"eventId\""), "connectorIntrospect");
             check(c.connectorBindDocument("p1", "must review").contains("\"doc:p1\""), "connectorBindDocument");
+            check(c.columnLineage("{\"id\":\"glue://catalog/suppliers\",\"kind\":\"glue\",\"name\":\"suppliers\",\"connector\":\"glue\",\"fields\":[]}",
+                    "{\"id\":\"MAP-1\",\"version\":\"1.0\",\"rules\":[]}").contains("glue://catalog/suppliers"), "columnLineage");
 
             try {
                 c.ontologyLatest("missing");

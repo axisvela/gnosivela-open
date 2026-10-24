@@ -502,6 +502,15 @@ func (c *Client) ConnectorBindDocument(ctx context.Context, req DocumentBindingR
 	return &out, err
 }
 
+// ColumnLineage maps source columns to ontology targets and reports unmapped
+// columns and orphan mapping rules.
+func (c *Client) ColumnLineage(ctx context.Context, req ColumnLineageRequest) (*ColumnLineageReport, error) {
+	body, _ := json.Marshal(req)
+	var out ColumnLineageReport
+	err := c.do(ctx, http.MethodPost, "/lineage/columns", "application/json", body, &out)
+	return &out, err
+}
+
 // BridgeContractExport fetches the signed semantic contract of the latest
 // published ontology version of a namespace.
 func (c *Client) BridgeContractExport(ctx context.Context, namespace string) (*BridgeContract, error) {
