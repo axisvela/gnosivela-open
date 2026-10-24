@@ -15,6 +15,10 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 - Verified the Python native adapters on Python 3.12.8 with `langchain-core
   1.7.0` (`StructuredTool`) and `llama-index-core 0.14.25` (`FunctionTool`);
   native tests skip when a framework is absent.
+- TypeScript `langchainTools` / `llamaIndexTools` return native
+  `DynamicStructuredTool` / `FunctionTool` objects when `@langchain/core` or
+  `llamaindex` is installed, and neutral specs otherwise. Verified on Node 22
+  with `@langchain/core 1.3.0` and `llamaindex 0.12.1`.
 
 ## [1.5.0] - 2026-10-24
 

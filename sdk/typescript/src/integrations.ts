@@ -122,3 +122,53 @@ export function toolHandlers(specs: ToolSpec[]): Record<string, (args?: Record<s
   }
   return out;
 }
+
+type LangChainToolFactory = (fn: (args: Record<string, unknown>) => Promise<string>, fields: {
+  name: string;
+  description: string;
+  schema: Record<string, unknown>;
+}) => unknown;
+
+type LlamaIndexToolFactory = {
+  from: (config: {
+    name: string;
+    description: string;
+    parameters: Record<string, unknown>;
+    execute: (args: Record<string, unknown>) => Promise<string>;
+  }) => unknown;
+};
+
+/** Return LangChain.js tools when `@langchain/core` is installed. */
+export async function langchainTools(client: Client, opts: ToolOptions = {}): Promise<unknown[]> {
+  const specs = toolSpecs(client, opts);
+  try {
+    const mod = (await import("@langchain/core/tools" as string)) as { tool: LangChainToolFactory };
+    return specs.map((spec) =>
+      mod.tool(async (args) => spec.invoke(args), {
+        name: spec.name,
+        description: spec.description,
+        schema: spec.parameters,
+      }),
+    );
+  } catch {
+    return specs;
+  }
+}
+
+/** Return LlamaIndex tools when `llamaindex` is installed. */
+export async function llamaIndexTools(client: Client, opts: ToolOptions = {}): Promise<unknown[]> {
+  const specs = toolSpecs(client, opts);
+  try {
+    const mod = (await import("llamaindex" as string)) as { FunctionTool: LlamaIndexToolFactory };
+    return specs.map((spec) =>
+      mod.FunctionTool.from({
+        name: spec.name,
+        description: spec.description,
+        parameters: spec.parameters,
+        execute: async (args) => spec.invoke(args),
+      }),
+    );
+  } catch {
+    return specs;
+  }
+}
