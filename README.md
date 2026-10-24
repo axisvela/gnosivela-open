@@ -30,7 +30,7 @@ GNOSIVELA's answer: define semantic objects first (Ontology / Assertion / Identi
 | Semantic Query | Intent parsing �?joint retrieval across entities/relations/documents/metrics �?purpose-scoped KnowledgeView with conflicts/gaps |
 | Hybrid Retrieval | BM25 + vector + graph recall fused with RRF; component scores/ranks via `POST /query/hybrid` |
 | MCP Server | JSON-RPC 2.0 tools (`ground`, `cite`, `search`, `hybrid_search`, `resolve_entity`) over HTTP or stdio |
-| Connector Hub | Schema-first introspection (`relational` / `catalog` / `api` / `streaming` / `objectstore` / `warehouse`) and markdown/text/HTML document binding without copying data |
+| Connector Hub | Schema-first introspection (`relational` / `catalog` / `api` / `objectstore` / `iceberg` / `glue` / `hive`; EE adds `streaming` / `snowflake` / `salesforce` / `warehouse` / `sharepoint`) and markdown/text/HTML document binding with `artifactDigest`, without copying data |
 | Ontology Studio | Read-only model/lineage/usage and change-impact view (`GET /studio`, `/studio/model`, `/studio/impact`) |
 | SHACL Export | Deterministic Turtle NodeShapes/PropertyShapes from ontology concepts, properties and relations (`GET /interop/shacl/{namespace}`) |
 | SPARQL | Read-only SPARQL 1.1 subset (SELECT/BGP/FILTER/PREFIX/LIMIT) over assertions (`GET/POST /sparql`) |
