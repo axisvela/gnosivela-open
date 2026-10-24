@@ -43,7 +43,7 @@ GNOSIVELA's answer: define semantic objects first (Ontology / Assertion / Identi
 | Repository | Role | License |
 | --- | --- | --- |
 | **GNOSIVELA-open (this repo)** | SDK, examples, API contract, distribution links | Apache-2.0 |
-| [GNOSIVELA](https://github.com/axisvela/GNOSIVELA) | Semantic Kernel, core connectors (incl. Hive/Glue/Iceberg/S3), document `artifactDigest` + IE SPI, governance, K8s baseline | AGPL-3.0 |
+| [GNOSIVELA](https://github.com/axisvela/GNOSIVELA) | Semantic Kernel, core connectors (incl. Hive/Glue/Iceberg/S3), document `artifactDigest` + IE/OCR SPI, column lineage, governance, K8s baseline | AGPL-3.0 |
 | [GNOSIVELA-ee](https://github.com/axisvela/GNOSIVELA-ee) | Advanced connectors, enterprise auth (Kerberos/SASL), HA/sharding/10B, multi-region, SLO/SLA, industry profiles | Enterprise |
 
 > License compliance: the SDK in this repository is Apache-2.0 and interacts with the core over HTTP — it never links the AGPL core.
@@ -145,7 +145,8 @@ Native adapter matrix tested locally:
 - Python 3.12.8: `langchain-core 1.7.0` (`StructuredTool`), `llama-index-core 0.14.25` (`FunctionTool`).
 - Node 22: `@langchain/core 1.3.0` (`DynamicStructuredTool`), `llamaindex 0.12.1` (`FunctionTool`).
 
-Native tests skip automatically when a framework is absent.
+Native tests skip automatically when a framework is absent. These adapters
+ship in v1.6.0.
 
 ## API contract
 
