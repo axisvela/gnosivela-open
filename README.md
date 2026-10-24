@@ -32,7 +32,7 @@ GNOSIVELA's answer: define semantic objects first (Ontology / Assertion / Identi
 | MCP Server | JSON-RPC 2.0 tools (`ground`, `cite`, `search`, `hybrid_search`, `resolve_entity`) over HTTP or stdio |
 | Connector Hub | Schema-first introspection (`relational` / `catalog` / `api` / `objectstore` / `iceberg` / `glue` / `hive`; EE adds `streaming` / `snowflake` / `salesforce` / `warehouse` / `sharepoint`) and markdown/text/HTML/PDF/image document binding with `artifactDigest`, a pluggable IE provider and an external OCR provider, without copying data |
 | Column Lineage | Source column → ontology concept/property with transform, confidence, unmapped columns and orphan rules (`POST /lineage/columns`) |
-| Ontology Studio | Model/lineage/usage and change-impact view plus a governed draft editor (`GET /studio`, `/studio/model`, `/studio/impact`; writes still go through Registry/Impact/approval) |
+| Ontology Studio | Model/lineage/usage and change-impact view plus a governed draft editor and interactive graph editor (force/circular/layered layouts, drag/zoom/pan, relation editing; writes still go through Registry/Impact/approval) |
 | SHACL Export | Deterministic Turtle NodeShapes/PropertyShapes from ontology concepts, properties and relations (`GET /interop/shacl/{namespace}`) |
 | SPARQL | Read-only SPARQL 1.1 subset (SELECT/BGP/FILTER/PREFIX/LIMIT) over assertions (`GET/POST /sparql`) |
 | Action Runtime | Governed webhook actions with approval binding, SSRF guard and full audit (`/actions*`) |
