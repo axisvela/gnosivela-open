@@ -12,7 +12,7 @@ operator: listings and certificates are evidence-based and link to source.
 | Partner program | Open | [partner-program.md](partner-program.md) |
 | Connector certification | Checklist ready | [connector-certification.md](connector-certification.md) |
 | Compatibility matrix | Published + machine-readable | [compatibility-matrix.md](compatibility-matrix.md), [compatibility.json](compatibility.json) |
-| Ecosystem gate | Ready | `scripts/ecosystem-gate.sh` validates docs, versions, contracts and partners; also runs from `scripts/release-local.sh` |
+| Ecosystem gate | Ready | `scripts/ecosystem-gate.sh` validates docs, versions, contracts and partners; runs from `scripts/release-local.sh` and CI |
 | Third-party benchmark reproduction | Process ready | [benchmark-reproduction.md](benchmark-reproduction.md) |
 | Registry publication | Script + credential check ready; credentials pending | [registry-publication.md](registry-publication.md) |
 | Partner registry | **0 listed** | [partners.json](partners.json), [partners.schema.json](partners.schema.json) |

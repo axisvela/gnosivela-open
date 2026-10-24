@@ -6,6 +6,12 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 
 ## [Unreleased]
 
+### Changed
+
+- CI runs `scripts/ecosystem-gate.sh` in the version-consistency job and uses
+  `npm test` for the full TypeScript suite. The gate wrapper auto-detects
+  `python` or `python3`.
+
 ## [1.7.0] - 2026-10-24
 
 ### Added
