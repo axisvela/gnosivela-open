@@ -42,6 +42,9 @@ for meta in "$PY_VERSION" "$TS_VERSION" "$JAVA_VERSION"; do
   }
 done
 
+echo "==> ecosystem gate"
+"$ROOT/scripts/ecosystem-gate.sh"
+
 if [[ "$SKIP_TESTS" -eq 0 ]]; then
   echo "==> Go SDK tests"
   (cd "$ROOT" && GOWORK=off go build ./... && GOWORK=off go vet ./... && GOWORK=off go test ./...)

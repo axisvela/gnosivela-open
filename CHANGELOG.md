@@ -13,7 +13,8 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
   registry (`partners.json` + schema), benchmark reproduction guide and issue
   templates under `docs/ecosystem/` and `.github/ISSUE_TEMPLATE/`.
 - `scripts/ecosystem-gate.sh` validates ecosystem docs, core/open versions,
-  SDK versions, OpenAPI contract parity and the partner registry.
+  SDK versions, OpenAPI contract parity and the partner registry. It also runs
+  as part of `scripts/release-local.sh`.
 - `scripts/publish-registry.sh` for PyPI / npm / Maven publication with
   `--check` and `--dry-run` modes. PyPI and npm are ready; Maven Central still
   requires `distributionManagement` and credentials.
