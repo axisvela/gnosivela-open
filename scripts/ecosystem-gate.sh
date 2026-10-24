@@ -15,4 +15,4 @@ if [[ -z "$PYTHON" ]]; then
   fi
 fi
 
-"$PYTHON" "$ROOT/scripts/ecosystem-gate.py"
+"$PYTHON" "$ROOT/scripts/ecosystem-gate.py" "$@"

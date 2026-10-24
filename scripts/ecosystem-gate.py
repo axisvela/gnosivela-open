@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import re
@@ -74,11 +75,18 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def load_json(path: Path) -> dict:
     try:
         return json.loads(read_text(path))
     except (OSError, json.JSONDecodeError) as exc:
-        errors.append(f"{path.relative_to(ROOT)}: {exc}")
+        errors.append(f"{display_path(path)}: {exc}")
         return {}
 
 
@@ -146,15 +154,16 @@ def check_versions() -> tuple[str | None, str | None]:
     return core_version, open_version
 
 
-def check_partners(core_version: str | None) -> int:
-    registry = load_json(ROOT / "docs/ecosystem/partners.json")
+def check_partners(core_version: str | None, registry_path: Path) -> int:
+    registry = load_json(registry_path)
     if not registry:
         return 0
+    label_prefix = display_path(registry_path)
     if registry.get("schemaVersion") != 1:
-        errors.append("partners.json schemaVersion must be 1")
+        errors.append(f"{label_prefix} schemaVersion must be 1")
     partners = registry.get("partners")
     if not isinstance(partners, list):
-        errors.append("partners.json partners must be an array")
+        errors.append(f"{label_prefix} partners must be an array")
         return 0
     seen: set[str] = set()
     for index, partner in enumerate(partners):
@@ -186,9 +195,20 @@ def check_docs() -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--partners-file",
+        default="docs/ecosystem/partners.json",
+        help="partner registry file to validate (default: docs/ecosystem/partners.json)",
+    )
+    args = parser.parse_args()
+    registry_path = Path(args.partners_file)
+    if not registry_path.is_absolute():
+        registry_path = ROOT / registry_path
+
     check_docs()
     core_version, open_version = check_versions()
-    partner_count = check_partners(core_version)
+    partner_count = check_partners(core_version, registry_path)
 
     for warning in warnings:
         print(f"warning: {warning}")
@@ -199,7 +219,7 @@ def main() -> int:
     print(
         "ecosystem gate passed: "
         f"core={core_version or 'n/a'} open={open_version or 'n/a'} "
-        f"partners={partner_count}"
+        f"partners={partner_count} registry={display_path(registry_path)}"
     )
     return 0
 

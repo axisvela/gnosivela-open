@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "partners": [
+    {
+      "name": "Example Connector",
+      "type": "connector",
+      "repository": "https://github.com/example/gnosivela-example-connector",
+      "licence": "Apache-2.0",
+      "coreRange": ">=1.7.0,<2.0.0",
+      "evidence": "https://github.com/example/gnosivela-example-connector/blob/main/VERIFICATION.md",
+      "contact": "maintainer@example.com",
+      "description": "Example only. Replace with a real connector, pack or service entry."
+    }
+  ]
+}

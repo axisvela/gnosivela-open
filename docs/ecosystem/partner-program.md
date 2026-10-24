@@ -40,6 +40,13 @@ validates it and checks that each partner's core range includes the current
 core version. Once two partner connectors or packs are listed, the P4-M4 exit
 gate has its second condition.
 
+Use [`partners.example.json`](partners.example.json) as a template and validate
+a candidate file without changing the live registry:
+
+```bash
+./scripts/ecosystem-gate.sh --partners-file docs/ecosystem/partners.example.json
+```
+
 ## Removal
 
 A listing is removed or marked stale if it fails a re-review, breaks the SPI,
