@@ -440,7 +440,7 @@ paths:
   /connectors/documents:
     post:
       summary: Bind a markdown, text or HTML document into citation-preserving chunks and claim candidates
-      description: The source document is not copied into GNOSIVELA; only chunk locators, bindings and extracted candidates are returned. HTML scripts/styles are dropped and entities decoded.
+      description: The source document is not copied into GNOSIVELA; only chunk locators, bindings and extracted candidates are returned. HTML scripts/styles are dropped and entities decoded. Claim extraction defaults to the built-in keyword provider; an external HTTP IE provider can be selected per binding.
       tags: [connector]
       requestBody:
         required: true
@@ -2040,7 +2040,17 @@ components:
         contentType: { type: string, enum: [markdown, text, html], description: "Content format; default markdown" }
         content: { type: string }
         extractClaims: { type: boolean }
+        extractor: { $ref: '#/components/schemas/DocumentExtractor' }
       required: [docId, content]
+    DocumentExtractor:
+      type: object
+      description: Claim extraction provider. The built-in keyword provider is used when omitted.
+      properties:
+        kind: { type: string, enum: [keyword, http], description: "Extractor kind; default keyword" }
+        url: { type: string, description: "HTTP IE provider endpoint (kind=http)" }
+        token: { type: string, description: "Optional Bearer token for the HTTP provider" }
+        allowPrivate: { type: boolean, description: "Allow loopback/private provider addresses" }
+      required: [kind]
     DocumentChunk:
       type: object
       properties:

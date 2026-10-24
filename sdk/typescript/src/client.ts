@@ -205,8 +205,10 @@ export class Client {
   connectorIntrospect(kind: string, spec: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.request("POST", "/connectors/introspect", { kind, spec });
   }
-  connectorBindDocument(docId: string, content: string, uri = "", version = "", extractClaims = false, contentType = "markdown"): Promise<Record<string, unknown>> {
-    return this.request("POST", "/connectors/documents", { docId, content, uri, version, extractClaims, contentType });
+  connectorBindDocument(docId: string, content: string, uri = "", version = "", extractClaims = false, contentType = "markdown", extractor?: Record<string, unknown>): Promise<Record<string, unknown>> {
+    const body: Record<string, unknown> = { docId, content, uri, version, extractClaims, contentType };
+    if (extractor) body.extractor = extractor;
+    return this.request("POST", "/connectors/documents", body);
   }
   pathQuery(from: string, to: string): Promise<Record<string, unknown>> {
     return this.request("POST", "/query/path", { from, to });
