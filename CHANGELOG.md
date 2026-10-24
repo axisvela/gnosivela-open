@@ -13,6 +13,8 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
   `python` or `python3`.
 - Partner registry example (`partners.example.json`) and
   `--partners-file` validation for candidate entries.
+- OpenAPI adds `GET /livez` (liveness without a store probe); Helm liveness uses
+  it while `/readyz` remains the readiness/startup probe.
 
 ## [1.7.0] - 2026-10-24
 

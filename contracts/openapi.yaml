@@ -1270,6 +1270,20 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/GroundingBundle' }
+  /livez:
+    get:
+      summary: Liveness check without a store probe
+      description: Returns 200 while the process is alive; use /readyz for store readiness.
+      tags: [ops]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [ok] }
+                  version: { type: string }
   /readyz:
     get:
       summary: Readiness check with backing store read probe
