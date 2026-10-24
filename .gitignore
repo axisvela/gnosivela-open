@@ -18,6 +18,10 @@ sdk/python/build/
 *.pyc
 *.egg-info/
 
+# Release staging
+.release/
+sdk/typescript/*.tgz
+
 # Env / local
 .env
 .env.local
