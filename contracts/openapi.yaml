@@ -440,7 +440,7 @@ paths:
   /connectors/documents:
     post:
       summary: Bind a markdown, text or HTML document into citation-preserving chunks and claim candidates
-      description: The source document is not copied into GNOSIVELA; only chunk locators, bindings and extracted candidates are returned. HTML scripts/styles are dropped and entities decoded. Claim extraction defaults to the built-in keyword provider; an external HTTP IE provider can be selected per binding.
+      description: The source document is not copied into GNOSIVELA; only chunk locators, bindings and extracted candidates are returned. HTML scripts/styles are dropped and entities decoded. Claim extraction defaults to the built-in keyword provider; an external HTTP IE provider can be selected per binding. PDF/image inputs are base64-encoded and processed by an external OCR provider; the artifactDigest covers the original bytes.
       tags: [connector]
       requestBody:
         required: true
@@ -2037,10 +2037,12 @@ components:
         docId: { type: string }
         uri: { type: string }
         version: { type: string }
-        contentType: { type: string, enum: [markdown, text, html], description: "Content format; default markdown" }
+        contentType: { type: string, enum: [markdown, text, html, application/pdf, image/png, image/jpeg, image/tiff], description: "Content format; default markdown. Binary types require contentEncoding=base64 and an OCR provider." }
+        contentEncoding: { type: string, enum: [utf-8, base64], description: "Content encoding; default utf-8" }
         content: { type: string }
         extractClaims: { type: boolean }
         extractor: { $ref: '#/components/schemas/DocumentExtractor' }
+        ocr: { $ref: '#/components/schemas/DocumentOCR' }
       required: [docId, content]
     DocumentExtractor:
       type: object
@@ -2051,6 +2053,16 @@ components:
         token: { type: string, description: "Optional Bearer token for the HTTP provider" }
         allowPrivate: { type: boolean, description: "Allow loopback/private provider addresses" }
       required: [kind]
+    DocumentOCR:
+      type: object
+      description: OCR provider for binary document bindings. The original bytes are sent as base64; artifactDigest remains the digest of those bytes.
+      properties:
+        kind: { type: string, enum: [http], description: "OCR kind; http" }
+        url: { type: string, description: "HTTP OCR provider endpoint" }
+        token: { type: string, description: "Optional Bearer token for the HTTP provider" }
+        language: { type: string, description: "Optional OCR language hint" }
+        allowPrivate: { type: boolean, description: "Allow loopback/private provider addresses" }
+      required: [kind, url]
     DocumentChunk:
       type: object
       properties:

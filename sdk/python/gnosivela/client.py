@@ -225,13 +225,17 @@ class Client:
 
     def connector_bind_document(self, doc_id: str, content: str, uri: str = "", version: str = "",
                                 content_type: str = "markdown", extract_claims: bool = False,
-                                extractor: Dict[str, Any] = None) -> Dict[str, Any]:
+                                extractor: Dict[str, Any] = None, content_encoding: str = "utf-8",
+                                ocr: Dict[str, Any] = None) -> Dict[str, Any]:
         payload = {
             "docId": doc_id, "content": content, "uri": uri,
             "version": version, "contentType": content_type, "extractClaims": extract_claims,
+            "contentEncoding": content_encoding,
         }
         if extractor:
             payload["extractor"] = extractor
+        if ocr:
+            payload["ocr"] = ocr
         return self._request("POST", "/connectors/documents", payload)
 
     def path_query(self, frm: str, to: str) -> Dict[str, Any]:

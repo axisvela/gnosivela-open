@@ -350,6 +350,7 @@ func TestStudioImpact(t *testing.T) {
 
 func TestConnectorMethods(t *testing.T) {
 	var gotExtractor *DocumentExtractor
+	var gotOCR *DocumentOCR
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/connectors":
@@ -371,6 +372,7 @@ func TestConnectorMethods(t *testing.T) {
 				return
 			}
 			gotExtractor = req.Extractor
+			gotOCR = req.OCR
 			writeJSON(w, http.StatusCreated, DocumentBinding{
 				ID: "doc:" + req.DocID, DocID: req.DocID, BindingState: "bound",
 				ArtifactDigest: "abc123",
@@ -399,8 +401,9 @@ func TestConnectorMethods(t *testing.T) {
 		t.Errorf("schema = %+v", schema)
 	}
 	binding, err := c.ConnectorBindDocument(ctx, DocumentBindingRequest{
-		DocID: "p1", Content: "must review",
+		DocID: "p1", Content: "must review", ContentEncoding: "utf-8",
 		Extractor: &DocumentExtractor{Kind: "http", URL: "https://ie.example/extract"},
+		OCR:       &DocumentOCR{Kind: "http", URL: "https://ocr.example/extract"},
 	})
 	if err != nil {
 		t.Fatalf("bind: %v", err)
@@ -410,6 +413,9 @@ func TestConnectorMethods(t *testing.T) {
 	}
 	if gotExtractor == nil || gotExtractor.Kind != "http" || gotExtractor.URL != "https://ie.example/extract" {
 		t.Errorf("extractor = %+v", gotExtractor)
+	}
+	if gotOCR == nil || gotOCR.Kind != "http" || gotOCR.URL != "https://ocr.example/extract" {
+		t.Errorf("ocr = %+v", gotOCR)
 	}
 }
 

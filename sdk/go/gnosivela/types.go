@@ -749,13 +749,15 @@ type SourceSchema struct {
 
 // DocumentBindingRequest is the input of /connectors/documents.
 type DocumentBindingRequest struct {
-	DocID         string             `json:"docId"`
-	URI           string             `json:"uri,omitempty"`
-	Version       string             `json:"version,omitempty"`
-	ContentType   string             `json:"contentType,omitempty"`
-	Content       string             `json:"content"`
-	ExtractClaims bool               `json:"extractClaims,omitempty"`
-	Extractor     *DocumentExtractor `json:"extractor,omitempty"`
+	DocID           string             `json:"docId"`
+	URI             string             `json:"uri,omitempty"`
+	Version         string             `json:"version,omitempty"`
+	ContentType     string             `json:"contentType,omitempty"`
+	ContentEncoding string             `json:"contentEncoding,omitempty"`
+	Content         string             `json:"content"`
+	ExtractClaims   bool               `json:"extractClaims,omitempty"`
+	Extractor       *DocumentExtractor `json:"extractor,omitempty"`
+	OCR             *DocumentOCR       `json:"ocr,omitempty"`
 }
 
 // DocumentExtractor configures claim extraction (keyword or external HTTP IE).
@@ -763,6 +765,15 @@ type DocumentExtractor struct {
 	Kind         string `json:"kind,omitempty"`
 	URL          string `json:"url,omitempty"`
 	Token        string `json:"token,omitempty"`
+	AllowPrivate bool   `json:"allowPrivate,omitempty"`
+}
+
+// DocumentOCR configures OCR for binary document bindings.
+type DocumentOCR struct {
+	Kind         string `json:"kind,omitempty"`
+	URL          string `json:"url,omitempty"`
+	Token        string `json:"token,omitempty"`
+	Language     string `json:"language,omitempty"`
 	AllowPrivate bool   `json:"allowPrivate,omitempty"`
 }
 
