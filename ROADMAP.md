@@ -12,9 +12,10 @@ core repository's `docs/ROADMAP.md` and `docs/OPEN-CORE.md`.
 - Distribution: GitHub Release artifacts (Python wheel/sdist, npm tgz, Java
   jar, OpenAPI, checksums); PyPI / npm / Maven Central publication is pending
   registry credentials. Container image publication is deferred.
-- Unreleased on main: OCR provider for binary documents and the Python
-  LangChain/LlamaIndex matrix (langchain-core 1.7.0, llama-index-core 0.14.25).
-  Next tag is pending; not part of v1.5.0 artifacts.
+- Unreleased on main: OCR provider for binary documents and the Python/TypeScript
+  LangChain/LlamaIndex matrix (langchain-core 1.7.0, llama-index-core 0.14.25,
+  @langchain/core 1.3.0, llamaindex 0.12.1). Next tag is pending; not part of
+  v1.5.0 artifacts.
 
 ## Repository division
 
@@ -28,7 +29,7 @@ core repository's `docs/ROADMAP.md` and `docs/OPEN-CORE.md`.
 
 | Version | Open-surface work | Gate |
 | --- | --- | --- |
-| v1.5.x | PyPI / npm / Maven Central publication; LangChain / LlamaIndex matrix (Python verified: langchain-core 1.7.0, llama-index-core 0.14.25; TS neutral specs); examples and MCP packaging; SDK parity checks | Registry artifacts installable; adapter matrix documented |
+| v1.5.x | PyPI / npm / Maven Central publication; LangChain / LlamaIndex matrix (Python: langchain-core 1.7.0 / llama-index-core 0.14.25; TS: @langchain/core 1.3.0 / llamaindex 0.12.1); examples and MCP packaging; SDK parity checks | Registry artifacts installable; adapter matrix documented |
 | v1.6 | Studio SDK surface; OCR/IE compatibility hardening; compatibility matrix; distribution hardening | SDK parity with core APIs; reproducible examples |
 | v1.7 | Partner adapters and ecosystem packages (aligned with core P4-M4) | 2 partner packages published |
 

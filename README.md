@@ -134,13 +134,17 @@ semantics into the agent framework:
   packages are installed and neutral specs otherwise.
 - TypeScript: `@axisvela/gnosivela/integrations` exports `toolSpecs`,
   `openAIToolDefinitions` (function-calling schema) and `toolHandlers`
-  (name → invoke map) for LangChain.js / LlamaIndex wrappers.
+  (name → invoke map), plus `langchainTools` / `llamaIndexTools` which return
+  native tools when `@langchain/core` / `llamaindex` are installed and neutral
+  specs otherwise.
 
 Both expose `ground`, `cite`, `search`, `hybrid_search` and `resolve_entity`.
 
-Python native adapter matrix tested locally on Python 3.12.8 with
-`langchain-core 1.7.0` (`StructuredTool`) and `llama-index-core 0.14.25`
-(`FunctionTool`). Native tests skip automatically when a framework is absent.
+Native adapter matrix tested locally:
+- Python 3.12.8: `langchain-core 1.7.0` (`StructuredTool`), `llama-index-core 0.14.25` (`FunctionTool`).
+- Node 22: `@langchain/core 1.3.0` (`DynamicStructuredTool`), `llamaindex 0.12.1` (`FunctionTool`).
+
+Native tests skip automatically when a framework is absent.
 
 ## API contract
 

@@ -18,7 +18,7 @@
     "src"
   ],
   "scripts": {
-    "test": "node --test tests/client.test.ts tests/integrations.test.ts",
+    "test": "node --test tests/client.test.ts tests/integrations.test.ts tests/integrations.native.test.ts",
     "typecheck": "tsc -p tsconfig.json"
   },
   "engines": {
