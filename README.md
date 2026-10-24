@@ -66,15 +66,15 @@ examples/             # End-to-end examples (quickstart)
 The control-plane server binaries are built from the **GNOSIVELA Core**
 repository (AGPL-3.0) and published on its GitHub Releases. SDK packages are
 published from this repository. Container image publication is deferred for
-v1.5.0.
+v1.6.0.
 
 | Artifact | Where |
 | --- | --- |
-| Prebuilt server binaries (linux-amd64 / linux-arm64 / darwin-arm64 / windows-amd64) | [GNOSIVELA Core v1.5.0](https://github.com/axisvela/GNOSIVELA/releases/tag/v1.5.0) (`gnosivela-*`, `sha256sums.txt`) |
-| Go / Python / TypeScript / Java SDKs | [GNOSIVELA-open v1.5.0](https://github.com/axisvela/GNOSIVELA-open/releases/tag/v1.5.0) (Python wheel/sdist, npm tgz, Java jar) |
-| Go module | `go get github.com/axisvela/GNOSIVELA-open/v3@v1.5.0` |
-| API contract | [OpenAPI 1.5.0](https://github.com/axisvela/GNOSIVELA-open/releases/download/v1.5.0/gnosivela-openapi-1.5.0.yaml) or `contracts/openapi.yaml` |
-| Container image | Deferred for v1.5.0; `ghcr.io/axisvela/GNOSIVELA` will resume on a later release |
+| Prebuilt server binaries (linux-amd64 / linux-arm64 / darwin-arm64 / windows-amd64) | [GNOSIVELA Core v1.6.0](https://github.com/axisvela/GNOSIVELA/releases/tag/v1.6.0) (`gnosivela-*`, `sha256sums.txt`) |
+| Go / Python / TypeScript / Java SDKs | [GNOSIVELA-open v1.6.0](https://github.com/axisvela/GNOSIVELA-open/releases/tag/v1.6.0) (Python wheel/sdist, npm tgz, Java jar) |
+| Go module | `go get github.com/axisvela/GNOSIVELA-open/v3@v1.6.0` |
+| API contract | [OpenAPI 1.6.0](https://github.com/axisvela/GNOSIVELA-open/releases/download/v1.6.0/gnosivela-openapi-1.6.0.yaml) or `contracts/openapi.yaml` |
+| Container image | Deferred for v1.6.0; `ghcr.io/axisvela/GNOSIVELA` will resume on a later release |
 
 PyPI / npm / Maven Central publication is pending registry credentials; use the
 GitHub Release artifacts for now.
