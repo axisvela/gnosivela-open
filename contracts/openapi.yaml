@@ -453,6 +453,22 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/DocumentBinding' }
         '400': { description: Missing docId or content }
+  /lineage/columns:
+    post:
+      summary: Analyze column-level mapping lineage
+      description: Maps each source column to its ontology target and reports unmapped columns and orphan mapping rules. Only metadata is analyzed; source data is never read.
+      tags: [connector]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ColumnLineageRequest' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ColumnLineageReport' }
+        '400': { description: Invalid schema or mapping }
   /actions:
     get:
       summary: List governed actions (webhook / function runtime)
@@ -2031,6 +2047,60 @@ components:
         connector: { type: string }
         retrievedAt: { type: string, format: date-time }
       required: [kind, fields, connector]
+    MappingRule:
+      type: object
+      properties:
+        sourceField: { type: string }
+        concept: { type: string }
+        property: { type: string }
+        transform: { type: string }
+        confidence: { type: number }
+      required: [sourceField, concept, property]
+    MappingSet:
+      type: object
+      properties:
+        id: { type: string }
+        sourceSchema: { type: string }
+        rules:
+          type: array
+          items: { $ref: '#/components/schemas/MappingRule' }
+        version: { type: string }
+        status: { type: string, enum: [draft, tested, published, deprecated] }
+        updatedAt: { type: string, format: date-time }
+      required: [version, rules]
+    ColumnLineageRequest:
+      type: object
+      properties:
+        schema: { $ref: '#/components/schemas/SourceSchema' }
+        mapping: { $ref: '#/components/schemas/MappingSet' }
+      required: [schema, mapping]
+    ColumnLineage:
+      type: object
+      properties:
+        sourceField: { type: string }
+        dataType: { type: string }
+        targetConcept: { type: string }
+        targetProperty: { type: string }
+        transform: { type: string }
+        confidence: { type: number }
+        status: { type: string, enum: [mapped, unmapped] }
+      required: [sourceField, status]
+    ColumnLineageReport:
+      type: object
+      properties:
+        sourceSchema: { type: string }
+        mappingId: { type: string }
+        mappingVersion: { type: string }
+        columns:
+          type: array
+          items: { $ref: '#/components/schemas/ColumnLineage' }
+        unmapped:
+          type: array
+          items: { type: string }
+        orphans:
+          type: array
+          items: { $ref: '#/components/schemas/MappingRule' }
+      required: [sourceSchema, columns]
     DocumentBindingRequest:
       type: object
       properties:

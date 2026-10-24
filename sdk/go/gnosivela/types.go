@@ -954,3 +954,49 @@ type GroundingExplanation struct {
 	Policy               string              `json:"policy"`
 	CitationCompleteness float64             `json:"citationCompleteness"`
 }
+
+// MappingRule binds a source field to an ontology concept property.
+type MappingRule struct {
+	SourceField string  `json:"sourceField"`
+	Concept     string  `json:"concept"`
+	Property    string  `json:"property"`
+	Transform   string  `json:"transform,omitempty"`
+	Confidence  float64 `json:"confidence,omitempty"`
+}
+
+// MappingSet is a governed set of field-to-concept mappings.
+type MappingSet struct {
+	ID           string        `json:"id,omitempty"`
+	SourceSchema string        `json:"sourceSchema,omitempty"`
+	Rules        []MappingRule `json:"rules"`
+	Version      string        `json:"version"`
+	Status       string        `json:"status,omitempty"`
+	UpdatedAt    time.Time     `json:"updatedAt,omitempty"`
+}
+
+// ColumnLineageRequest is the input of /lineage/columns.
+type ColumnLineageRequest struct {
+	Schema  *SourceSchema `json:"schema"`
+	Mapping *MappingSet   `json:"mapping"`
+}
+
+// ColumnLineage connects one source column to its mapped ontology property.
+type ColumnLineage struct {
+	SourceField    string  `json:"sourceField"`
+	DataType       string  `json:"dataType,omitempty"`
+	TargetConcept  string  `json:"targetConcept,omitempty"`
+	TargetProperty string  `json:"targetProperty,omitempty"`
+	Transform      string  `json:"transform,omitempty"`
+	Confidence     float64 `json:"confidence,omitempty"`
+	Status         string  `json:"status"`
+}
+
+// ColumnLineageReport is the column-level view of one source schema and mapping.
+type ColumnLineageReport struct {
+	SourceSchema   string          `json:"sourceSchema"`
+	MappingID      string          `json:"mappingId,omitempty"`
+	MappingVersion string          `json:"mappingVersion,omitempty"`
+	Columns        []ColumnLineage `json:"columns"`
+	Unmapped       []string        `json:"unmapped,omitempty"`
+	Orphans        []MappingRule   `json:"orphans,omitempty"`
+}

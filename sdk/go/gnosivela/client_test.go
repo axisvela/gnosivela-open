@@ -419,6 +419,36 @@ func TestConnectorMethods(t *testing.T) {
 	}
 }
 
+func TestColumnLineage(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost || r.URL.Path != "/lineage/columns" {
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+		var req ColumnLineageRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		writeJSON(w, http.StatusOK, ColumnLineageReport{
+			SourceSchema: req.Schema.ID, MappingID: req.Mapping.ID, MappingVersion: req.Mapping.Version,
+			Columns:  []ColumnLineage{{SourceField: "supplier_id", TargetProperty: "supplierId", Status: "mapped"}},
+			Unmapped: []string{"active"},
+		})
+	}))
+	defer ts.Close()
+	report, err := New(ts.URL).ColumnLineage(context.Background(), ColumnLineageRequest{
+		Schema:  &SourceSchema{ID: "glue://catalog/suppliers", Fields: []SourceField{{Name: "supplier_id", DataType: "integer"}}},
+		Mapping: &MappingSet{ID: "MAP-1", Version: "1.0", Rules: []MappingRule{{SourceField: "supplier_id", Concept: "Supplier", Property: "supplierId"}}},
+	})
+	if err != nil {
+		t.Fatalf("lineage: %v", err)
+	}
+	if report.SourceSchema != "glue://catalog/suppliers" || len(report.Columns) != 1 || len(report.Unmapped) != 1 {
+		t.Errorf("report = %+v", report)
+	}
+}
+
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

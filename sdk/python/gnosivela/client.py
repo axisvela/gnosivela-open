@@ -238,6 +238,9 @@ class Client:
             payload["ocr"] = ocr
         return self._request("POST", "/connectors/documents", payload)
 
+    def column_lineage(self, schema: Dict[str, Any], mapping: Dict[str, Any]) -> Dict[str, Any]:
+        return self._request("POST", "/lineage/columns", {"schema": schema, "mapping": mapping})
+
     def path_query(self, frm: str, to: str) -> Dict[str, Any]:
         return self._request("POST", "/query/path", {"from": frm, "to": to})
 

@@ -260,6 +260,10 @@ public final class GnosivelaClient {
                 "\",\"content\":\"" + escape(content) + "\"}");
     }
 
+    public String columnLineage(String schemaJson, String mappingJson) {
+        return post("/lineage/columns", "{\"schema\":" + schemaJson + ",\"mapping\":" + mappingJson + "}");
+    }
+
     public String pathQuery(String from, String to) {
         return post("/query/path", "{\"from\":\"" + escape(from) + "\",\"to\":\"" + escape(to) + "\"}");
     }

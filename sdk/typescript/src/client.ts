@@ -211,6 +211,9 @@ export class Client {
     if (ocr) body.ocr = ocr;
     return this.request("POST", "/connectors/documents", body);
   }
+  columnLineage(schema: Record<string, unknown>, mapping: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.request("POST", "/lineage/columns", { schema, mapping });
+  }
   pathQuery(from: string, to: string): Promise<Record<string, unknown>> {
     return this.request("POST", "/query/path", { from, to });
   }

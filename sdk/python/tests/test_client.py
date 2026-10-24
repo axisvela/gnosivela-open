@@ -116,6 +116,13 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
         elif self.path == "/connectors/documents":
             self._reply({"id": "doc:" + body.get("docId", ""), "docId": body.get("docId"), "bindingState": "bound",
                          "chunks": [{"id": "c1", "docId": body.get("docId"), "content": body.get("content"), "locator": "p#c"}]}, 201)
+        elif self.path == "/lineage/columns":
+            schema = body.get("schema", {})
+            mapping = body.get("mapping", {})
+            self._reply({"sourceSchema": schema.get("id"), "mappingId": mapping.get("id"),
+                         "mappingVersion": mapping.get("version"),
+                         "columns": [{"sourceField": "supplier_id", "targetProperty": "supplierId", "status": "mapped"}],
+                         "unmapped": ["active"]})
         else:
             self._reply({"error": "not found"}, 404)
 
@@ -223,6 +230,13 @@ class TestClient(unittest.TestCase):
         kinds = [x["kind"] for x in c.connectors()["connectors"]]
         self.assertIn("streaming", kinds)
         schema = c.connector_introspect("streaming", {"options": {"inlineSchema": "{}"}})
+        lineage = c.column_lineage(
+            {"id": "glue://catalog/suppliers", "kind": "glue", "name": "suppliers", "connector": "glue",
+             "fields": [{"name": "supplier_id", "dataType": "integer"}]},
+            {"id": "MAP-1", "version": "1.0", "rules": []},
+        )
+        self.assertEqual(lineage["sourceSchema"], "glue://catalog/suppliers")
+        self.assertEqual(lineage["unmapped"], ["active"])
         self.assertEqual(schema["kind"], "streaming")
         self.assertEqual(schema["fields"][0]["name"], "eventId")
         binding = c.connector_bind_document("p1", "Suppliers must be reviewed.", extract_claims=True)

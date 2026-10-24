@@ -112,6 +112,10 @@ test.before(async () => {
     if (req.method === "POST" && path === "/connectors/documents") {
       return send({ id: "doc:p1", docId: "p1", bindingState: "bound", chunks: [{ id: "c1", docId: "p1", locator: "p#c" }] }, 201);
     }
+    if (req.method === "POST" && path === "/lineage/columns") {
+      return send({ sourceSchema: "glue://catalog/suppliers", mappingId: "MAP-1", mappingVersion: "1.0",
+        columns: [{ sourceField: "supplier_id", targetProperty: "supplierId", status: "mapped" }], unmapped: ["active"] });
+    }
     return send({ error: "not found" }, 404);
   });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -221,6 +225,12 @@ test("connectors", async () => {
   assert.equal(schema.kind, "streaming");
   const binding = await c.connectorBindDocument("p1", "Suppliers must be reviewed.", "", "", true);
   assert.equal(binding.docId, "p1");
+  const lineage = await c.columnLineage(
+    { id: "glue://catalog/suppliers", kind: "glue", name: "suppliers", connector: "glue", fields: [] },
+    { id: "MAP-1", version: "1.0", rules: [] },
+  );
+  assert.equal(lineage.sourceSchema, "glue://catalog/suppliers");
+  assert.deepEqual(lineage.unmapped, ["active"]);
 });
 
 test("error surfaces status", async () => {
