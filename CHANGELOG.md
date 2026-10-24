@@ -17,6 +17,9 @@ and semantic versioning. Versions are kept in sync with GNOSIVELA Core.
 - `scripts/publish-registry.sh` for PyPI / npm / Maven publication with
   `--check` and `--dry-run` modes. PyPI and npm are ready; Maven Central still
   requires `distributionManagement` and credentials.
+- OpenAPI contract adds `GET /readyz` (readiness with store read probe); Helm
+  readiness/startup probes use it. Helm chart `version`/`appVersion`/image tag
+  are aligned with core `VERSION` and checked by the core release gate.
 
 ## [1.6.0] - 2026-10-24
 
